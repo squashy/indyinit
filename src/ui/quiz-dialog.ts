@@ -180,7 +180,8 @@ function reducedMotion(): boolean {
 
 function show(dialog: HTMLElement): void {
   dialog.hidden = false;
-  dialog.scrollIntoView({ block: "nearest", inline: "nearest" });
+  const scroller = dialog.closest(".phase-dialogs");
+  if (scroller instanceof HTMLElement) scroller.scrollTop = 0;
 }
 
 function hide(dialog: HTMLElement): void {

@@ -338,6 +338,24 @@ input:focus-visible,
   overflow: auto;
 }
 
+@media (min-width: 821px) {
+  .phase-dock {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .phase-dock > section:has(#phase) {
+    flex: none;
+  }
+
+  .phase-dialogs {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: min(28rem, 52dvh);
+  }
+}
+
 .phase-dialogs {
   min-height: 0;
   overflow: auto;
