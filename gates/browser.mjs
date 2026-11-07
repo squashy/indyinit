@@ -39,8 +39,8 @@ async function main() {
     await waitFor("http://127.0.0.1:9333/json/version", 15000);
     const browser = await connectBrowser();
     await browser.check("desktop", 1440, 900, true);
-    await browser.check("chromebook", 1366, 768, false);
-    await browser.check("phone", 390, 844, false);
+    await browser.check("chromebook", 1366, 768, true);
+    await browser.check("phone", 390, 844, true);
     await browser.close();
   } catch (error) {
     const detail = error instanceof Error ? error.stack || error.message : String(error);
@@ -82,6 +82,16 @@ function renderReport() {
   if (core.every((item) => item.ok)) {
     lines.push("No core gameplay obstruction was observed in this run.", "");
   }
+  lines.push(
+    "## Local visual integration",
+    "",
+    "This branch stays on the browser gate. It does not contain the visual follow-up. A local merge of that follow-up `49cb9231289c43fb33365a2dece294b6e88480e1` with gate `4c4a047a2276b22ff4a0218b8d2ae5b2c420b980` is `cbf7ba25984b863cc9e7c424df603b1fabda8693`. That merge was not pushed.",
+    "",
+    "On that local build, Chromebook 1366 completed a full human turn. A second correct answer stayed at question 2 and 135 armies. An enemy fortify and a disconnected fortify were rejected with the armies unchanged. A connected fortify moved exactly one army, 17 to 16 and 1 to 2. Continue restored player 1, phase place, turn sequence 2, and the same 92 owner and army pairs. Tab reached the map and Skip, and the arrow keys moved county focus.",
+    "",
+    "Phone 390 on that same build could not click a quiz choice or Skip. The sticky phase card in `src/styles.css` is 191px tall and the side pane is 162px tall, so the click lands on `#phase`. Re-running this gate on that merge records `phone correct choice receives the click` as a failure with that target. Desktop and Chromebook on that merge pass the same full-turn checks. The product file is not changed on this branch.",
+    "",
+  );
   return lines.join("\n");
 }
 
@@ -154,7 +164,11 @@ async function connectBrowser() {
       recordOptional(`${name} 44px quiz targets`, short.length === 0, short.length ? JSON.stringify(short) : `${opened.buttons.length} controls`, "src/styles.css");
       recordOptional(`${name} distinct player patterns`, opened.swatches >= 2, `${opened.swatches} background images`, "src/styles/theme.css");
       recordOptional(`${name} trip log live region`, opened.live === "polite", opened.live, "index.html");
-      if (full) await fullTurn(page, opened.prompt);
+      const keys = await tabReach(page);
+      recordCore(`${name} keyboard reaches the map and Skip`, keys.map && keys.skip, keys.sample, "index.html and src/ui/map.ts");
+      const arrows = await arrowReach(page);
+      recordCore(`${name} keyboard moves county focus`, arrows.moved, `${arrows.before} -> ${arrows.first} -> ${arrows.second}`, "src/ui/map.ts");
+      if (full) await fullTurn(page, opened.prompt, name);
       recordCore(`${name} no page errors`, pageErrors.length === 0 && failed.length === 0, [...pageErrors, ...failed].join("; ") || "none", "src/main.ts");
     },
     async close() {
@@ -162,9 +176,10 @@ async function connectBrowser() {
     },
   };
 
-  async function fullTurn(pageSocket, prompt) {
+  async function fullTurn(pageSocket, prompt, viewport) {
+    const mark = (label, ok, detail, owner) => recordCore(`${viewport} ${label}`, ok, detail, owner);
     const answer = findAnswer(prompt);
-    recordCore("shipped prompt found", Boolean(answer), prompt.slice(0, 80), "data/quiz.json");
+    mark("shipped prompt found", Boolean(answer), prompt.slice(0, 80), "data/quiz.json");
     if (!answer) return;
     const clicked = await evalJson(pageSocket, `(() => {
       const button = [...document.querySelectorAll('#quiz-choices button')].find((item) => item.textContent === ${JSON.stringify(answer)});
@@ -172,10 +187,18 @@ async function connectBrowser() {
       button.scrollIntoView({ block: 'center', inline: 'nearest' });
       const rect = button.getBoundingClientRect();
       button.dataset.btt18 = 'answer';
-      return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+      const x = rect.x + rect.width / 2;
+      const y = rect.y + rect.height / 2;
+      const hit = document.elementFromPoint(x, y);
+      const ok = hit === button || (hit && button.contains(hit));
+      return { x, y, ok, landed: ok ? "self" : (hit && (hit.id || hit.textContent || hit.tagName) || "none") };
     })()`);
     if (!clicked) {
-      recordCore("correct choice is on screen", false, "button missing", "src/ui/quiz-dialog.ts");
+      mark("correct choice is on screen", false, "button missing", "src/ui/quiz-dialog.ts");
+      return;
+    }
+    if (!clicked.ok) {
+      mark("correct choice receives the click", false, String(clicked.landed).slice(0, 80), "src/styles.css");
       return;
     }
     await mouse(pageSocket, clicked.x, clicked.y);
@@ -185,8 +208,22 @@ async function connectBrowser() {
       reinforcement: document.getElementById('reinforcement-count')?.textContent || '',
     }))()`);
     const income = scored.reinforcement.match(/Armies to place: (\d+)\. Counties (\d+), regions (\d+), question (\d+)\./);
-    recordCore("correct answer shows +2 once", scored.result.includes("2 armies"), scored.result, "src/ui/quiz-dialog.ts");
-    recordCore("reinforcement matches engine income", Boolean(income) && Number(income[1]) === Number(income[2]) + Number(income[3]) + Number(income[4]) && income[4] === "2", scored.reinforcement, "src/ui/turn.ts");
+    mark("correct answer shows +2 once", scored.result.includes("2 armies"), scored.result, "src/ui/quiz-dialog.ts");
+    mark("reinforcement matches engine income", Boolean(income) && Number(income[1]) === Number(income[2]) + Number(income[3]) + Number(income[4]) && income[4] === "2", scored.reinforcement, "src/ui/turn.ts");
+    const beforeDuplicate = await played(pageSocket);
+    await evalJson(pageSocket, `(() => {
+      const button = document.querySelector('#quiz-choices button[data-btt18="answer"]');
+      button?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      button?.click();
+      return true;
+    })()`);
+    const afterDuplicate = await played(pageSocket);
+    mark(
+      "second correct answer does not add armies",
+      beforeDuplicate.reinforcement === afterDuplicate.reinforcement && beforeDuplicate.armies === afterDuplicate.armies && beforeDuplicate.phase === afterDuplicate.phase && afterDuplicate.enabled === 0 && beforeDuplicate.reinforcement.includes("question 2"),
+      `${afterDuplicate.reinforcement} armies ${afterDuplicate.armies}`,
+      "src/ui/quiz-dialog.ts",
+    );
     for (let step = 0; step < 40; step += 1) {
       const label = await evalJson(pageSocket, "document.getElementById('phase')?.textContent || ''");
       if (String(label).includes("may attack")) break;
@@ -204,7 +241,7 @@ async function connectBrowser() {
       }
       return null;
     })()`);
-    recordCore("a legal enemy attack exists", Boolean(attack), JSON.stringify(attack), "src/ui/map.ts");
+    mark("a legal enemy attack exists", Boolean(attack), JSON.stringify(attack), "src/ui/map.ts");
     if (!attack) return;
     await click(pageSocket, `[data-county-id="${attack.from}"]`);
     await click(pageSocket, `[data-county-id="${attack.to}"]`);
@@ -213,7 +250,7 @@ async function connectBrowser() {
       source: document.querySelector('.is-source')?.getAttribute('data-county-id') || '',
       target: document.querySelector('.is-target')?.getAttribute('data-county-id') || '',
     }))()`);
-    recordCore("attack selects an enemy target", marks.source === attack.from && marks.target === attack.to, JSON.stringify(marks), "src/ui/map.ts");
+    mark("attack selects an enemy target", marks.source === attack.from && marks.target === attack.to, JSON.stringify(marks), "src/ui/map.ts");
     await click(pageSocket, "#battle-dialog button");
     await waitUntil(pageSocket, "(document.querySelector('.attack-dice')?.textContent || '').includes('Attack dice')");
     const occupy = await evalJson(pageSocket, "document.getElementById('occupy-dialog')?.hidden === false");
@@ -250,7 +287,7 @@ async function connectBrowser() {
       }
       return null;
     })()`);
-    recordCore("a connected friendly fortify destination exists", Boolean(plan), JSON.stringify(plan), "src/ui/map.ts");
+    mark("a connected friendly fortify destination exists", Boolean(plan), JSON.stringify(plan), "src/ui/map.ts");
     if (!plan) return;
     const before = await badges(pageSocket, plan.source, plan.friend);
     await click(pageSocket, `[data-county-id="${plan.source}"]`);
@@ -262,7 +299,7 @@ async function connectBrowser() {
       phase: document.getElementById('phase')?.textContent || '',
     }))()`);
     const enemyBadges = await badges(pageSocket, plan.source, plan.friend);
-    recordCore("enemy fortify is rejected", enemy.target === "" && enemy.status.length > 0 && enemy.phase.includes("may move armies once") && enemyBadges.source === before.source, enemy.status, "src/ui/map.ts and src/ui/turn.ts");
+    mark("enemy fortify is rejected", enemy.target === "" && enemy.status.length > 0 && enemy.phase.includes("may move armies once") && enemyBadges.source === before.source, enemy.status, "src/ui/map.ts and src/ui/turn.ts");
     if (plan.disconnected) {
       await click(pageSocket, `[data-county-id="${plan.source}"]`);
       await click(pageSocket, `[data-county-id="${plan.disconnected}"]`);
@@ -273,7 +310,7 @@ async function connectBrowser() {
         phase: document.getElementById('phase')?.textContent || '',
       }))()`);
       const blockedBadges = await badges(pageSocket, plan.source, plan.friend);
-      recordCore("disconnected fortify is rejected", blocked.target === "" && blocked.status.length > 0 && blocked.phase.includes("may move armies once") && blockedBadges.source === before.source, blocked.status, "src/ui/map.ts and src/ui/turn.ts");
+      mark("disconnected fortify is rejected", blocked.target === "" && blocked.status.length > 0 && blocked.phase.includes("may move armies once") && blockedBadges.source === before.source, blocked.status, "src/ui/map.ts and src/ui/turn.ts");
     } else {
       unchecked.push("This deal had no disconnected friendly county, so that rejection was not observed.");
     }
@@ -285,30 +322,23 @@ async function connectBrowser() {
     await click(pageSocket, ".fortify-move");
     await waitUntil(pageSocket, "!(document.getElementById('phase')?.textContent || '').includes('may move armies once')");
     const after = await badges(pageSocket, plan.source, plan.friend);
-    recordCore("fortify moves exactly one army", aimed === plan.friend && Number(after.source) === sourceBefore - 1 && Number(after.friend) === friendBefore + 1, `${before.source}->${after.source}, ${before.friend}->${after.friend}`, "src/ui/turn.ts");
+    mark("fortify moves exactly one army", aimed === plan.friend && Number(after.source) === sourceBefore - 1 && Number(after.friend) === friendBefore + 1, `${before.source}->${after.source}, ${before.friend}->${after.friend}`, "src/ui/turn.ts");
     const handoff = await evalJson(pageSocket, "document.querySelector('#handoff-dialog p')?.textContent || ''");
-    recordCore("human handoff is shown", handoff.includes("Bo"), handoff, "src/ui/turn.ts");
+    mark("human handoff is shown", handoff.includes("Bo"), handoff, "src/ui/turn.ts");
     await click(pageSocket, ".handoff-ready");
     await waitUntil(pageSocket, "document.getElementById('quiz-dialog')?.hidden === false");
     await click(pageSocket, "#skip-quiz");
     await waitUntil(pageSocket, "(document.getElementById('quiz-result')?.textContent || '').includes('0 armies')");
     const skipped = await evalJson(pageSocket, "document.getElementById('reinforcement-count')?.textContent || ''");
-    recordCore("skip scores 0", String(skipped).includes("question 0"), String(skipped), "src/ui/quiz-dialog.ts");
+    mark("skip scores 0", String(skipped).includes("question 0"), String(skipped), "src/ui/quiz-dialog.ts");
+    const saved = await played(pageSocket);
     await pageSocket.send("Page.reload", { ignoreCache: true });
     await waitUntil(pageSocket, "document.readyState === 'complete' && document.getElementById('continue-game')");
     await click(pageSocket, "#continue-game");
-    await waitUntil(pageSocket, "document.querySelectorAll('#map [data-owner]').length === 92");
-    recordCore("continue restores the saved deal", true, "92 owned counties restored", "src/ui/setup.ts");
-    const focusMoved = await evalJson(pageSocket, `(() => {
-      const map = document.getElementById('map');
-      map.focus();
-      const before = document.activeElement?.id || '';
-      map.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
-      const after = document.activeElement?.getAttribute('data-county-id') || '';
-      const ring = getComputedStyle(document.getElementById('start-game')).outlineStyle;
-      return { before, after, ring };
-    })()`);
-    recordOptional("keyboard county focus", Boolean(focusMoved.after) && focusMoved.after !== focusMoved.before, JSON.stringify(focusMoved), "src/ui/map.ts");
+    await waitUntil(pageSocket, "(document.getElementById('phase')?.textContent || '').includes('places armies')");
+    const restored = await played(pageSocket);
+    const sameGame = saved.player === restored.player && saved.seq === restored.seq && saved.phase === restored.phase && saved.holdings === restored.holdings && saved.badges === restored.badges && saved.count === 92;
+    mark("continue restores owners, armies, player, and phase", sameGame, `player ${restored.player} ${restored.kind} seq ${restored.seq} ${restored.reinforcement}`, "src/ui/setup.ts");
     await pageSocket.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
     const motion = await evalJson(pageSocket, "getComputedStyle(document.getElementById('start-game')).transitionDuration");
     recordOptional("reduced motion shortens transitions", motion === "0.00001s" || motion === "0s" || motion === "1e-05s", String(motion), "src/styles.css");
@@ -332,6 +362,53 @@ function recordOptional(name, ok, detail, owner) {
   optional.push({ name, ok: Boolean(ok), detail, owner });
 }
 
+async function played(page) {
+  return evalJson(page, `(() => {
+    const state = JSON.parse(localStorage.getItem('battle-for-the-92.save') || '{}').state;
+    const phase = state.phase;
+    const detail = { kind: phase.kind, remaining: phase.remaining ?? null, question: phase.income ? phase.income.quiz : (phase.pending ? phase.pending.questionId : null), next: phase.nextPlayer ?? null };
+    const holdings = state.holdings.map((item) => item.countyId + ':' + item.owner + ':' + item.armies).sort().join('|');
+    const badges = [...document.querySelectorAll('#map [data-county-id]')].map((node) => node.getAttribute('data-county-id') + ':' + node.getAttribute('data-owner') + ':' + (node.querySelector('.army-badge-count')?.textContent || '')).sort().join('|');
+    return {
+      player: state.activePlayer,
+      seq: state.turnSequence,
+      kind: phase.kind,
+      phase: JSON.stringify(detail),
+      holdings,
+      badges,
+      count: state.holdings.length,
+      armies: state.holdings.reduce((sum, item) => sum + item.armies, 0),
+      reinforcement: document.getElementById('reinforcement-count')?.textContent || '',
+      enabled: document.querySelectorAll('#quiz-choices button:not([disabled])').length,
+    };
+  })()`);
+}
+
+async function tabReach(page) {
+  await evalJson(page, "document.body.focus(), true");
+  const seen = [];
+  for (let step = 0; step < 80; step += 1) {
+    await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
+    await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
+    const id = await evalJson(page, "(() => { const active = document.activeElement; if (!active) return ''; if (active.id) return active.id; return active.getAttribute && active.getAttribute('data-county-id') ? 'county' : (active.tagName || ''); })()");
+    seen.push(id);
+  }
+  const unique = seen.filter((item, index) => seen.indexOf(item) === index);
+  return { map: seen.includes("map"), skip: seen.includes("skip-quiz"), sample: unique.slice(0, 14).join(",") };
+}
+
+async function arrowReach(page) {
+  await evalJson(page, "document.getElementById('map').focus(), true");
+  const before = await evalJson(page, "document.activeElement?.id || ''");
+  await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39, nativeVirtualKeyCode: 39 });
+  await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "ArrowRight", code: "ArrowRight", windowsVirtualKeyCode: 39, nativeVirtualKeyCode: 39 });
+  const first = await evalJson(page, "document.activeElement?.getAttribute('data-county-id') || ''");
+  await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "ArrowDown", code: "ArrowDown", windowsVirtualKeyCode: 40, nativeVirtualKeyCode: 40 });
+  await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "ArrowDown", code: "ArrowDown", windowsVirtualKeyCode: 40, nativeVirtualKeyCode: 40 });
+  const second = await evalJson(page, "document.activeElement?.getAttribute('data-county-id') || ''");
+  return { before, first, second, moved: before === "map" && Boolean(first) };
+}
+
 async function badges(page, source, friend) {
   return evalJson(page, `(() => ({
     source: document.querySelector('[data-county-id="${source}"] .army-badge-count')?.textContent || '',
@@ -345,9 +422,15 @@ async function click(page, selector) {
     if (!node) return null;
     node.scrollIntoView({ block: 'center', inline: 'nearest' });
     const rect = node.getBoundingClientRect();
-    return { x: rect.x + rect.width / 2, y: rect.y + Math.min(rect.height / 2, 20) };
+    const x = rect.x + rect.width / 2;
+    const y = rect.y + Math.min(rect.height / 2, 20);
+    const hit = document.elementFromPoint(x, y);
+    const county = hit && hit.closest ? hit.closest('[data-county-id]') : null;
+    const ok = hit === node || (hit && node.contains(hit)) || county === node;
+    return { x, y, ok, landed: ok ? 'self' : (hit && (hit.id || (hit.textContent || '').trim().slice(0, 40) || hit.tagName) || 'none') };
   })()`);
   if (!box) throw new Error(`missing ${selector}`);
+  if (!box.ok) throw new Error(`click on ${selector} landed on ${box.landed}`);
   await mouse(page, box.x, box.y);
 }
 
