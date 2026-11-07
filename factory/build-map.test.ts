@@ -87,6 +87,37 @@ test("the Indiana pack matches the Census counties and excludes corner touches",
   assert.equal(built.manifest.geometrySource, GEOMETRY_SOURCE.censusUrl);
 });
 
+test("an explicit integer bonus is copied and a missing bonus stays zero without being marked reviewed", () => {
+  const raw = JSON.parse(readFileSync(path.join(root, "regions", "in", "region.json"), "utf8")) as {
+    review: string;
+    regions: { bonus?: number; review: string; id: string }[];
+  };
+  assert.equal(parseRegionFile(raw).regions.every((region) => region.bonus === undefined), true);
+  const adopted = structuredClone(raw);
+  adopted.review = "reviewed";
+  const first = adopted.regions[0];
+  const second = adopted.regions[1];
+  if (!first || !second) throw new Error("missing region");
+  first.bonus = 5;
+  const parsed = parseRegionFile(adopted);
+  assert.equal(parsed.regions[0]?.bonus, 5);
+  assert.equal(parsed.regions[1]?.bonus, undefined);
+  const built = buildState(parsed, atlasJson());
+  const copied = built.map.regions.find((region) => region.id === first.id);
+  const untouched = built.map.regions.find((region) => region.id === second.id);
+  assert.equal(copied?.bonus, 5);
+  assert.equal(copied?.review, "draft");
+  assert.equal(untouched?.bonus, 0);
+  assert.equal(untouched?.review, "draft");
+  assert.equal(built.manifest.regions.find((region) => region.id === first.id)?.bonus, 5);
+  assert.equal(built.manifest.regions.find((region) => region.id === second.id)?.bonus, undefined);
+  const fractional = structuredClone(raw);
+  const target = fractional.regions[0];
+  if (!target) throw new Error("missing region");
+  target.bonus = 1.5;
+  assert.throws(() => parseRegionFile(fractional), /bonus/);
+});
+
 function nameOf(atlas: ReturnType<typeof loadAtlas>, fips: string): string {
   return atlas.shapes.find((shape) => shape.fips === fips)?.name ?? fips;
 }

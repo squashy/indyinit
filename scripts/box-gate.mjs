@@ -6,12 +6,13 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const gates = {
   map: "gates/map-gate.ts",
   rules: "gates/rules.gate.ts",
+  "rules-engine": "gates/rules-gate.ts",
+  quiz: "gates/quiz-gate.ts",
 };
 const name = process.argv[2];
-const file = gates[name];
+const file = name && Object.hasOwn(gates, name) ? gates[name] : undefined;
 if (!file) {
-  const known = Object.keys(gates).join(", ");
-  console.error(name ? `Unknown gate "${name}". Known gates: ${known}` : "Usage: npm run gates -- <name>");
+  console.error(name ? `Unknown gate "${name}". Known gates: ${Object.keys(gates).join(", ")}` : "Usage: npm run gates -- <name>");
   process.exit(1);
 }
 const result = spawnSync(process.execPath, ["--experimental-strip-types", path.join(root, file)], {

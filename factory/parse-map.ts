@@ -14,6 +14,8 @@ export type RegionFile = {
     name: string;
     counties: readonly string[];
     review: "draft" | "reviewed";
+    /** Present only when the manifest adopted an integer. Missing means not adopted. */
+    bonus?: number;
   }[];
 };
 
@@ -34,6 +36,7 @@ export function parseRegionFile(input: unknown): RegionFile {
         name: expectString(region, "name"),
         counties: expectStrings(region, "counties"),
         review: expectReview(region, "review"),
+        ...optionalBonus(region),
       };
     }),
   };
@@ -86,6 +89,13 @@ function parseRegion(input: unknown, index: number): Region {
 function parseFact(input: unknown, index: number): CountyFact {
   const record = expectRecord(input, `facts[${index}]`);
   return { label: expectString(record, "label"), text: expectString(record, "text") };
+}
+
+function optionalBonus(record: Record<string, unknown>): { bonus: number } | Record<string, never> {
+  if (!Object.hasOwn(record, "bonus")) return {};
+  const value = record.bonus;
+  if (typeof value !== "number" || !Number.isSafeInteger(value)) throw new Error("bonus must be an integer");
+  return { bonus: value };
 }
 
 function expectReview(record: Record<string, unknown>, key: string): "draft" | "reviewed" {

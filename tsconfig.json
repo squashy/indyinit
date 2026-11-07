@@ -14,5 +14,5 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["factory/**/*.ts", "gates/**/*.ts", "src/**/*.ts", "vite.config.ts"]
+  "include": ["factory/**/*.ts", "gates/**/*.ts", "src/**/*.ts", "tests/**/*.ts", "vite.config.ts"]
 }
