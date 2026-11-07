@@ -23,7 +23,7 @@ async function boot(): Promise<void> {
     }
     const map = bindMap(document);
     const svg = document.getElementById("map");
-    if (svg instanceof SVGSVGElement) attachPanZoom(svg);
+    const panZoom = svg instanceof SVGSVGElement ? attachPanZoom(svg) : null;
     let live: Session | null = null;
     let setup: { persist(session: PlaySession): void } | null = null;
     const act = (action: Action): boolean => {
@@ -61,6 +61,7 @@ async function boot(): Promise<void> {
       packs: packs.value,
       onSession(session) {
         live = { state: session.state, rng: session.rng };
+        panZoom?.reset();
         render();
       },
     });
