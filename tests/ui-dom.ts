@@ -72,8 +72,22 @@ export class DomClassList {
 export class DomNode {
   parentElement: DomElement | null = null;
   ownerDocument: DomDocument | null = null;
-  textContent = "";
   childNodes: DomNode[] = [];
+  #text = "";
+
+  get textContent(): string {
+    if (this instanceof DomElement && this.children.length > 0) {
+      return this.children.map((child) => child.textContent).join("");
+    }
+    return this.#text;
+  }
+
+  set textContent(value: string) {
+    this.#text = value;
+    if (this instanceof DomElement) {
+      for (const child of [...this.children]) child.remove();
+    }
+  }
 }
 
 export class DomElement extends DomNode {
@@ -215,6 +229,10 @@ export class DomElement extends DomNode {
   click(): void {
     if (this instanceof DomButton && this.disabled) return;
     this.dispatchEvent(new DomMouseEvent("click"));
+    if (this instanceof DomButton && this.type === "submit") {
+      const form = this.closest("form");
+      form?.dispatchEvent(new DomEvent("submit", { bubbles: false }));
+    }
   }
 
   focus(): void {
@@ -292,10 +310,19 @@ export class DomButton extends DomHTMLElement {
 export class DomInput extends DomHTMLElement {
   type = "text";
   name = "";
-  value = "";
   min = "";
   max = "";
   disabled = false;
+  #value = "";
+
+  get value(): string {
+    return this.#value;
+  }
+
+  set value(next: string) {
+    this.#value = next;
+    this.dispatchEvent(new DomEvent("input"));
+  }
 }
 export class DomTextArea extends DomHTMLElement {}
 export class DomSelect extends DomHTMLElement {}

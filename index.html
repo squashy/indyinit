@@ -1480,9 +1480,12 @@
         <section id="occupy-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Move armies in">
           <h2>Move armies in</h2>
           <p>Move at least as many armies as the dice you rolled. Leave at least 1 army behind.</p>
-          <label>Armies to move
-            <input type="number" name="occupy-count" min="1" step="1" inputmode="numeric">
-          </label>
+          <form class="occupy-form">
+            <label>Armies to move
+              <input type="number" name="occupy-count" min="1" step="1" inputmode="numeric">
+            </label>
+            <button type="submit" class="occupy-move">Move armies</button>
+          </form>
         </section>
         <section id="handoff-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Pass the screen">
           <h2>Pass the screen</h2>

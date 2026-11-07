@@ -597,6 +597,24 @@ summary {
   font-variant-numeric: tabular-nums;
 }
 
+.battle-matchup,
+.battle-outcome,
+#occupy-dialog p {
+  font-weight: 700;
+}
+
+.dice-actions,
+.occupy-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+.occupy-form label {
+  flex: 1 1 8rem;
+}
+
 #county-info,
 #quiz-question,
 #quiz-result,

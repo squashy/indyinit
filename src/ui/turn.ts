@@ -359,7 +359,7 @@ function eventLine(state: GameState, event: GameEvent): string | null {
     return `${name} got 0 armies.`;
   }
   if (event.kind === "battle") {
-    return `${nameOf(state, event.from)} attacked ${nameOf(state, event.to)}. Attack dice ${event.attackRolls.join(", ")}. Defend dice ${event.defenseRolls.join(", ")}.`;
+    return `${nameOf(state, event.from)} attacked ${nameOf(state, event.to)}. Attack dice ${event.attackRolls.join(", ")}. Defend dice ${event.defenseRolls.join(", ")}. Attacker lost ${event.attackLosses}. Defender lost ${event.defenseLosses}.`;
   }
   if (event.kind === "capture") return `${name} moved ${event.moved} armies into ${nameOf(state, event.countyId)}.`;
   if (event.kind === "winner") return `${name} wins.`;
