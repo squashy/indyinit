@@ -214,9 +214,14 @@ async function connectBrowser() {
       result: document.getElementById('quiz-result')?.textContent || '',
       reinforcement: document.getElementById('reinforcement-count')?.textContent || '',
     }))()`);
-    const income = scored.reinforcement.match(/Armies to place: (\d+)\. Counties (\d+), regions (\d+), question (\d+)\./);
+    const income = scored.reinforcement.match(/Counties (\d+)\. Base reinforcement (\d+)\. Regions (\d+)\. Question (\d+)\. Armies to place (\d+)\./);
     mark("correct answer shows +2 once", scored.result.includes("2 armies"), scored.result, "src/ui/quiz-dialog.ts");
-    mark("reinforcement matches engine income", Boolean(income) && Number(income[1]) === Number(income[2]) + Number(income[3]) + Number(income[4]) && income[4] === "2", scored.reinforcement, "src/ui/turn.ts");
+    mark(
+      "reinforcement matches engine income",
+      Boolean(income) && income[1] !== income[2] && Number(income[5]) === Number(income[2]) + Number(income[3]) + Number(income[4]) && income[4] === "2",
+      scored.reinforcement,
+      "src/ui/turn.ts",
+    );
     const beforeDuplicate = await played(pageSocket);
     await evalJson(pageSocket, `(() => {
       const button = document.querySelector('#quiz-choices button[data-btt18="answer"]');
@@ -227,7 +232,7 @@ async function connectBrowser() {
     const afterDuplicate = await played(pageSocket);
     mark(
       "second correct answer does not add armies",
-      beforeDuplicate.reinforcement === afterDuplicate.reinforcement && beforeDuplicate.armies === afterDuplicate.armies && beforeDuplicate.phase === afterDuplicate.phase && afterDuplicate.enabled === 0 && beforeDuplicate.reinforcement.includes("question 2"),
+      beforeDuplicate.reinforcement === afterDuplicate.reinforcement && beforeDuplicate.armies === afterDuplicate.armies && beforeDuplicate.phase === afterDuplicate.phase && afterDuplicate.enabled === 0 && beforeDuplicate.reinforcement.includes("Question 2"),
       `${afterDuplicate.reinforcement} armies ${afterDuplicate.armies}`,
       "src/ui/quiz-dialog.ts",
     );
@@ -252,13 +257,13 @@ async function connectBrowser() {
     if (!attack) return;
     await click(pageSocket, `[data-county-id="${attack.from}"]`);
     await click(pageSocket, `[data-county-id="${attack.to}"]`);
-    await waitUntil(pageSocket, "document.querySelector('#battle-dialog button')");
+    await waitUntil(pageSocket, "document.querySelector('#battle-dialog:not([hidden]) .dice-actions button')");
     const marks = await evalJson(pageSocket, `(() => ({
       source: document.querySelector('.is-source')?.getAttribute('data-county-id') || '',
       target: document.querySelector('.is-target')?.getAttribute('data-county-id') || '',
     }))()`);
     mark("attack selects an enemy target", marks.source === attack.from && marks.target === attack.to, JSON.stringify(marks), "src/ui/map.ts");
-    await click(pageSocket, "#battle-dialog button");
+    await click(pageSocket, "#battle-dialog .dice-actions button");
     await waitUntil(pageSocket, "(document.querySelector('.attack-dice')?.textContent || '').includes('Attack dice')");
     const occupy = await evalJson(pageSocket, "document.getElementById('occupy-dialog')?.hidden === false");
     if (occupy) {
@@ -337,7 +342,7 @@ async function connectBrowser() {
     await click(pageSocket, "#skip-quiz");
     await waitUntil(pageSocket, "(document.getElementById('quiz-result')?.textContent || '').includes('0 armies')");
     const skipped = await evalJson(pageSocket, "document.getElementById('reinforcement-count')?.textContent || ''");
-    mark("skip scores 0", String(skipped).includes("question 0"), String(skipped), "src/ui/quiz-dialog.ts");
+    mark("skip scores 0", String(skipped).includes("Question 0"), String(skipped), "src/ui/quiz-dialog.ts");
     const saved = await played(pageSocket);
     await pageSocket.send("Page.reload", { ignoreCache: true });
     await waitUntil(pageSocket, "document.readyState === 'complete' && document.getElementById('continue-game')");

@@ -8,7 +8,7 @@ import { bindBattle } from "../src/ui/battle.ts";
 import { bindQuiz } from "../src/ui/quiz-dialog.ts";
 import { bindTurn } from "../src/ui/turn.ts";
 import type { Action, ChoiceLetter, CountyId, GameState, MapPack, QuestionId, QuizPack, QuizQuestion } from "../src/types.ts";
-import { createDocument, DomButton, installDom, useDocument, type DomDocument } from "./ui-dom.ts";
+import { createDocument, DomButton, DomKeyboardEvent, installDom, useDocument, type DomDocument } from "./ui-dom.ts";
 
 installDom();
 
@@ -77,6 +77,26 @@ test("a correct quiz credits 2 once, and a wrong or skipped quiz credits 0", () 
   if (skipped.live.state.phase.kind !== "place") return;
   assert.equal(skipped.live.state.phase.income.quiz, 0);
   assert.match(skipped.doc.getElementById("quiz-result")?.textContent ?? "", /0/);
+});
+
+test("quiz focus starts on the first choice and Tab is not trapped", () => {
+  const harness = quizHarness(false);
+  harness.show(harness.state);
+  const first = harness.choice(0);
+  const skip = harness.doc.getElementById("skip-quiz");
+  assert.equal(harness.doc.activeElement === first, true);
+  assert.ok(skip instanceof DomButton);
+  skip.focus();
+  skip.dispatchEvent(new DomKeyboardEvent("keydown", { key: "Tab" }));
+  assert.equal(harness.doc.activeElement === skip, true);
+  first.focus();
+  first.dispatchEvent(new DomKeyboardEvent("keydown", { key: "Tab", shiftKey: true }));
+  assert.equal(harness.doc.activeElement === first, true);
+  const calls = harness.calls;
+  first.dispatchEvent(new DomKeyboardEvent("keydown", { key: "Escape" }));
+  assert.equal(harness.calls, calls);
+  assert.equal(harness.live.state.phase.kind, "quiz");
+  assert.equal(first.disabled, false);
 });
 
 test("quiz and battle input lock only the pending action and a rejection can be retried", () => {

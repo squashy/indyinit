@@ -132,7 +132,14 @@ export function bindBattle(doc: Document, act: Act, map: MapView): BattleDialog 
           pending = true;
           const ok = act({ kind: "attack", from, to, dice: rolled });
           pending = false;
-          if (!ok && current.phase.kind === "attack") paintBattle(matchup, attackDice, defendDice, outcome, current, from, to, holding(current, from)?.armies ?? origin.armies, holding(current, to)?.armies ?? target.armies, latestBattle(current, from, to), false);
+          const fought = current ? latestBattle(current, from, to) : null;
+          if (ok && fought) {
+            if (attackDice) attackDice.textContent = `Attack dice ${fought.attackRolls.join(", ")}.`;
+            if (defendDice) defendDice.textContent = `Defend dice ${fought.defenseRolls.join(", ")}.`;
+            if (outcome && !outcome.textContent) outcome.textContent = `Attacker lost ${fought.attackLosses}. Defender lost ${fought.defenseLosses}.`;
+          } else if (!ok && current && current.phase.kind === "attack") {
+            paintBattle(matchup, attackDice, defendDice, outcome, current, from, to, holding(current, from)?.armies ?? origin.armies, holding(current, to)?.armies ?? target.armies, fought, false);
+          }
         });
         diceBox.appendChild(button);
       }
