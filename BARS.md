@@ -1,10 +1,14 @@
 # Pass/fail bars
 
-Each bar is an automated gate unless marked otherwise. Gates run by one command for any state, and CI blocks any pull request that fails them. Changing a bar takes a person and a row in `FAILURES.md`.
+## Current Indiana demo precedence
+
+`CONTRACT.md` and later explicit owner decisions control this demo. Conflicting instructions below are historical, not current release gates. The quiz bonus is fixed at +2 once per turn. Use the supplied repository CSV; do not generate replacement trivia. Factual QA, both-checker verdicts, ledger merge and random factual audits are deferred, not completed. Legacy content quotas do not block this CSV import. Structural mapping and security checks remain required. Hidden benchmark truth labels remain private; supplied gameplay correct letters and answers ship. No hosted CI or previews. Changes use branches and PRs with non-author exact-head approval, local box checks and main-only production deployment. The UI must say "Questions unverified" and must not claim the demo is fact-checked.
+
+Each bar below is a historical benchmark gate unless the precedence section keeps it active. Structural map checks, security checks, and gameplay-rule checks still apply. Fact bars, the `quizBonus` tuner, hosted CI, and preview checks are deferred or superseded for the current Indiana demo. Changing a still-active bar takes a person and a row in `FAILURES.md`.
 
 ## Facts
 
-Scored by the key holder, per state and overall. These numbers come from outside the agents' reach, so they are the ones we trust most.
+Historical benchmark measures, deferred for the current Indiana demo. They do not block import or release until factual QA is explicitly authorized. BTT-11 and BTT-12 are not Done. When that work is authorized, the key holder scores these outside the agents' reach.
 
 | Measure | Bar | Why |
 |---|---|---|
@@ -28,8 +32,10 @@ We also report each checker's catch rate alone and how often they disagreed. Tha
 
 ## Quiz
 
-- Every county has at least 4 questions across at least 3 categories
-- A seat question for every county with a seat, whose answer equals the seat field
+Legacy coverage and seat quotas are deferred for the current demo and do not block CSV import (`CONTRACT.md` §5.4). Structural choice, duplicate, county-name, and HTML checks still apply.
+
+- **Deferred content quota:** every county has at least 4 questions across at least 3 categories
+- **Deferred content quota:** a seat question for every county with a seat, whose answer equals the seat field
 - 4 unique choices; answer in range; no duplicate questions; the county named in the question
 - No HTML in any text
 - Reading level of explanations is reported per state, with a target of grade 5. This is reported and does not block
@@ -39,7 +45,7 @@ We also report each checker's catch rate alone and how often they disagreed. Tha
 - All rule tests pass on every state's map
 - At least 6 deliberately broken rules, all caught by the tests
 - Simulated games all finish with a valid winner, no state corruption, and armies conserved
-- **Knowledge matters:** in simulated 2-player games between a player who always answers correctly and one who never does, with seats balanced, the correct player wins 60% to 75% of at least 100 games. The tuner raises `quizBonus` until this passes, never going below 2
+- **Knowledge matters:** in simulated 2-player games between a player who always answers correctly and one who never does, with seats balanced, the correct player wins 60% to 75% of at least 100 games. The tuner raises `quizBonus` until this passes, never going below 2. **Superseded for the current demo:** the award is fixed at +2 once per correct answer (`CONTRACT.md` §3.3) and is not tuned
 - **Fair start:** 2-player first-mover win rate between 35% and 65% over at least 100 games per mode. The tuner adjusts `secondPlayerExtra` per state
 - **Game length:** 4-player median of at most 35 rounds in Total and 25 in Quick. If a state misses, the builder adds regions and retests. If Total still misses, the state offers Quick only and says so. If Quick misses, the state does not ship
 
@@ -47,7 +53,7 @@ Tuning order: game length, then quiz reward, then second-player armies.
 
 ## Browser
 
-Real clicks, at phone, 1366x768 Chromebook and desktop sizes, on the local build and the preview URL:
+Real clicks, at phone, 1366x768 Chromebook and desktop sizes, on the local build. Hosted preview URLs are superseded for the current demo. The checks:
 
 - A full human turn: quiz, reinforce, attack, fortify, handoff
 - Reinforcement total matches the formula, including the quiz reward
@@ -57,7 +63,7 @@ Real clicks, at phone, 1366x768 Chromebook and desktop sizes, on the local build
 ## Security
 
 - No `innerHTML` with game or quiz text; no `eval`; no external scripts; no secrets in shipped files
-- No file containing the answer key before verdicts lock
+- No file containing the hidden true/fake benchmark key before that key is published. Supplied gameplay correct letters are not that key (`CONTRACT.md` §10)
 - Content-Security-Policy, X-Content-Type-Options and Referrer-Policy headers set
 - Security review run, with findings resolved or listed in `SCORECARD.md`
 
