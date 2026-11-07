@@ -49,7 +49,7 @@ Legacy coverage and seat quotas are deferred for the current demo and do not blo
 - **Fair start:** 2-player first-mover win rate between 35% and 65% over at least 100 games per mode. The tuner adjusts `secondPlayerExtra` per state
 - **Game length:** 4-player median of at most 35 rounds in Total and 25 in Quick. If a state misses, the builder adds regions and retests. If Total still misses, the state offers Quick only and says so. If Quick misses, the state does not ship
 
-Tuning order: game length, then quiz reward, then second-player armies.
+Historical tuning order: game length, then quiz reward, then second-player armies. The current demo does not tune the fixed +2 quiz award.
 
 ## Browser
 

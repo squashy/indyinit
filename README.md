@@ -1,6 +1,12 @@
 # Battle for the 92
 
-An original conquest game that teaches Indiana fourth graders their own county's history, where knowing it wins you armies. Every question has been checked by two independent AIs, and we planted fakes to measure how well that works.
+An original conquest game that teaches Indiana fourth graders their own county's history, where knowing it wins you armies.
+
+## Current Indiana demo precedence
+
+`CONTRACT.md` and later explicit owner decisions control this demo. Conflicting instructions below are historical, not current release gates. The quiz bonus is fixed at +2 once per turn. Use the supplied repository CSV; do not generate replacement trivia. Factual QA, both-checker verdicts, ledger merge and random factual audits are deferred, not completed. Legacy content quotas do not block this CSV import. Structural mapping and security checks remain required. Hidden benchmark truth labels remain private; supplied gameplay correct letters and answers ship. No hosted CI or previews. Changes use branches and PRs with non-author exact-head approval, local box checks and main-only production deployment. The UI must say "Questions unverified" and must not claim the demo is fact-checked.
+
+The historical benchmark plan planted fakes and used two independent checkers. That work is deferred, not Done. Do not describe the current demo as fact-checked. The supplied questions and gameplay answers are `inputs/battle-for-the-92-benchmark-1000_nokey.csv`. `bank/questions.csv` is not in this repo.
 
 Built at Indy Init on November 7. This first commit is the plan and question bank; everything that runs was built on the day, and the commit history shows it.
 
@@ -16,14 +22,14 @@ Built at Indy Init on November 7. This first commit is the plan and question ban
 | `.claude/agents/` | Designer, dev, content and fact-checker briefs |
 | `BARS.md` | The pass/fail numbers |
 | `STATES.md` | The seven contest states and all 51 jurisdictions |
-| `bank/` | Question bank and how it's scored |
+| `bank/` | Historical bank note and unpublished key schedule (`bank/README.md`). Not the current importer input |
 | `decisions/` | Choices we made, with their tradeoffs |
 | `FAILURES.md` | Where the AI needed correcting, and what we changed |
 | `SCORECARD.md` | Results by judging category |
 | `metrics/` | Time, tokens and interventions per ticket |
 | `RUNBOOK.md` | The day's schedule and the demo |
 
-To begin, an agent reads `SPEC.md` and takes ticket 1 from `BOARD.md`.
+To begin, an agent reads `CONTRACT.md` first, then `SPEC.md`, subject to the current demo precedence above, and takes the next unblocked ticket from `BOARD.md`.
 
 ## Box checks
 

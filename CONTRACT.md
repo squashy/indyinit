@@ -368,7 +368,9 @@ Checked on main `e014f9d48c32ede212a27b900d949599ad86182d`. This edit moves no p
 - `factory/import-quiz.ts` writes only the explicit `--out` argument. It has no default path.
 - `vite.config.ts` copies the `data/` directory to `dist/data/` at the end of the build. `docs/btt19-release.md` follows `data/quiz.json` to `dist/data/quiz.json` and states that a pack only under `public/` is not the source that check uses.
 
-BTT-14, the Vite/build owner (BTT-2), and the release check (BTT-19) still have to agree on one destination before any move. `src/main.ts` is not on this main, so this note does not claim a runtime load failure. Do not create `public/data/quiz.json` as a second maintained pack, and do not treat `data/quiz.json` as a silently approved replacement name.
+BTT-14, the Vite/build owner (BTT-2), and the release check (BTT-19) still have to agree on one destination before any move. `src/main.ts` is not on this main, so this note does not claim a runtime load failure from this tree. Do not create `public/data/quiz.json` as a second maintained pack, and do not treat `data/quiz.json` as a silently approved replacement name.
+
+Reported evidence, not a test run by this documentation edit: CoS reported that dev2's production packaging audit of open PR 12 at `e86012ded097ebb755f0fd7950d36a49c03d5ae7` passed. The report says one copy emits `dist/data`, a fetch returned 200, the corrected CSV digest matched, and the pack covered 92 counties and 1,000 questions. That report describes the tracked `data/` to `dist/data` copy. It does not adopt `data/quiz.json` as the approved destination name, and it does not remove the name `public/data/quiz.json`.
 
 ---
 
@@ -385,6 +387,18 @@ BARS.md	BTT-1
 AGENTS.md	BTT-1
 CONTRACT.template.md	BTT-1
 decisions/004-independent-blind-fact-checking.md	BTT-1
+decisions/005-gates-before-features.md	BTT-1
+decisions/006-human-approval-boundaries.md	BTT-1
+decisions/007-board-driven-multi-vendor-team.md	BTT-1
+decisions/008-tune-balance-per-state.md	BTT-1
+CLAUDE.md	BTT-1
+README.md	BTT-1
+RUNBOOK.md	BTT-1
+bank/README.md	BTT-1
+.claude/agents/content.md	BTT-1
+.claude/agents/designer.md	BTT-1
+.claude/agents/dev.md	BTT-1
+.claude/agents/fact-checker.md	BTT-1
 inputs/battle-for-the-92-benchmark-1000_nokey.csv	BTT-14
 src/types.ts	BTT-1
 package.json	BTT-2
@@ -454,7 +468,7 @@ release/verification.md	BTT-19
 
 | Card | Owns (exclusive) | Notes |
 |------|------------------|-------|
-| **BTT-1** | `CONTRACT.md`, `SPEC.md`, `BARS.md`, `AGENTS.md`, `CONTRACT.template.md`, `decisions/0001-rules.md`, `decisions/004-independent-blind-fact-checking.md`, draft `src/types.ts` | Root docs; design-only for product code |
+| **BTT-1** | Root docs, decision records, and agent briefs listed as BTT-1 in §9.1, plus draft `src/types.ts` | Design-only for product code |
 | **BTT-2** | Vite skeleton, `package.json`, `tsconfig`, `vercel.json`, lean box gate **runner scripts** | Not product logic |
 | **BTT-3** | `factory/build-map.*`, `regions/in/region.json`, `data/regions/in/map.json`, `gates/map.*` | |
 | **BTT-4** | `gates/rules.*`, `gates/mutants.*` | |
