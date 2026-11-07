@@ -1,0 +1,77 @@
+{
+  "sha": "fead794ce33fec26e2b2543a60ccd233549fe8e0",
+  "log": [
+    {
+      "step": "quiz-open",
+      "unverified": "Questions unverified",
+      "quizCounty": "Porter",
+      "highlighted": "18127",
+      "promptMatchesPack": true,
+      "countyId": "18127",
+      "highlightMatches": true
+    },
+    {
+      "step": "correct-once",
+      "result": "Right. You get 2 armies, one time.",
+      "reinforce": "Armies to place: 17. Counties 15, regions 0, question 2.",
+      "reinforceAfterSecondClick": "Armies to place: 17. Counties 15, regions 0, question 2.",
+      "unchanged": true,
+      "choiceDisabled": true
+    },
+    {
+      "step": "placed",
+      "phase": "This step: Ada may attack",
+      "reinforce": "Armies to place: 0.",
+      "status": ""
+    },
+    {
+      "step": "after-attacks",
+      "phase": "This step: Ada moves armies in",
+      "occupyHidden": false,
+      "status": ""
+    },
+    {
+      "step": "occupied",
+      "phase": "This step: Ada may attack",
+      "status": ""
+    },
+    {
+      "step": "ended-attacks",
+      "phase": "This step: Ada may move armies once",
+      "status": ""
+    },
+    {
+      "step": "fortified",
+      "from": "18001",
+      "to": "18003",
+      "before": 17,
+      "beforeTo": 1,
+      "afterFrom": 16,
+      "afterTo": 2,
+      "phase": "This step: Pass the screen",
+      "status": ""
+    },
+    {
+      "step": "handoff",
+      "phase": "This step: Pass the screen",
+      "handoff": "Hand the screen to Ben.",
+      "hidden": false
+    },
+    {
+      "step": "second-quiz",
+      "unverified": "Questions unverified",
+      "quizCounty": "Clay",
+      "highlighted": "18021",
+      "highlightMatches": true,
+      "phase": "This step: Ben answers a question"
+    },
+    {
+      "step": "wrong",
+      "result": "Not this time. The answer is The Lincoln Highway. You get 0 armies. The courthouse, the county's fifth, is the only building housing county government offices and records.",
+      "reinforce": "Armies to place: 15. Counties 15, regions 0, question 0.",
+      "hasExplanation": true,
+      "showsAnswer": true,
+      "showsZero": true
+    }
+  ]
+}
