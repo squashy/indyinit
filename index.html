@@ -1500,6 +1500,20 @@
           </div>
         </div>
         <div class="side-rest">
+        <section id="online-play" class="card" hidden aria-label="Play online">
+          <h2>Play online</h2>
+          <p>Optional. If this table is down, start the game on this screen as usual.</p>
+          <label class="name-field">Your name
+            <input type="text" id="online-name" maxlength="24" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="name-field">Seats
+            <input type="number" id="online-seats" min="2" max="6" value="2">
+          </label>
+          <button type="button" id="create-online">Create online game</button>
+          <button type="button" id="join-online" hidden>Join this game</button>
+          <p id="online-share"></p>
+          <p id="online-message" role="status"></p>
+        </section>
         <section id="setup" class="card" aria-label="Set up the game">
           <h2>Set up</h2>
           <p>Choose 2 to 6 players. Type a name for each person or computer who is playing.</p>
