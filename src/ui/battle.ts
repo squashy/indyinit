@@ -30,6 +30,9 @@ export function bindBattle(doc: Document, act: Act, map: MapView): BattleDialog 
   let pending = false;
   let occupyKey = "";
   let occupyOpen = false;
+  const seenEvents = new Set<string>();
+  let seenEventCount = 0;
+  let motionPlays = 0;
 
   countInput?.addEventListener("input", () => {
     if (occupyPainting || !current || current.phase.kind !== "occupy") return;
@@ -107,7 +110,13 @@ export function bindBattle(doc: Document, act: Act, map: MapView): BattleDialog 
         return;
       }
       const battle = latestBattle(state, from, to);
-      paintBattle(matchup, attackDice, defendDice, outcome, state, from, to, origin.armies, target.armies, battle);
+      const fresh = freshEventKeys(state, seenEvents, () => seenEventCount, (count) => {
+        seenEventCount = count;
+      });
+      const battleKey = battle ? eventKey(battle, state.events.lastIndexOf(battle)) : "";
+      if (battle && fresh.has(battleKey)) motionPlays += 1;
+      if (dialog) dialog.dataset.motionPlays = String(motionPlays);
+      paintBattle(matchup, attackDice, defendDice, outcome, state, from, to, origin.armies, target.armies, battle, Boolean(battle && fresh.has(battleKey) && !reducedMotion()));
       const max = Math.min(3, origin.armies - 1);
       const active = doc.activeElement;
       const previous = Array.from(diceBox.querySelectorAll("button"));
@@ -123,7 +132,7 @@ export function bindBattle(doc: Document, act: Act, map: MapView): BattleDialog 
           pending = true;
           const ok = act({ kind: "attack", from, to, dice: rolled });
           pending = false;
-          if (!ok && current.phase.kind === "attack") paintBattle(matchup, attackDice, defendDice, outcome, current, from, to, holding(current, from)?.armies ?? origin.armies, holding(current, to)?.armies ?? target.armies, latestBattle(current, from, to));
+          if (!ok && current.phase.kind === "attack") paintBattle(matchup, attackDice, defendDice, outcome, current, from, to, holding(current, from)?.armies ?? origin.armies, holding(current, to)?.armies ?? target.armies, latestBattle(current, from, to), false);
         });
         diceBox.appendChild(button);
       }
@@ -147,6 +156,7 @@ function paintBattle(
   attackNow: number,
   defendNow: number,
   battle: Extract<GameEvent, { kind: "battle" }> | null,
+  roll: boolean,
 ): void {
   const attackBefore = attackNow + (battle?.attackLosses ?? 0);
   const defendBefore = defendNow + (battle?.defenseLosses ?? 0);
@@ -161,8 +171,14 @@ function paintBattle(
     if (outcome) outcome.textContent = "";
     return;
   }
-  if (attackDice) attackDice.textContent = `Attack dice ${battle.attackRolls.join(", ")}.`;
-  if (defendDice) defendDice.textContent = `Defend dice ${battle.defenseRolls.join(", ")}.`;
+  if (attackDice) {
+    attackDice.textContent = `Attack dice ${battle.attackRolls.join(", ")}.`;
+    attackDice.classList.toggle("is-rolling", roll);
+  }
+  if (defendDice) {
+    defendDice.textContent = `Defend dice ${battle.defenseRolls.join(", ")}.`;
+    defendDice.classList.toggle("is-rolling", roll);
+  }
   if (outcome) outcome.textContent = `Attacker lost ${battle.attackLosses}. Defender lost ${battle.defenseLosses}.`;
 }
 
@@ -297,6 +313,33 @@ function nameOf(state: GameState, countyId: CountyId): string {
 
 function cssEscape(value: string): string {
   return value.replace(/[^0-9A-Za-z_-]/g, "");
+}
+
+function freshEventKeys(state: GameState, seen: Set<string>, readCount: () => number, writeCount: (count: number) => void): Set<string> {
+  if (state.events.length < readCount()) seen.clear();
+  writeCount(state.events.length);
+  const fresh = new Set<string>();
+  state.events.forEach((event, index) => {
+    const key = eventKey(event, index);
+    if (seen.has(key)) return;
+    seen.add(key);
+    fresh.add(key);
+  });
+  return fresh;
+}
+
+function eventKey(event: GameEvent, index: number): string {
+  if (event.kind === "battle") {
+    return `${index}:${event.turnSequence}:battle:${event.from}:${event.to}:${event.attackRolls.join("-")}:${event.defenseRolls.join("-")}:${event.attackLosses}:${event.defenseLosses}`;
+  }
+  if (event.kind === "quizResolved") return `${index}:${event.turnSequence}:quiz:${event.result}:${event.bonus}`;
+  if (event.kind === "capture") return `${index}:${event.turnSequence}:capture:${event.countyId}:${event.moved}`;
+  if (event.kind === "phase") return `${index}:${event.turnSequence}:phase:${event.phase}`;
+  return `${index}:${event.turnSequence}:${event.kind}`;
+}
+
+function reducedMotion(): boolean {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 }
 
 function show(dialog: HTMLElement | null): void {

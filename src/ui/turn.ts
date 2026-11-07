@@ -25,6 +25,8 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
   let rushing = false;
   let pendingKey = "";
   let seenPhase = "";
+  let phaseMoves = 0;
+  let phaseKind = "";
 
   const chrome: TurnChrome = {
     show(state) {
@@ -48,6 +50,7 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
         fortifyButton.disabled = !moving;
       }
       syncPhaseFocus(state);
+      syncPhaseMotion(state);
       considerComputer(state);
     },
     hurry() {
@@ -125,6 +128,18 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
   });
 
   return chrome;
+
+  function syncPhaseMotion(state: GameState): void {
+    if (!phase) return;
+    const section = phase.closest("section");
+    if (!(section instanceof HTMLElement)) return;
+    if (state.phase.kind === phaseKind) return;
+    phaseKind = state.phase.kind;
+    phaseMoves += 1;
+    section.dataset.phaseMoves = String(phaseMoves);
+    if (reducedMotion()) section.classList.remove("is-entering");
+    else section.classList.add("is-entering");
+  }
 
   function syncPhaseFocus(state: GameState): void {
     const key = phaseKey(state);
@@ -487,9 +502,12 @@ function ownedCount(state: GameState): number {
   return state.holdings.reduce((total, holding) => total + (holding.owner === state.activePlayer ? 1 : 0), 0);
 }
 
+function reducedMotion(): boolean {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+}
+
 function motionDelay(): number {
-  const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  return reduce ? 0 : 700;
+  return reducedMotion() ? 0 : 700;
 }
 
 function ensureFortifyButton(doc: Document): HTMLButtonElement | null {

@@ -16,12 +16,17 @@ export function bindQuiz(doc: Document, act: Act): QuizDialog {
   const skip = doc.getElementById("skip-quiz");
   ensureNotice(doc, dialog);
 
+  let submission = false;
+
   skip?.addEventListener("click", () => {
     const state = current;
-    if (!state || state.phase.kind !== "quiz") return;
+    if (submission || !state || state.phase.kind !== "quiz") return;
     const pending = state.phase.pending;
     const found = findQuestion(state, pending.countyId, pending.questionId);
-    if (act({ kind: "skipQuiz", turnSequence: state.turnSequence, questionId: pending.questionId })) {
+    submission = true;
+    const ok = act({ kind: "skipQuiz", turnSequence: state.turnSequence, questionId: pending.questionId });
+    submission = false;
+    if (ok) {
       showResult(result, "skipped", found);
       lockChoices(choices);
     }
@@ -85,6 +90,10 @@ export function bindQuiz(doc: Document, act: Act): QuizDialog {
       const name = countyName(state, pending.countyId);
       county.textContent = name;
       show(dialog);
+      if (shownId !== pending.questionId) {
+        if (reducedMotion()) dialog.classList.remove("is-entering");
+        else dialog.classList.add("is-entering");
+      }
       if (shownId === pending.questionId && shownId !== "") return;
       shownId = pending.questionId;
       question.textContent = found?.prompt ?? "";
@@ -96,14 +105,17 @@ export function bindQuiz(doc: Document, act: Act): QuizDialog {
         button.type = "button";
         button.textContent = label;
         button.addEventListener("click", () => {
-          if (!current || current.phase.kind !== "quiz") return;
+          if (submission || !current || current.phase.kind !== "quiz") return;
           const open = current.phase.pending;
-          if (!act({
+          submission = true;
+          const ok = act({
             kind: "answerQuiz",
             turnSequence: current.turnSequence,
             questionId: open.questionId,
             answer: { kind: "choice", index },
-          })) return;
+          });
+          submission = false;
+          if (!ok) return;
           const letter = open.choiceOrder[index];
           const outcome = found && letter === found.correctLetter ? "correct" : "wrong";
           showResult(result, outcome, found);
@@ -160,6 +172,10 @@ function findQuestion(state: GameState, countyId: CountyId, questionId: string):
 
 function countyName(state: GameState, countyId: CountyId): string {
   return state.config.map.counties.find((county) => county.id === countyId)?.name ?? "County";
+}
+
+function reducedMotion(): boolean {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 }
 
 function show(dialog: HTMLElement): void {

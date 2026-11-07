@@ -724,6 +724,46 @@ summary {
   }
 }
 
+#quiz-dialog,
+#battle-dialog,
+#occupy-dialog,
+#handoff-dialog,
+.phase-dock {
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.is-entering {
+  animation: phase-in 160ms ease;
+}
+
+.is-rolling {
+  animation: dice-in 400ms ease;
+}
+
+@keyframes phase-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dice-in {
+  from {
+    opacity: 0.45;
+    transform: translateY(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -732,6 +772,13 @@ summary {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .is-entering,
+  .is-rolling {
+    animation: none;
+    transform: none;
+    opacity: 1;
   }
 }
 

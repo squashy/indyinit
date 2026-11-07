@@ -7,6 +7,7 @@ import { readGamePacks, bindSetup, type GamePacks, type PlaySession } from "../s
 import "./surface-phase.test.ts";
 import "./surface-battle.test.ts";
 import "./surface-map.test.ts";
+import "./surface-motion.test.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
