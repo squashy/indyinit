@@ -17,11 +17,11 @@
     "mapPath": "data/regions/in/map.json",
     "approvedDestinationName": "public/data/quiz.json",
     "packaging": "Consumed the tracked pack at data/quiz.json. The approved destination name public/data/quiz.json is unresolved. This report does not create that path, move the pack, or write a second pack.",
-    "revision": "e3efa86c52ee26c733a128a40f91a53115283af0",
+    "revision": "86d2f98635b75f47576d7f6500f3cb7c92105535",
     "revisionPath": "data/quiz.json",
     "revisionMeaning": "git commit that last changed data/quiz.json; null when git cannot resolve it",
     "sourceDigest": "12ecc69109decb249faeafbf558a45b48d82e4e4efb4e9d8cda0dc613ddfee5a",
-    "mapDigest": "bdfc6a3ab0dc9b47554a92be0e65bd86c44919651148cfdfdb9dc1bb277e2013",
+    "mapDigest": "3a4567de500538dfcf959f63f43fcd5b7f11ea226db448a82b02251f68725a87",
     "sourceDigestNote": "sourceDigest is copied from the tracked pack and is not recomputed. This report does not read or rewrite the CSV.",
     "mapIssues": []
   },
@@ -57,8 +57,8 @@
   "diagnostics": {
     "checker": "gates/quiz-check.ts checkShippedPack",
     "scope": "pack-level failures, Johnson through Whitley entries, and range question ids repeated outside the range",
-    "minimaNote": "minimaEnforced is false. Coverage fields from the existing checker are counts, not quotas.",
-    "minimaEnforced": false,
+    "minimaNote": "The shipped pack gate rejects a county under 4 questions, under 3 categories, or with no answer equal to a non-blank county seat. A blank or missing seat does not skip that rule. This report does not check facts.",
+    "minimaEnforced": true,
     "historicalFactCheck": "not-run",
     "ledger": "not-implemented",
     "errors": [],
@@ -71,7 +71,7 @@
       "countiesUnderThreeCategories": 0,
       "countiesWithoutSeatAnswer": 0,
       "mapCountiesMissingFromPack": 0,
-      "minimaEnforced": false,
+      "minimaEnforced": true,
       "ledger": "not-implemented",
       "historicalFactCheck": "not-run"
     }

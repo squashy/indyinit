@@ -25,23 +25,52 @@ test("structural failures name the broken question", () => {
   assert.deepEqual(html, [{ code: "html", detail: "q-1: prompt contains HTML" }]);
 });
 
-test("a one-question fixture is not rejected for coverage minimums", () => {
-  const pack = {
-    version: 1,
-    mapDigest: "ab".repeat(32),
-    sourceDigest: "cd".repeat(32),
-    counties: { "18001": [question()] },
-  };
-  const map = { digest: pack.mapDigest, counties: [{ id: "18001", name: "Adams" }] };
-  const result = checkShippedPack(pack, map);
-  assert.deepEqual(result.errors, []);
-  assert.equal(result.coverage.questions, 1);
-  assert.equal(result.coverage.countiesUnderFour, 1);
-  assert.equal(result.coverage.countiesUnderThreeCategories, 1);
-  assert.equal(result.coverage.minimaEnforced, false);
-  const text = formatQuizResult(result);
+test("a shipped pack fails closed under 4 questions, under 3 categories, or without a seat answer", () => {
+  const map = { digest: "ab".repeat(32), counties: [{ id: "18001", name: "Adams" }] };
+  const thin = checkShippedPack(packOf([question()]), map);
+  assert.equal(thin.coverage.minimaEnforced, true);
+  assert.equal(thin.coverage.countiesUnderFour, 1);
+  assert.equal(thin.coverage.countiesUnderThreeCategories, 1);
+  assert.ok(thin.errors.some((error) => error.detail === "18001: fewer than 4 questions"));
+  assert.ok(thin.errors.some((error) => error.detail === "18001: fewer than 3 categories"));
+  assert.equal(thin.errors.some((error) => error.detail.includes("county seat")), false);
+  assert.equal(formatQuizResult(thin).startsWith("quiz structure: FAIL"), true);
+
+  const twoCategories = checkShippedPack(packOf([
+    question({ id: "q-1", category: "history" }),
+    question({ id: "q-2", category: "history", prompt: "Which history belongs to Adams?", correctLetter: "B", correctAnswer: "Berne" }),
+    question({ id: "q-3", category: "landmark", prompt: "Which landmark belongs to Adams?", correctLetter: "C", correctAnswer: "Geneva" }),
+    question({ id: "q-4", category: "landmark", prompt: "Which other landmark belongs to Adams?", correctLetter: "D", correctAnswer: "Monroe" }),
+  ]), map);
+  assert.equal(twoCategories.errors.some((error) => error.detail === "18001: fewer than 4 questions"), false);
+  assert.ok(twoCategories.errors.some((error) => error.detail === "18001: fewer than 3 categories"));
+
+  const noSeat = checkShippedPack(packOf([
+    question({ id: "q-1", category: "history", correctLetter: "B", correctAnswer: "Berne" }),
+    question({ id: "q-2", category: "landmark", prompt: "Which landmark belongs to Adams?", correctLetter: "C", correctAnswer: "Geneva" }),
+    question({ id: "q-3", category: "people", prompt: "Which person belongs to Adams?", correctLetter: "D", correctAnswer: "Monroe" }),
+    question({ id: "q-4", category: "namesake", prompt: "Which namesake belongs to Adams?", correctLetter: "B", correctAnswer: "Berne" }),
+  ]), map);
+  assert.deepEqual(noSeat.errors.map((error) => error.detail), ["18001: no question answers with the county seat"]);
+  assert.equal(noSeat.coverage.countiesWithoutSeatAnswer, 1);
+
+  const blankSeat = checkShippedPack(packOf(cleanQuestions().map((item) => ({ ...item, countySeat: "" }))), map);
+  assert.deepEqual(blankSeat.errors.map((error) => error.detail), ["18001: no question answers with the county seat"]);
+  const whitespaceSeat = checkShippedPack(packOf(cleanQuestions().map((item) => ({ ...item, countySeat: "   " }))), map);
+  assert.deepEqual(whitespaceSeat.errors.map((error) => error.detail), ["18001: no question answers with the county seat"]);
+  const missingSeat = checkShippedPack(packOf(cleanQuestions().map((item) => {
+    const copy = { ...item };
+    delete copy.countySeat;
+    return copy;
+  })), map);
+  assert.deepEqual(missingSeat.errors.map((error) => error.detail), ["18001: no question answers with the county seat"]);
+  assert.equal(formatQuizResult(missingSeat).startsWith("quiz structure: FAIL"), true);
+
+  const clean = checkShippedPack(packOf(cleanQuestions()), map);
+  assert.deepEqual(clean.errors, []);
+  const text = formatQuizResult(clean);
   assert.equal(text.startsWith("quiz structure: PASS"), true);
-  assert.match(text, /minima: not applied/);
+  assert.match(text, /minima: enforced for the shipped pack/);
   assert.equal(text.includes("ledger: not-implemented"), true);
   assert.equal(text.includes("ledger: pass"), false);
   assert.equal(text.includes("historical fact check: not-run"), true);
@@ -53,12 +82,12 @@ test("the supplied parser fixture passes and a digest mismatch fails", () => {
   assert.equal(parsed.rows.length, 3);
   for (const row of parsed.rows) assert.deepEqual(checkQuestion(fromRow(row)), []);
 
-  const pack = {
-    version: 1,
-    mapDigest: "ab".repeat(32),
-    sourceDigest: "cd".repeat(32),
-    counties: { "18001": [question()] },
-  };
+  const pack = packOf([
+    question({ id: "q-1", category: "seat" }),
+    question({ id: "q-2", category: "history", prompt: "Which history belongs to Adams?", correctLetter: "B", correctAnswer: "Berne" }),
+    question({ id: "q-3", category: "landmark", prompt: "Which landmark belongs to Adams?", correctLetter: "C", correctAnswer: "Geneva" }),
+    question({ id: "q-4", category: "people", prompt: "Which person belongs to Adams?", correctLetter: "D", correctAnswer: "Monroe" }),
+  ]);
   const mismatch = checkShippedPack(pack, { digest: "ef".repeat(32), counties: [{ id: "18001", name: "Adams" }] });
   assert.deepEqual(mismatch.errors, [{ code: "digest", detail: "mapDigest does not match the map" }]);
 });
@@ -66,12 +95,30 @@ test("the supplied parser fixture passes and a digest mismatch fails", () => {
 test("the shipped quiz pack passes structural checks and reports coverage", () => {
   const result = checkShippedQuiz(root);
   assert.deepEqual(result.errors, []);
-  assert.equal(result.coverage.minimaEnforced, false);
+  assert.equal(result.coverage.minimaEnforced, true);
   assert.equal(result.coverage.ledger, "not-implemented");
   assert.equal(result.coverage.historicalFactCheck, "not-run");
   assert.equal(result.coverage.mapCountiesMissingFromPack, 0);
   console.log(formatQuizResult(result));
 });
+
+function cleanQuestions(): Record<string, unknown>[] {
+  return [
+    question({ id: "q-1", category: "seat" }),
+    question({ id: "q-2", category: "history", prompt: "Which history belongs to Adams?", correctLetter: "B", correctAnswer: "Berne" }),
+    question({ id: "q-3", category: "landmark", prompt: "Which landmark belongs to Adams?", correctLetter: "C", correctAnswer: "Geneva" }),
+    question({ id: "q-4", category: "people", prompt: "Which person belongs to Adams?", correctLetter: "D", correctAnswer: "Monroe" }),
+  ];
+}
+
+function packOf(items: readonly Record<string, unknown>[]): Record<string, unknown> {
+  return {
+    version: 1,
+    mapDigest: "ab".repeat(32),
+    sourceDigest: "cd".repeat(32),
+    counties: { "18001": items },
+  };
+}
 
 function question(patch: Record<string, unknown> = {}): Record<string, unknown> {
   return {
