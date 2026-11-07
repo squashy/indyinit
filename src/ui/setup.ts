@@ -53,19 +53,19 @@ export function readGamePacks(mapRaw: unknown, quizRaw: unknown): ParseResult<Ga
 }
 
 export function bindSetup(doc: Document, options: SetupOptions): SetupBinding {
-  const storage = options.storage ?? doc.defaultView?.localStorage;
   const start = doc.getElementById("start-game");
   const resumeButton = doc.getElementById("continue-game");
   const onStart = () => {
-    startGame(doc, options, storage);
+    startGame(doc, options);
   };
   const onResume = () => {
-    resumeGame(doc, options, storage);
+    resumeGame(doc, options);
   };
   start?.addEventListener("click", onStart);
   resumeButton?.addEventListener("click", onResume);
   return {
     persist(session) {
+      const storage = openStorage(doc, options.storage);
       if (storage) writeSave(storage, session);
     },
     dispose() {
@@ -73,6 +73,15 @@ export function bindSetup(doc: Document, options: SetupOptions): SetupBinding {
       resumeButton?.removeEventListener("click", onResume);
     },
   };
+}
+
+function openStorage(doc: Document, explicit: Storage | undefined): Storage | undefined {
+  if (explicit !== undefined) return explicit;
+  try {
+    return doc.defaultView?.localStorage;
+  } catch {
+    return undefined;
+  }
 }
 
 export function readSeatForm(doc: Document): ParseResult<{ readonly players: readonly Player[]; readonly mode: Mode }> {
@@ -100,7 +109,7 @@ export function readSeatForm(doc: Document): ParseResult<{ readonly players: rea
   return { ok: true, value: { players, mode: readMode(doc) } };
 }
 
-function startGame(doc: Document, options: SetupOptions, storage: Storage | undefined): void {
+function startGame(doc: Document, options: SetupOptions): void {
   const form = readSeatForm(doc);
   if (!form.ok) {
     setStatus(doc, form.error.message);
@@ -125,12 +134,14 @@ function startGame(doc: Document, options: SetupOptions, storage: Storage | unde
     return;
   }
   const session: PlaySession = { state: created.value, rng };
+  const storage = openStorage(doc, options.storage);
   if (storage) writeSave(storage, session);
   setStatus(doc, "");
   options.onSession(session);
 }
 
-function resumeGame(doc: Document, options: SetupOptions, storage: Storage | undefined): void {
+function resumeGame(doc: Document, options: SetupOptions): void {
+  const storage = openStorage(doc, options.storage);
   if (!storage) {
     setStatus(doc, "This screen could not read the saved game.");
     return;
