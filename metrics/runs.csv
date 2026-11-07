@@ -2,3 +2,4 @@ timestamp,ticket,tool,state,territories,minutes,tokens,est_cost_usd,gate_failure
 2026-11-07T16:21:10Z,engine-quiz,cursor,in,92,30,,,1,2,0,0,rules engine quiz selector and csv importer; computer player not included; no supplied question bank
 2026-11-07T16:32:00Z,quiz-pack,cursor,in,92,10,,,0,0,1000,1000,imported the supplied file; 92 counties; no rows rejected
 2026-11-07T16:55:00Z,engine-rollback,cursor,in,92,,,,0,0,0,0,rejected turns roll the random cursor back with the position; unsupported RNG algorithms fail to load
+2026-11-07T18:31:11Z,BTT-10,cursor,in,52,,,,0,0,573,0,Johnson through Whitley coverage report only; 52 counties; 573 questions; 5 categories; 2292 choices; 0 missing; 0 malformed; factual QA deferred; tracked pack data/quiz.json unchanged
