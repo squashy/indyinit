@@ -4,8 +4,8 @@ import * as path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { parseMapPack } from "../factory/parse-map.ts";
-import { createRng, engine } from "../src/engine/engine.ts";
-import type { SeededRng } from "../src/engine/engine.ts";
+import { createRng, dispatch, engine, load, save } from "../src/engine/engine.ts";
+import type { SeededRng, Session } from "../src/engine/engine.ts";
 import type {
   Action,
   County,
@@ -74,14 +74,115 @@ test("a reload keeps the pending quiz and an occupation without redrawing them",
   assert.deepEqual(apply(state, action, rng), apply(loaded.value.state, action, restored));
 
   const battle = reachOccupy();
-  const occupied = engine.serialize({ version: 1, state: battle.state, rng: battle.rng.snapshot() });
+  const cursor = createRng("occupy");
+  const occupied = engine.serialize({ version: 1, state: battle.state, rng: cursor.snapshot() });
   const resumed = engine.deserialize(occupied);
   assert.equal(resumed.ok, true);
   if (!resumed.ok || battle.state.phase.kind !== "occupy") return;
   assert.deepEqual(resumed.value.state.phase, battle.state.phase);
-  assert.deepEqual(resumed.value.rng, battle.rng.snapshot());
+  assert.deepEqual(resumed.value.rng, cursor.snapshot());
   const move = { kind: "occupy" as const, count: battle.state.phase.minimum };
   assert.deepEqual(apply(battle.state, move, constant(0)), apply(resumed.value.state, move, constant(0)));
+});
+
+test("an unsupported rng algorithm fails to load and leaves the live session", () => {
+  const rng = createRng("live");
+  const state = open(indiana, 2, "quick60", rng);
+  const session: Session = { state, rng };
+  const cursor = rng.snapshot();
+  const saved = JSON.parse(save(session)) as { rng: { algorithm: string } };
+  saved.rng.algorithm = "xoshiro128**";
+  const loaded = load(session, saved);
+  assert.equal(loaded.ok, false);
+  if (loaded.ok) return;
+  assert.equal(loaded.error.code, "INVALID_SAVE");
+  assert.match(loaded.error.message, /algorithm/);
+  assert.equal(session.state, state);
+  assert.equal(session.rng, rng);
+  assert.deepEqual(rng.snapshot(), cursor);
+  const direct = engine.deserialize(saved);
+  assert.equal(direct.ok, false);
+});
+
+test("a mid-quiz save and load keeps the question, choice order, and cursor", () => {
+  const rng = createRng("mid-quiz");
+  const state = open(indiana, 2, "quick60", rng);
+  assert.equal(state.phase.kind, "quiz");
+  if (state.phase.kind !== "quiz") return;
+  const questionId = state.phase.pending.questionId;
+  const choiceOrder = [...state.phase.pending.choiceOrder];
+  const cursor = rng.snapshot();
+  const session: Session = { state, rng };
+  const saved = save(session);
+  rng.draw();
+  session.state = apply(state, answer(state, 0), createRng("elsewhere"));
+  assert.notEqual(session.state.phase.kind, "quiz");
+  assert.notDeepEqual(rng.snapshot(), cursor);
+  const loaded = load(session, saved);
+  assert.equal(loaded.ok, true);
+  if (!loaded.ok || session.state.phase.kind !== "quiz") return;
+  assert.equal(session.state.phase.pending.questionId, questionId);
+  assert.deepEqual([...session.state.phase.pending.choiceOrder], choiceOrder);
+  assert.deepEqual(session.rng.snapshot(), cursor);
+  assert.equal(session.rng, rng);
+});
+
+test("an invalid draw during combat or shuffle is rejected and the cursor stays", () => {
+  const setup = constant(0);
+  let state = open(linkedMap(), 2, "total92", setup, questionsFor(linkedMap(), () => true));
+  state = clearQuizAndPlace(state);
+  const pair = attackPair(state, (armies) => armies >= 1);
+  assert.ok(pair);
+  if (!pair) return;
+  const rng = scriptedCursor([0.2, 1]);
+  const session: Session = { state, rng };
+  const cursor = rng.snapshot();
+  const attacked = dispatch(session, { kind: "attack", from: pair.from, to: pair.to, dice: 1 });
+  assert.equal(attacked.ok, false);
+  if (attacked.ok) return;
+  assert.match(attacked.error.message, /RNG/);
+  assert.equal(attacked.state, state);
+  assert.equal(session.state, state);
+  assert.deepEqual(rng.snapshot(), cursor);
+  assert.deepEqual(session.rng.snapshot(), cursor);
+
+  const live = open(tinyMap(), 2, "total92", createRng("shuffle-live"), emptyPack(tinyMap()));
+  const shuffle = scriptedCursor([0.1, 1]);
+  const before = shuffle.snapshot();
+  const created = engine.createGame(live.config, inject(shuffle));
+  assert.equal(created.ok, false);
+  if (!created.ok) {
+    assert.equal(created.error.code, "INVALID_INPUT");
+    assert.match(created.error.message, /RNG/);
+  }
+  assert.deepEqual(shuffle.snapshot(), before);
+  assert.equal(live.phase.kind, "place");
+});
+
+test("a successful transition advances the cursor exactly once", () => {
+  let state = open(tinyMap(), 2, "total92", constant(0), emptyPack(tinyMap()));
+  for (let guard = 0; guard < 6 && state.phase.kind !== "handoff"; guard += 1) {
+    const action = scriptedAction(state);
+    if (!action) break;
+    state = apply(state, action, constant(0));
+  }
+  assert.equal(state.phase.kind, "handoff");
+  if (state.phase.kind !== "handoff") return;
+  const rng = createRng("once");
+  const session: Session = { state, rng };
+  const before = rng.snapshot().draws;
+  const result = dispatch(session, { kind: "acknowledgeHandoff", turnSequence: state.turnSequence });
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  assert.equal(session.state, result.state);
+  assert.equal(session.state.phase.kind, "place");
+  assert.equal(rng.snapshot().draws, before + 1);
+  const saved = save(session);
+  const reloaded = engine.deserialize(saved);
+  assert.equal(reloaded.ok, true);
+  if (!reloaded.ok) return;
+  assert.equal(reloaded.value.rng.draws, before + 1);
+  assert.deepEqual(reloaded.value.state, session.state);
 });
 
 test("an invalid action returns the same state and does not advance the RNG", () => {
@@ -274,7 +375,9 @@ function apply(state: GameState, action: Action, rng: SeededRng): GameState {
   const result = engine.reduce(state, action, () => rng.draw());
   if (!result.ok) throw new Error(result.error.message);
   assert.deepEqual(engine.checkInvariants(result.state), []);
-  const saved = engine.serialize({ version: 1, state: result.state, rng: rng.snapshot() });
+  const snapshot = rng.snapshot();
+  const cursor = snapshot.algorithm === "mulberry32" ? snapshot : { version: 1 as const, algorithm: "mulberry32", seed: "round-trip", draws: 0 };
+  const saved = engine.serialize({ version: 1, state: result.state, rng: cursor });
   const loaded = engine.deserialize(saved);
   if (!loaded.ok) throw new Error(loaded.error.message);
   assert.deepEqual(loaded.value.state, result.state);
@@ -491,6 +594,36 @@ function mapOf(counties: readonly (readonly [string, readonly string[], string])
       review: "draft",
     })),
   };
+}
+
+function scriptedCursor(values: readonly number[]): SeededRng {
+  let draws = 0;
+  return {
+    version: 1,
+    algorithm: "scripted",
+    draw() {
+      const value = values[draws] ?? Number.NaN;
+      draws += 1;
+      return value;
+    },
+    snapshot() {
+      return { version: 1, algorithm: "scripted", seed: values.join(","), draws };
+    },
+    restore(snapshot) {
+      draws = snapshot.draws;
+    },
+  };
+}
+
+function inject(rng: SeededRng): Rng {
+  const draw: Rng = () => rng.draw();
+  return Object.assign(draw, {
+    draw: () => rng.draw(),
+    snapshot: () => rng.snapshot(),
+    restore: (snapshot: RngSnapshot) => {
+      rng.restore(snapshot);
+    },
+  });
 }
 
 function constant(value: number): SeededRng {

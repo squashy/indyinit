@@ -84,20 +84,113 @@ export function createRng(seed: string): SeededRng {
 
 export const engine: Engine = { createGame, reduce, checkInvariants, serialize, deserialize };
 
+export interface Session {
+  state: GameState;
+  rng: SeededRng;
+}
+
 export function createGame(config: GameConfig, rng: Rng): ParseResult<GameState> {
-  try {
-    return startGame(config, rng);
-  } catch (error) {
-    return { ok: false, error: { code: "INVALID_INPUT", message: errorText(error) } };
-  }
+  return withCursor(rng, (draw) => startGame(config, draw), (error) => ({
+    ok: false,
+    error: { code: "INVALID_INPUT", message: errorText(error) },
+  }));
 }
 
 export function reduce(state: GameState, action: Action, rng: Rng): ReduceResult {
+  return withCursor(rng, (draw) => apply(state, action, draw), (error) => reject(state, "INVALID_INPUT", errorText(error)));
+}
+
+export function dispatch(session: Session, action: Action): ReduceResult {
+  const result = reduce(session.state, action, bindCursor(session.rng));
+  if (result.ok) session.state = result.state;
+  return result;
+}
+
+export function save(session: Session): string {
+  return serialize({ version: 1, state: session.state, rng: session.rng.snapshot() });
+}
+
+export function load(session: Session, raw: unknown): ParseResult<Session> {
+  const parsed = deserialize(raw);
+  if (!parsed.ok) return parsed;
+  let temporary: SeededRng;
   try {
-    return apply(state, action, rng);
+    temporary = createRng(parsed.value.rng.seed);
+    temporary.restore(parsed.value.rng);
   } catch (error) {
-    return reject(state, "INVALID_INPUT", errorText(error));
+    return { ok: false, error: { code: "INVALID_SAVE", message: errorText(error) } };
   }
+  const next = temporary.snapshot();
+  const live = session.rng.snapshot();
+  try {
+    if (live.algorithm === next.algorithm && live.seed === next.seed) session.rng.restore(next);
+    else session.rng = temporary;
+  } catch (error) {
+    return { ok: false, error: { code: "INVALID_SAVE", message: errorText(error) } };
+  }
+  session.state = parsed.value.state;
+  return { ok: true, value: session };
+}
+
+function bindCursor(rng: SeededRng): Rng {
+  const draw: Rng = () => rng.draw();
+  return Object.assign(draw, {
+    draw: () => rng.draw(),
+    snapshot: () => rng.snapshot(),
+    restore: (snapshot: RngSnapshot) => {
+      rng.restore(snapshot);
+    },
+  });
+}
+
+function withCursor<T>(rng: Rng, run: (draw: Rng) => T, onThrow: (error: unknown) => T): T {
+  const cursor = asCursor(rng);
+  if (!cursor) {
+    try {
+      return run(rng);
+    } catch (error) {
+      return onThrow(error);
+    }
+  }
+  const saved = cursor.snapshot();
+  const temporary = saved.algorithm === RNG_ALGORITHM ? forkCursor(saved) : null;
+  try {
+    const result = run(temporary ? () => temporary.draw() : () => cursor.draw());
+    if (accepted(result)) {
+      if (temporary) cursor.restore(temporary.snapshot());
+      return result;
+    }
+    if (!temporary) cursor.restore(saved);
+    return result;
+  } catch (error) {
+    if (!temporary) cursor.restore(saved);
+    return onThrow(error);
+  }
+}
+
+function forkCursor(saved: RngSnapshot): SeededRng {
+  const copy = createRng(saved.seed);
+  copy.restore(saved);
+  return copy;
+}
+
+function asCursor(rng: Rng): Pick<SeededRng, "draw" | "snapshot" | "restore"> | null {
+  const candidate = rng as Rng & Partial<Pick<SeededRng, "draw" | "snapshot" | "restore">>;
+  const snapshot = candidate.snapshot;
+  const restore = candidate.restore;
+  if (typeof snapshot !== "function" || typeof restore !== "function") return null;
+  const draw = candidate.draw;
+  return {
+    draw: typeof draw === "function" ? () => draw() : () => rng(),
+    snapshot: () => snapshot(),
+    restore: (next) => {
+      restore(next);
+    },
+  };
+}
+
+function accepted(result: unknown): boolean {
+  return typeof result === "object" && result !== null && "ok" in result && result.ok === true;
 }
 
 function startGame(config: GameConfig, rng: Rng): ParseResult<GameState> {
@@ -510,7 +603,9 @@ export function deserialize(raw: unknown): ParseResult<SaveEnvelope> {
     const envelope = readEnvelope(parsed);
     const issues = checkInvariants(envelope.state);
     if (issues.length > 0) return { ok: false, error: { code: "INVALID_SAVE", message: issues.join("; ") } };
-    return { ok: true, value: envelope };
+    const temporary = createRng(envelope.rng.seed);
+    temporary.restore(envelope.rng);
+    return { ok: true, value: { version: 1, state: envelope.state, rng: temporary.snapshot() } };
   } catch (error) {
     return { ok: false, error: { code: "INVALID_SAVE", message: errorText(error) } };
   }
@@ -524,9 +619,10 @@ function readEnvelope(raw: unknown): SaveEnvelope {
 
 function readSnapshot(raw: unknown): RngSnapshot {
   const record = objectOf(raw, "rng");
-  if (record.version !== 1 || typeof record.algorithm !== "string" || record.algorithm === "") throw new Error("rng version is invalid");
+  if (record.version !== 1) throw new Error("rng version is invalid");
+  if (typeof record.algorithm !== "string" || record.algorithm !== RNG_ALGORITHM) throw new Error("rng algorithm is not supported");
   if (typeof record.seed !== "string" || !Number.isSafeInteger(record.draws) || Number(record.draws) < 0) throw new Error("rng cursor is invalid");
-  return { version: 1, algorithm: record.algorithm, seed: record.seed, draws: Number(record.draws) };
+  return { version: 1, algorithm: RNG_ALGORITHM, seed: record.seed, draws: Number(record.draws) };
 }
 
 function readState(raw: unknown): GameState {
