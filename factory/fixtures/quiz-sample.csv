@@ -1,0 +1,4 @@
+﻿Q#,FIPS,County,County Seat,Established,Named For,Category,Question,Choice A,Choice B,Choice C,Choice D,Correct Letter,Correct Answer,Explanation
+q-adams-1,18001,Adams,Decatur,1836,John Quincy Adams,history,"Which city is the seat of Adams?",Decatur,Berne,Geneva,Monroe,A,Decatur,"Decatur is the seat of Adams, Indiana."
+q-adams-2,18001,Adams,Decatur,1836,John Quincy Adams,names,"Adams was named for which person?","A poet","John Quincy Adams","A river","A fort",B,John Quincy Adams,"The supplied name is ""John Quincy Adams""."
+q-allen-1,18003,Allen,Fort Wayne,1824,John Allen,history,"Which city is the seat of Allen?","New Haven",Grabill,Leo,"Fort Wayne",D,"Fort Wayne","Fort Wayne is the seat of Allen."
