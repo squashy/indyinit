@@ -25,13 +25,29 @@ export function bindMap(doc: Document): MapView {
     const county = state.config.map.counties.find((item) => item.id === id);
     if (!holding || !county) return;
     marks.selected = id;
-    if (marks.source && holding.owner !== state.activePlayer && adjacent(state, marks.source, id)) {
+    if (state.phase.kind === "fortify" && marks.source && id !== marks.source) {
+      if (holding.owner !== state.activePlayer) {
+        marks.target = null;
+        setStatus(doc, "Move armies only into a county you hold.");
+      } else if (!canSource(state, marks.source) || !ownedPath(state, marks.source, id)) {
+        marks.target = null;
+        setStatus(doc, "Those counties are not connected through territory you hold, or the county you leave cannot spare an army.");
+      } else {
+        marks.target = id;
+        setStatus(doc, "");
+      }
+    } else if (state.phase.kind !== "fortify" && marks.source && holding.owner !== state.activePlayer && adjacent(state, marks.source, id)) {
       marks.target = id;
+      setStatus(doc, "");
     } else if (holding.owner === state.activePlayer && holding.armies >= 2) {
       marks.source = id;
       marks.target = null;
+      setStatus(doc, "");
     } else {
       marks.target = null;
+      if (state.phase.kind === "fortify" && !marks.source) {
+        setStatus(doc, "Pick a county with at least 2 armies to move from.");
+      }
     }
     paint(doc, state, marks);
     showCountyInfo(doc, county);
@@ -85,9 +101,7 @@ export function bindMap(doc: Document): MapView {
     show(next) {
       state = next;
       if (marks.source && !canSource(next, marks.source)) marks.source = null;
-      if (marks.target && !(marks.source && adjacent(next, marks.source, marks.target) && ownerOf(next, marks.target) !== next.activePlayer)) {
-        marks.target = null;
-      }
+      if (marks.target && !legalTarget(next, marks.source, marks.target)) marks.target = null;
       paint(doc, next, marks);
       const quiz = quizCounty(next);
       if (quiz && quiz !== marks.scrolledQuiz) {
@@ -246,6 +260,30 @@ function canSource(state: GameState, id: CountyId): boolean {
 
 function ownerOf(state: GameState, id: CountyId): PlayerId | null {
   return state.holdings.find((item) => item.countyId === id)?.owner ?? null;
+}
+
+function legalTarget(state: GameState, source: CountyId | null, target: CountyId | null): boolean {
+  if (!source || !target || source === target) return false;
+  if (state.phase.kind === "fortify") return canSource(state, source) && ownedPath(state, source, target);
+  return adjacent(state, source, target) && ownerOf(state, target) !== state.activePlayer;
+}
+
+function ownedPath(state: GameState, from: CountyId, to: CountyId): boolean {
+  const owned = new Set(state.holdings.filter((holding) => holding.owner === state.activePlayer).map((holding) => holding.countyId));
+  if (!owned.has(from) || !owned.has(to)) return false;
+  const seen = new Set<CountyId>([from]);
+  const queue = [from];
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current) continue;
+    for (const next of state.config.map.counties.find((county) => county.id === current)?.neighbors ?? []) {
+      if (!owned.has(next) || seen.has(next)) continue;
+      if (next === to) return true;
+      seen.add(next);
+      queue.push(next);
+    }
+  }
+  return false;
 }
 
 function adjacent(state: GameState, from: CountyId, to: CountyId): boolean {

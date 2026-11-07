@@ -70,9 +70,13 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
 
   fortifyButton?.addEventListener("click", () => {
     const state = stateOf();
+    if (!state || state.phase.kind !== "fortify") return;
     const from = map.source();
     const to = map.target();
-    if (!state || state.phase.kind !== "fortify" || !from || !to) return;
+    if (!from || !to) {
+      setStatus(doc, "Pick a county to move from, then a connected county you hold.");
+      return;
+    }
     act({ kind: "fortify", from, to, count: 1 });
   });
 
@@ -269,6 +273,11 @@ function markOf(state: GameState): string {
   const phase = state.phase;
   const extra = phase.kind === "place" ? String(phase.remaining) : phase.kind === "quiz" ? phase.pending.questionId : "";
   return `${state.turnSequence}:${phase.kind}:${extra}:${state.events.length}`;
+}
+
+function setStatus(doc: Document, message: string): void {
+  const status = doc.getElementById("error-status");
+  if (status) status.textContent = message;
 }
 
 function motionDelay(): number {
