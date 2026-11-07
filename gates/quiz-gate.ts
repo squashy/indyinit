@@ -5,7 +5,14 @@ import { pathToFileURL } from "node:url";
 export function runQuizGate(root = process.cwd()): { exitCode: number; output: string } {
   const result = spawnSync(
     process.execPath,
-    ["--experimental-strip-types", "--test", path.join(root, "tests/quiz.test.ts"), path.join(root, "factory/import-quiz.test.ts")],
+    [
+      "--experimental-strip-types",
+      "--test",
+      path.join(root, "tests/quiz.test.ts"),
+      path.join(root, "factory/import-quiz.test.ts"),
+      path.join(root, "gates/quiz-check.test.ts"),
+      path.join(root, "gates/security-check.test.ts"),
+    ],
     { cwd: root, encoding: "utf8" },
   );
   return { exitCode: result.status ?? 1, output: `${result.stdout ?? ""}${result.stderr ?? ""}`.trim() };

@@ -1,5 +1,11 @@
 # Runbook: November 7
 
+## Current Indiana demo precedence
+
+`CONTRACT.md` and later explicit owner decisions control this demo. Conflicting instructions below are historical, not current release gates. The quiz bonus is fixed at +2 once per turn. Use the supplied repository CSV; do not generate replacement trivia. Factual QA, both-checker verdicts, ledger merge and random factual audits are deferred, not completed. Legacy content quotas do not block this CSV import. Structural mapping and security checks remain required. Hidden benchmark truth labels remain private; supplied gameplay correct letters and answers ship. No hosted CI or previews. Changes use branches and PRs with non-author exact-head approval, local box checks and main-only production deployment. The UI must say "Questions unverified" and must not claim the demo is fact-checked.
+
+The schedule below is the historical benchmark day. Hosted CI, the fact-check sample, quiz tuning, verdict freeze, and publishing `bank/revealed.csv` are not current demo gates. Box checks and non-author exact-head review are the current path. Production deploys only from `main`.
+
 Submissions close at exactly 5:00 PM on Devpost, with no late entries.
 
 ## Schedule
