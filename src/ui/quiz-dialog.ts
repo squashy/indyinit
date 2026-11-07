@@ -40,12 +40,19 @@ export function bindQuiz(doc: Document, act: Act): QuizDialog {
         result.textContent = "You get 0 armies.";
         choices.replaceChildren();
         shownId = "";
+        settleQuiz(choices, skip);
         show(dialog);
         return;
       }
       if (state.phase.kind !== "quiz") {
-        if (state.phase.kind !== "place") hide(dialog);
+        if (state.phase.kind === "place") settleQuiz(choices, skip);
+        else hide(dialog);
         return;
+      }
+      choices.hidden = false;
+      if (skip instanceof HTMLButtonElement) {
+        skip.hidden = false;
+        skip.disabled = false;
       }
       const pending = state.phase.pending;
       const found = findQuestion(state, pending.countyId, pending.questionId);
@@ -106,6 +113,15 @@ function lockChoices(choices: HTMLElement | null): void {
   if (!choices) return;
   for (const button of Array.from(choices.querySelectorAll("button"))) {
     if (button instanceof HTMLButtonElement) button.disabled = true;
+  }
+}
+
+function settleQuiz(choices: HTMLElement | null, skip: HTMLElement | null): void {
+  lockChoices(choices);
+  if (choices) choices.hidden = true;
+  if (skip instanceof HTMLButtonElement) {
+    skip.disabled = true;
+    skip.hidden = true;
   }
 }
 

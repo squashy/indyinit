@@ -30,9 +30,17 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
       paintLog(doc, log, state, () => logged, (next) => { logged = next; });
       paintHandoff(handoff, state);
       paintWinner(winner, state);
-      if (endAttacks instanceof HTMLButtonElement) endAttacks.disabled = state.phase.kind !== "attack";
-      if (endTurn instanceof HTMLButtonElement) endTurn.disabled = state.phase.kind !== "attack" && state.phase.kind !== "fortify";
-      if (fortifyButton) fortifyButton.hidden = state.phase.kind !== "fortify";
+      const attacking = state.phase.kind === "attack";
+      const moving = state.phase.kind === "fortify";
+      if (endAttacks instanceof HTMLButtonElement) {
+        endAttacks.disabled = !attacking;
+        endAttacks.hidden = !attacking;
+      }
+      if (endTurn instanceof HTMLButtonElement) {
+        endTurn.disabled = !attacking && !moving;
+        endTurn.hidden = !attacking && !moving;
+      }
+      if (fortifyButton) fortifyButton.hidden = !moving;
       considerComputer(state);
     },
     hurry() {

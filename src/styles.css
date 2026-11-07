@@ -111,7 +111,12 @@ button.secondary:hover,
   background: #fff;
 }
 
-button:disabled {
+button:disabled,
+#end-attacks:disabled,
+#end-turn:disabled,
+#skip-quiz:disabled,
+#continue-game:disabled,
+#quiz-choices button:disabled {
   color: #4e463c;
   background: #d9d0c0;
   border-color: #8a7d6c;
@@ -205,15 +210,21 @@ input:focus-visible,
 }
 
 .map-column {
-  padding: 0.45rem 0.55rem 0.35rem;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
   background: #f6f1e6;
   border: 2px solid #1a2330;
 }
 
 #map {
+  position: absolute;
+  inset: 0.35rem;
   display: block;
-  width: 100%;
-  height: auto;
+  width: calc(100% - 0.7rem);
+  height: calc(100% - 0.7rem);
+  max-width: none;
+  max-height: none;
   background: transparent;
 }
 
@@ -278,7 +289,6 @@ input:focus-visible,
   fill: #ffffff;
   font-family: var(--font-ui);
   font-weight: 800;
-  font-size: 12px;
 }
 
 .county:focus-visible .county-shape {
@@ -473,9 +483,8 @@ summary {
 .map-place {
   fill: #5d6b78;
   font-family: var(--font-ui);
-  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   pointer-events: none;
 }
 
@@ -579,7 +588,7 @@ summary {
 
   .board {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(14rem, 48dvh) minmax(0, 1fr);
+    grid-template-rows: minmax(12rem, 70dvh) minmax(0, 1fr);
   }
 
   #player-list li {
