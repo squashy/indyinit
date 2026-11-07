@@ -55,14 +55,39 @@ export function readGamePacks(mapRaw: unknown, quizRaw: unknown): ParseResult<Ga
 export function bindSetup(doc: Document, options: SetupOptions): SetupBinding {
   const start = doc.getElementById("start-game");
   const resumeButton = doc.getElementById("continue-game");
+  const replaceDialog = doc.getElementById("replace-dialog");
+  const confirm = doc.getElementById("replace-confirm");
+  const stay = doc.getElementById("replace-stay");
   const onStart = () => {
+    if (hasSavedGame(doc, options.storage)) {
+      askBeforeReplace(doc);
+      return;
+    }
     startGame(doc, options);
   };
   const onResume = () => {
     resumeGame(doc, options);
   };
+  const onConfirm = () => {
+    hideReplace(doc);
+    startGame(doc, options);
+  };
+  const onStay = () => {
+    hideReplace(doc);
+    if (start instanceof HTMLElement) start.focus();
+  };
+  const onReplaceKey = (event: Event) => {
+    if (!(event instanceof KeyboardEvent)) return;
+    if (!(replaceDialog instanceof HTMLElement) || replaceDialog.hidden) return;
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    onStay();
+  };
   start?.addEventListener("click", onStart);
   resumeButton?.addEventListener("click", onResume);
+  confirm?.addEventListener("click", onConfirm);
+  stay?.addEventListener("click", onStay);
+  replaceDialog?.addEventListener("keydown", onReplaceKey);
   return {
     persist(session) {
       const storage = openStorage(doc, options.storage);
@@ -71,8 +96,32 @@ export function bindSetup(doc: Document, options: SetupOptions): SetupBinding {
     dispose() {
       start?.removeEventListener("click", onStart);
       resumeButton?.removeEventListener("click", onResume);
+      confirm?.removeEventListener("click", onConfirm);
+      stay?.removeEventListener("click", onStay);
+      replaceDialog?.removeEventListener("keydown", onReplaceKey);
     },
   };
+}
+
+export function hasSavedGame(doc: Document, storage?: Storage): boolean {
+  const store = openStorage(doc, storage);
+  if (!store) return false;
+  const raw = readSave(store);
+  if (!raw.ok || raw.value === null || raw.value === "") return false;
+  return engine.deserialize(raw.value).ok;
+}
+
+function askBeforeReplace(doc: Document): void {
+  const dialog = doc.getElementById("replace-dialog");
+  if (!(dialog instanceof HTMLElement)) return;
+  dialog.hidden = false;
+  const title = doc.getElementById("replace-title");
+  if (title instanceof HTMLElement) title.focus();
+}
+
+function hideReplace(doc: Document): void {
+  const dialog = doc.getElementById("replace-dialog");
+  if (dialog instanceof HTMLElement) dialog.hidden = true;
 }
 
 function openStorage(doc: Document, explicit: Storage | undefined): Storage | undefined {
