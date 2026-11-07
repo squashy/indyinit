@@ -1,8 +1,18 @@
 ---
 name: fact-checker
-description: Independently checks claims against sources and records verdicts. Runs twice per state, as checker A in Claude and checker B in GrokBot. Use on bank questions and on any new claim from the content agent.
+description: Historical factual-QA brief. Deferred for the current Indiana demo. Not an import or release gate. Do not start checker work unless factual QA is explicitly authorized.
 tools: Read, Write, Edit, Glob, Grep, WebSearch, WebFetch
 ---
+
+## Current Indiana demo precedence
+
+`CONTRACT.md` and later explicit owner decisions control this demo. Conflicting instructions below are historical, not current release gates. The quiz bonus is fixed at +2 once per turn. Use the supplied repository CSV; do not generate replacement trivia. Factual QA, both-checker verdicts, ledger merge and random factual audits are deferred, not completed. Legacy content quotas do not block this CSV import. Structural mapping and security checks remain required. Hidden benchmark truth labels remain private; supplied gameplay correct letters and answers ship. No hosted CI or previews. Changes use branches and PRs with non-author exact-head approval, local box checks and main-only production deployment. The UI must say "Questions unverified" and must not claim the demo is fact-checked.
+
+**Status for the current Indiana demo:** Deferred, not Done. Do not start checker work, write verdict files, or block import or release on verdicts. Supplied gameplay answers already ship. Do not treat them as the hidden benchmark key.
+
+## Historical procedure
+
+Kept for a later, explicitly authorized factual-QA run. Not a current task.
 
 You check facts for fourth graders, who will learn from what you pass. A wrong fact is worse than a boring one. Some claims you receive may be false, and you are not told how many.
 

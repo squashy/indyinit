@@ -1,5 +1,9 @@
 # Battle for the 92: spec
 
+## Current Indiana demo precedence
+
+`CONTRACT.md` and later explicit owner decisions control this demo. Conflicting instructions below are historical, not current release gates. The quiz bonus is fixed at +2 once per turn. Use the supplied repository CSV; do not generate replacement trivia. Factual QA, both-checker verdicts, ledger merge and random factual audits are deferred, not completed. Legacy content quotas do not block this CSV import. Structural mapping and security checks remain required. Hidden benchmark truth labels remain private; supplied gameplay correct letters and answers ship. No hosted CI or previews. Changes use branches and PRs with non-author exact-head approval, local box checks and main-only production deployment. The UI must say "Questions unverified" and must not claim the demo is fact-checked.
+
 Indy Init, November 7. Build runs 9:00 AM to 5:00 PM from an empty public repo. This repo's first commit is the plan and question bank; everything that runs is built during the contest.
 
 ## Why we are building this
@@ -27,22 +31,24 @@ AI can write that content quickly, and it can be confidently wrong. In our pract
 
 ## How the team works
 
-Two people, several tools. Both operators' agents pull the next unblocked ticket from a traverseit.io board, so ownership comes from tickets, not people. Claude Code, GrokBot and Cursor cloud agents all follow `AGENTS.md`. Because Claude's hooks do not run for the other tools, CI is what enforces every rule.
+Two people, several tools. Both operators' agents pull the next unblocked ticket from a traverseit.io board, so ownership comes from tickets, not people. Claude Code, GrokBot and Cursor cloud agents all follow `AGENTS.md`. The historical plan used hosted CI as the shared enforcer because Claude's hooks do not run for the other tools. For the current demo, box checks are the enforcer; hosted CI and previews stay off (`CONTRACT.md`).
 
 ## Inputs
 
 | Input | Location |
 |---|---|
-| Question bank, true and fake mixed and unlabeled | `bank/questions.csv` |
-| Answer key | Off the repo until published at 4:30 PM (`bank/README.md`) |
+| Supplied question bank. Gameplay questions and answers ship. The hidden true/fake key is not this file | `inputs/battle-for-the-92-benchmark-1000_nokey.csv` |
+| Hidden benchmark key | Off the repo until published (`bank/README.md`). Historical publish time in that note: 4:30 PM |
 | Decisions | `BARS.md`, `STATES.md`, `decisions/` |
 | Map shapes | `us-atlas` npm package (public-domain Census data) |
 
 Adjacency comes from shared borders in the map data, so counties touching only at a corner are not neighbors.
 
+`bank/questions.csv` is not in this repo and is not the current importer input. `bank/README.md` describes the historical bank columns and the unpublished benchmark key.
+
 ## Phases
 
-Each phase ends when its check passes. Times are in `RUNBOOK.md`, and tickets are in `BOARD.md`.
+Phases 1–7 below are the historical benchmark plan. Checker verdicts, preview builds, quiz-reward tuning, and key publication are deferred for the current Indiana demo. They are not current release gates. Times are in `RUNBOOK.md`, and tickets are in `BOARD.md`.
 
 ### 1. Foundation
 Repo, Vercel project, CI, and every gate in `BARS.md`, failing for the right reason before any game code exists.
@@ -71,6 +77,8 @@ Pull more state tickets until the 4:15 PM freeze.
 Lock verdicts, score, publish the key, fill `SCORECARD.md`, finish Devpost, rehearse.
 
 ## Pipeline for one state
+
+Historical benchmark procedure, superseded for the current Indiana demo by the precedence section. It stays so a later, explicitly authorized factual-QA run can reuse it.
 
 1. Generate the map from the state's manifest, with machine-drawn regions and any crossings from `STATES.md`.
 2. Run checker A and checker B on the state's bank questions, separately.
