@@ -14,17 +14,17 @@
   --focus: #a67c2d;
   --danger: #6e1020;
   --hit: 44px;
-  --owner-0: #4477aa;
-  --owner-1: #ccbb44;
-  --owner-2: #ee6677;
-  --owner-3: #228833;
-  --owner-4: #66ccee;
-  --owner-5: #aa3377;
+  --owner-0: #2f6fbe;
+  --owner-1: #e36a12;
+  --owner-2: #c4475c;
+  --owner-3: #1f7a32;
+  --owner-4: #1f7f96;
+  --owner-5: #8d2b66;
   --on-owner-0: #ffffff;
-  --on-owner-1: #24180f;
-  --on-owner-2: #24180f;
+  --on-owner-1: #ffffff;
+  --on-owner-2: #ffffff;
   --on-owner-3: #ffffff;
-  --on-owner-4: #24180f;
+  --on-owner-4: #ffffff;
   --on-owner-5: #ffffff;
   --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
   --font-ui: "Segoe UI", system-ui, -apple-system, "Noto Sans", "Liberation Sans", sans-serif;
@@ -44,19 +44,16 @@ h3 {
 
 .player-swatch[data-owner="0"] {
   background-color: var(--owner-0);
-  background-image: radial-gradient(circle, transparent 0 3px, rgba(20, 12, 8, 0.7) 3.4px 4.4px, transparent 4.8px);
+  background-image: repeating-conic-gradient(rgba(8, 24, 48, 0.45) 0% 25%, transparent 0% 50%);
   background-size: 12px 12px;
-  border-radius: 50%;
+  border-radius: 4px;
 }
 
 .player-swatch[data-owner="1"] {
   background-color: var(--owner-1);
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgba(20, 12, 8, 0.45) 0 4px,
-    transparent 4px 9px
-  );
-  border-radius: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10'%3E%3Cpath d='M6 1 L11 9 L1 9 Z' fill='%23602600' fill-opacity='0.45'/%3E%3C/svg%3E");
+  background-size: 12px 10px;
+  border-radius: 4px;
 }
 
 .player-swatch[data-owner="2"] {
@@ -104,7 +101,7 @@ h3 {
 
 .county-shape {
   fill: var(--quilt);
-  stroke: var(--stitch);
+  stroke: #1a2330;
 }
 
 .county[data-owner="0"] .county-shape { fill: var(--owner-0); }

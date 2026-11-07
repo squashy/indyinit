@@ -111,7 +111,12 @@ button.secondary:hover,
   background: #fff;
 }
 
-button:disabled {
+button:disabled,
+#end-attacks:disabled,
+#end-turn:disabled,
+#skip-quiz:disabled,
+#continue-game:disabled,
+#quiz-choices button:disabled {
   color: #4e463c;
   background: #d9d0c0;
   border-color: #8a7d6c;
@@ -205,17 +210,21 @@ input:focus-visible,
 }
 
 .map-column {
-  padding: 0.6rem;
-  background:
-    linear-gradient(var(--paper-card), var(--paper-card)) padding-box,
-    repeating-linear-gradient(90deg, var(--stitch) 0 10px, var(--gold) 10px 16px) border-box;
-  border: 10px solid transparent;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  background: #f6f1e6;
+  border: 2px solid #1a2330;
 }
 
 #map {
+  position: absolute;
+  inset: 0.35rem;
   display: block;
-  width: 100%;
-  height: auto;
+  width: calc(100% - 0.7rem);
+  height: calc(100% - 0.7rem);
+  max-width: none;
+  max-height: none;
   background: transparent;
 }
 
@@ -230,8 +239,8 @@ input:focus-visible,
 
 .state-outline {
   fill: none;
-  stroke: var(--blue-deep);
-  stroke-width: 2.4;
+  stroke: #101820;
+  stroke-width: 4.5;
   stroke-linejoin: round;
   pointer-events: none;
 }
@@ -241,7 +250,7 @@ input:focus-visible,
 }
 
 .county-shape {
-  stroke-width: 1.2;
+  stroke-width: 0.8;
   stroke-linejoin: round;
 }
 
@@ -260,13 +269,10 @@ input:focus-visible,
 }
 
 .county-label {
-  fill: var(--ink);
-  stroke: #f7f0de;
-  stroke-width: 0.45;
-  paint-order: stroke fill;
+  font-size: 0;
+  fill: transparent;
+  stroke: none;
   pointer-events: none;
-  font-family: var(--font-ui);
-  font-weight: 700;
 }
 
 .army-badge {
@@ -274,15 +280,15 @@ input:focus-visible,
 }
 
 .army-badge-shape {
-  fill: #efe6d2;
-  stroke: var(--ink);
-  stroke-width: 0.7;
+  fill: #142033;
+  stroke: #ffffff;
+  stroke-width: 1.1;
 }
 
 .army-badge-count {
-  fill: var(--ink);
+  fill: #ffffff;
   font-family: var(--font-ui);
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .county:focus-visible .county-shape {
@@ -419,9 +425,67 @@ summary {
   flex: 1 1 10rem;
 }
 
+.side section:has(#phase) {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--paper-card);
+  box-shadow: 0 -14px 0 0 var(--paper-deep);
+}
+
 .status-bar p {
   margin: 0.15rem 0;
   font-weight: 700;
+}
+
+.phase-track {
+  display: flex;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0.35rem 0 0.2rem;
+  padding: 0;
+}
+
+.phase-track li {
+  flex: 1 1 0;
+  min-height: var(--hit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #1a2330;
+  background: var(--paper);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+#phase[data-step="quiz"] + .phase-track [data-step="quiz"],
+#phase[data-step="place"] + .phase-track [data-step="place"],
+#phase[data-step="attack"] + .phase-track [data-step="attack"],
+#phase[data-step="occupy"] + .phase-track [data-step="attack"],
+#phase[data-step="fortify"] + .phase-track [data-step="fortify"] {
+  background: var(--blue);
+  color: #fff8ea;
+}
+
+#reinforcement-count {
+  font-size: 1rem;
+}
+
+#reinforcement-count[data-remaining]::before {
+  content: attr(data-remaining);
+  display: block;
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.map-place {
+  fill: #5d6b78;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  pointer-events: none;
 }
 
 .map-marks li {
@@ -522,9 +586,33 @@ summary {
     font-size: 1.35rem;
   }
 
+  html,
+  body {
+    height: auto;
+  }
+
+  #app {
+    max-height: none;
+    overflow: visible;
+  }
+
   .board {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(14rem, 48dvh) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  .map-column {
+    height: min(62dvh, 40rem);
+    min-height: 16rem;
+  }
+
+  .side {
+    overflow: visible;
+  }
+
+  .side section:has(#phase) {
+    position: static;
+    box-shadow: none;
   }
 
   #player-list li {
