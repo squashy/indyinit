@@ -1,26 +1,26 @@
 # Shared-URL reuse contract
 
-Architect verified Origin `packages/online` on 2026-11-07; adopt PR32 as draft base; see `docs/BTT27-architect-adaptation-contract.md` for decisions (invite URL still open; BTT-28/29 no-go until BF92-owned store; idempotency required in BTT-29; seats 2–6; sanitized public view).
+A separate read of the stopped reference `packages/online` on 2026-11-07 confirmed this draft. Decisions are in `docs/BTT27-architect-adaptation-contract.md` (invite URL still open; BTT-28/29 no-go until this app has its own store; idempotency required in BTT-29; seats 2–6; sanitized public view).
 
 Investigation only. This record does not move board cards, mark any story Done, change gameplay, or authorize a store, deploy, or spend.
 
-Stories named for later linkage:
+## Later work, not done here
 
-| Story | Scope seen | In this change |
+| Work | Scope | In this change |
 |---|---|---|
-| BTT27 `sty_82e08b75` | Reuse investigation and adaptation contract | This document |
-| BTT28 `sty_6ab383ae` | Optional shared-URL create/join. Depends on BTT27 | Not implemented |
-| BTT29 `sty_c79cae9c` | Authoritative synchronized turns and resilient rejoin. Depends on BTT27 and BTT28 | Not implemented |
+| BTT-27 reuse contract | This document and the adaptation decisions | Recorded |
+| BTT-28 optional shared-URL create/join | Depends on BTT-27 | Not implemented |
+| BTT-29 authoritative synchronized turns and resilient rejoin | Depends on BTT-27 and BTT-28 | Not implemented |
 
-BTT28 and BTT29 stay blocked while this app has no authoritative store of its own. Cards were Inbox and unassigned when this was written. This file does not change that.
+BTT-28 and BTT-29 stay blocked while this app has no authoritative store of its own. This file does not change board state.
 
 ## Access
 
-The named Origin repository was not readable from this environment. The Origin client reports that it is not authenticated, and no session token was injected. No GitHub repository of that name was visible to the authenticated GitHub account. The earlier app was not modified, pushed, or deployed.
+The reference repository was not readable from the environment that wrote the first draft. That client was not authenticated, and no session token was injected. The reference app was not modified, pushed, or deployed. It stays stopped, and it is a read-only reference.
 
-What was readable, through the already connected hosting account, is the earlier app's production deployment file tree, deployment `dpl_Cwa9dVGjXNecJDodrRSoeu6MYi1n`, project `hoosier-conquest`. That tree includes a repository snapshot under `src/` (client, `packages/online`, serverless `api/games`, and an unused room server). It is a deployed snapshot, not a proven match to the Origin repository's current head.
+What that draft could read was a production deployment file tree of the reference app, through an already connected hosting account. The tree includes a repository snapshot (client, `packages/online`, serverless `api/games`, and an unused room server). It is a deployed snapshot, not a proven match to the reference repository's current head. A later read of `packages/online` matched the HTTP and Redis behavior below.
 
-A read-only `GET /api/health/db` against the public earlier app returned `200` and `{"ok":true}`. That route pings the store. No game was created or joined, so this is not proof of a finished shared turn.
+A read-only `GET /api/health/db` against the public reference app returned `200` and `{"ok":true}`. That route pings the store. No game was created or joined, so this is not proof of a finished shared turn.
 
 ## What the shipped snapshot actually does
 
@@ -31,7 +31,7 @@ Production routing is HTTP, not the room server.
 - Live shared play is serverless: `POST /api/games`, `POST /api/games/:id/join`, `GET /api/games/:id?since=`, `POST /api/games/:id/intents`.
 - `liveDeps` requires `KV_REST_API_URL` and `KV_REST_API_TOKEN` and constructs an Upstash Redis client. If either is missing it throws `Redis is not configured`.
 - The health route is named `db` and calls that same Redis ping. Older architecture text mentions Postgres. The running path that was inspected is Redis.
-- A separate AI ticket route and a `TYPESAFE_API_KEY` exist on the earlier project. They are not part of shared turns.
+- A separate AI ticket route and a `TYPESAFE_API_KEY` exist on the reference project. They are not part of shared turns.
 
 Authority and races, from `packages/online`:
 
@@ -46,13 +46,13 @@ The shipped client also keeps local hot-seat and versus-computer setup. Those mo
 
 ## Storage for this app
 
-`battlefor92` has no environment variables.
+This app's hosted project has no environment variables.
 
-The only Redis store visible on the team is `hoosier-conquest-kv` (Upstash Redis, free plan, primary region `iad1`). It is connected only to `hoosier-conquest`, which holds `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `KV_REST_API_READ_ONLY_TOKEN`, `KV_URL`, and `REDIS_URL`. Those values were not copied.
+The only Redis store visible on the team is attached to the stopped reference app (Upstash Redis, free plan). It holds `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `KV_REST_API_READ_ONLY_TOKEN`, `KV_URL`, and `REDIS_URL`. Those values were not copied.
 
-Reusing that store would write this game into the earlier app's database. Creating another database was not attempted. The free plan text says it is limited to one database per account, and a new paid database would be spend. Neither action is authorized by this contract.
+Reusing that store would write this game into the reference app's database. Creating another database was not attempted. The free plan text says it is limited to one database per account, and a new paid database would be spend. Neither action is authorized by this contract.
 
-Until a store is attached to `battlefor92` by a person, or an already available credential appears in this environment, BTT28 and BTT29 have no production authority. A memory stand-in can unit-test the compare-and-swap later. It cannot keep two independent browsers in sync after the process exits, and it is not a substitute for the missing store.
+Until a store is attached to this app by a person, or an already available credential appears in this environment, BTT-28 and BTT-29 have no production authority. A memory stand-in can unit-test the compare-and-swap later. It cannot keep two independent browsers in sync after the process exits, and it is not a substitute for the missing store.
 
 ## Adaptation, not a copy
 
@@ -68,20 +68,20 @@ Reusable once a store exists for this app:
 Do not copy these into this game:
 
 - Player cap of 2, 3, or 4, and the client check that a seat index above 3 is unreadable. This game seats 2 through 6.
-- The earlier rules engine, 60-minute cap, place-value formula, hello room, or AI ticket route.
-- Publishing the whole rules document. This game's `GameState` embeds `config.quiz`, and that pack includes `correctLetter` and `correctAnswer`. The earlier public view returns `doc.state` unchanged. Doing that here would ship the answer key to every browser on the poll. The shared document may carry holdings, phase, a prompt, and the displayed choice order. The correct letter stays on the authority.
+- The reference rules engine, 60-minute cap, place-value formula, hello room, or AI ticket route.
+- Publishing the whole rules document. This game's `GameState` embeds `config.quiz`, and that pack includes `correctLetter` and `correctAnswer`. The reference public view returns `doc.state` unchanged. Doing that here would ship the answer key to every browser on the poll. The shared document may carry holdings, phase, a prompt, and the displayed choice order. The correct letter stays on the authority.
 - Storing the map and the full quiz pack inside every Redis document. The document should carry pack digests and the play state. Both browsers already load the same static packs.
 - Treating a lost success response as safe to click again. Version compare rejects a stale `expectedVersion`. It does not remember that an intent already landed. A retried place or attack that is still legal can apply twice. Shared actions need an idempotency key stored with the committed version. The snapshot has no such key (`idempot` does not appear in the shipped client).
-- Putting the invite code in the query string without a decision. That is how the earlier share link works, and it is also how the invite leaks into logs and history. The seat token rule is the part to keep. The invite placement needs an explicit choice before BTT28.
+- Putting the invite code in the query string without a decision. That is how the reference share link works, and it is also how the invite leaks into logs and history. The seat token rule is the part to keep. The invite placement needs an explicit owner decision before BTT-28.
 - Routing hot-seat or computer play through the network. Those modes stay on this device, including when storage is down. The quiz dialog must keep the text `Questions unverified`. Factual QA stays deferred. No replacement trivia bank.
 
-## Proof this change does not claim
+## Proof this investigation does not claim
 
-Not run, because no product code changed and no store was added:
+Not run for the original investigation, because no product code changed and no store was added:
 
 - `npm run typecheck`, `npm test`, `npm run build`, `npm run gates`, `npm run box`
 - Two independent browser contexts joining one URL
 - A refresh, a rejoin, or a rejected stale action on this game
 - A full turn whose result appears on both browsers
 
-The earlier health ping and the deployment file read are the checks that were actually performed.
+The health ping and the deployment-file read are the checks that investigation performed. A box run after that draft merged, and any fresh check of a later commit, is a different head. Neither one is pre-merge proof for the original draft.
