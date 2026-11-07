@@ -122,7 +122,7 @@ export function checkShippedPack(packValue: unknown, mapValue: unknown): QuizChe
       perCounty.push({ id: countyId, questions: list.length, categories: categories.size, hasSeat, seatAnswer });
       if (list.length < 4) errors.push({ code: "coverage", detail: `${countyId}: fewer than 4 questions` });
       if (categories.size < 3) errors.push({ code: "coverage", detail: `${countyId}: fewer than 3 categories` });
-      if (hasSeat && !seatAnswer) errors.push({ code: "coverage", detail: `${countyId}: no question answers with the county seat` });
+      if (!seatAnswer) errors.push({ code: "coverage", detail: `${countyId}: no question answers with the county seat` });
     }
   }
   const lengths = perCounty.map((county) => county.questions);
@@ -136,7 +136,7 @@ export function checkShippedPack(packValue: unknown, mapValue: unknown): QuizChe
       maxQuestions: lengths.length > 0 ? Math.max(...lengths) : 0,
       countiesUnderFour: perCounty.filter((county) => county.questions < 4).length,
       countiesUnderThreeCategories: perCounty.filter((county) => county.categories < 3).length,
-      countiesWithoutSeatAnswer: perCounty.filter((county) => county.hasSeat && !county.seatAnswer).length,
+      countiesWithoutSeatAnswer: perCounty.filter((county) => !county.seatAnswer).length,
       mapCountiesMissingFromPack: missing,
       minimaEnforced: true,
       ledger: "not-implemented",
@@ -160,7 +160,7 @@ export function formatQuizResult(result: QuizCheckResult): string {
     `coverage: ${coverage.questions} questions, ${coverage.counties} counties, ${coverage.minQuestions} to ${coverage.maxQuestions} each, under four ${coverage.countiesUnderFour}, under three categories ${coverage.countiesUnderThreeCategories}, without a seat-matching answer ${coverage.countiesWithoutSeatAnswer}, map counties missing ${coverage.mapCountiesMissingFromPack}`,
   );
   lines.push(
-    "minima: enforced for the shipped pack. A county with fewer than 4 questions, fewer than 3 categories, or a seat and no answer equal to that seat fails. CSV import does not apply these quotas.",
+    "minima: enforced for the shipped pack. A county with fewer than 4 questions, fewer than 3 categories, or no answer equal to a non-blank county seat fails. A blank or missing seat does not skip that rule. CSV import does not apply these quotas.",
   );
   lines.push("historical fact check: not-run");
   lines.push("ledger: not-implemented");

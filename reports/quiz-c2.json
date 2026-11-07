@@ -57,7 +57,7 @@
   "diagnostics": {
     "checker": "gates/quiz-check.ts checkShippedPack",
     "scope": "pack-level failures, Johnson through Whitley entries, and range question ids repeated outside the range",
-    "minimaNote": "The shipped pack gate rejects a county under 4 questions, under 3 categories, or with a seat and no matching answer. This report does not check facts.",
+    "minimaNote": "The shipped pack gate rejects a county under 4 questions, under 3 categories, or with no answer equal to a non-blank county seat. A blank or missing seat does not skip that rule. This report does not check facts.",
     "minimaEnforced": true,
     "historicalFactCheck": "not-run",
     "ledger": "not-implemented",
