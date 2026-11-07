@@ -21,7 +21,7 @@
     "revisionPath": "data/quiz.json",
     "revisionMeaning": "git commit that last changed data/quiz.json; null when git cannot resolve it",
     "sourceDigest": "12ecc69109decb249faeafbf558a45b48d82e4e4efb4e9d8cda0dc613ddfee5a",
-    "mapDigest": "3a4567de500538dfcf959f63f43fcd5b7f11ea226db448a82b02251f68725a87",
+    "mapDigest": "57497897418ebedcf790be833f0421ba6713d647ee3571004c26d9290dded72c",
     "sourceDigestNote": "sourceDigest is copied from the tracked pack and is not recomputed. This report does not read or rewrite the CSV.",
     "mapIssues": []
   },
