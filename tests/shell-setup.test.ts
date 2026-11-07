@@ -4,6 +4,7 @@ import path from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { readGamePacks, bindSetup, type GamePacks, type PlaySession } from "../src/ui/setup.ts";
+import "./surface-phase.test.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 

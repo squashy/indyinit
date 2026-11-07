@@ -30,6 +30,32 @@ export function bindQuiz(doc: Document, act: Act): QuizDialog {
   let current: GameState | null = null;
   let shownId = "";
 
+  dialog?.addEventListener("keydown", (event) => {
+    if (!(event instanceof KeyboardEvent) || !(dialog instanceof HTMLElement) || dialog.hidden) return;
+    if (!current || current.phase.kind !== "quiz") return;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const items = Array.from(dialog.querySelectorAll("button, input")).filter((node): node is HTMLElement => {
+      if (!(node instanceof HTMLButtonElement || node instanceof HTMLInputElement)) return false;
+      if (node.disabled || node.hidden) return false;
+      return true;
+    });
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (!first || !last) return;
+    const active = doc.activeElement;
+    if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
   return {
     show(state) {
       current = state;
@@ -85,6 +111,9 @@ export function bindQuiz(doc: Document, act: Act): QuizDialog {
         });
         choices.appendChild(button);
       });
+      const firstChoice = choices.querySelector("button");
+      if (firstChoice instanceof HTMLButtonElement) firstChoice.focus();
+      else if (skip instanceof HTMLButtonElement) skip.focus();
     },
   };
 }

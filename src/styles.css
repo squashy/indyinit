@@ -319,8 +319,29 @@ input:focus-visible,
 }
 
 .side {
+  display: flex;
+  flex-direction: column;
   padding: 0.75rem;
+  overflow: hidden;
   background: var(--paper-deep);
+}
+
+.phase-dock {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow: auto;
+}
+
+.phase-dialogs {
+  min-height: 0;
+  overflow: auto;
+}
+
+.side-rest {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 .card {
@@ -426,11 +447,8 @@ summary {
 }
 
 .side section:has(#phase) {
-  position: sticky;
-  top: 0;
-  z-index: 2;
+  position: static;
   background: var(--paper-card);
-  box-shadow: 0 -14px 0 0 var(--paper-deep);
 }
 
 .status-bar p {
@@ -446,25 +464,31 @@ summary {
   padding: 0;
 }
 
+.phase-track {
+  flex-wrap: wrap;
+}
+
 .phase-track li {
-  flex: 1 1 0;
-  min-height: var(--hit);
+  flex: 1 1 4.2rem;
+  min-height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #1a2330;
   background: var(--paper);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
+  text-align: center;
 }
 
-#phase[data-step="quiz"] + .phase-track [data-step="quiz"],
-#phase[data-step="place"] + .phase-track [data-step="place"],
-#phase[data-step="attack"] + .phase-track [data-step="attack"],
-#phase[data-step="occupy"] + .phase-track [data-step="attack"],
-#phase[data-step="fortify"] + .phase-track [data-step="fortify"] {
+.phase-track [aria-current="step"] {
   background: var(--blue);
   color: #fff8ea;
+}
+
+.phase-action {
+  margin: 0.2rem 0 0.35rem;
+  font-weight: 700;
 }
 
 #reinforcement-count {
@@ -545,6 +569,8 @@ summary {
   inset: auto;
   margin: 0 0 0.75rem;
   max-width: 100%;
+  max-height: min(24rem, 46dvh);
+  overflow: auto;
 }
 
 [hidden] {
@@ -608,6 +634,13 @@ summary {
 
   .side {
     overflow: visible;
+    max-height: none;
+  }
+
+  .phase-dock,
+  .side-rest {
+    overflow: visible;
+    max-height: none;
   }
 
   .side section:has(#phase) {
@@ -636,6 +669,10 @@ summary {
   .site-header {
     padding-top: 0.3rem;
     padding-bottom: 0.3rem;
+  }
+
+  #reinforcement-count[data-remaining]::before {
+    font-size: 1.6rem;
   }
 }
 

@@ -24,10 +24,11 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
   let ticket = 0;
   let rushing = false;
   let pendingKey = "";
+  let seenPhase = "";
 
   const chrome: TurnChrome = {
     show(state) {
-      paintStatus(phase, reinforcement, state);
+      paintStatus(doc, phase, reinforcement, state);
       paintLog(doc, log, state, () => logged, (next) => { logged = next; });
       paintHandoff(handoff, state);
       paintWinner(winner, state);
@@ -38,10 +39,15 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
         endAttacks.hidden = !attacking;
       }
       if (endTurn instanceof HTMLButtonElement) {
-        endTurn.disabled = !attacking && !moving;
-        endTurn.hidden = !attacking && !moving;
+        endTurn.disabled = !moving;
+        endTurn.hidden = !moving;
+        endTurn.textContent = "Skip fortify";
       }
-      if (fortifyButton) fortifyButton.hidden = !moving;
+      if (fortifyButton) {
+        fortifyButton.hidden = !moving;
+        fortifyButton.disabled = !moving;
+      }
+      syncPhaseFocus(state);
       considerComputer(state);
     },
     hurry() {
@@ -60,21 +66,13 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
   };
 
   endAttacks?.addEventListener("click", () => {
-    const state = stateOf();
-    if (!state || state.phase.kind !== "attack") return;
+    if (!stateOf()) return;
     act({ kind: "endAttacks" });
   });
 
   endTurn?.addEventListener("click", () => {
-    const state = stateOf();
-    if (!state) return;
-    if (state.phase.kind === "attack") {
-      if (!act({ kind: "endAttacks" })) return;
-      const next = stateOf();
-      if (next?.phase.kind === "fortify") act({ kind: "skipFortify" });
-      return;
-    }
-    if (state.phase.kind === "fortify") act({ kind: "skipFortify" });
+    if (!stateOf()) return;
+    act({ kind: "skipFortify" });
   });
 
   fortifyButton?.addEventListener("click", () => {
@@ -96,7 +94,21 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
       chrome.hurry();
       return;
     }
-    if (state.phase.kind === "handoff") act({ kind: "acknowledgeHandoff", turnSequence: state.turnSequence });
+    act({ kind: "acknowledgeHandoff", turnSequence: state.turnSequence });
+  });
+
+  handoff?.addEventListener("keydown", (event) => {
+    if (!(event instanceof KeyboardEvent) || !(handoff instanceof HTMLElement) || handoff.hidden) return;
+    guardDialogKey(doc, handoff, event, true);
+  });
+
+  doc.addEventListener("keydown", (event) => {
+    if (!(event instanceof KeyboardEvent) || event.key !== "Escape") return;
+    const state = stateOf();
+    if (!state) return;
+    if (state.phase.kind === "quiz" || state.phase.kind === "occupy" || state.phase.kind === "handoff") {
+      event.preventDefault();
+    }
   });
 
   skip?.addEventListener("click", () => {
@@ -113,6 +125,19 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
   });
 
   return chrome;
+
+  function syncPhaseFocus(state: GameState): void {
+    const key = phaseKey(state);
+    const changed = key !== seenPhase;
+    seenPhase = key;
+    if (!changed) return;
+    const dialog = phaseDialog(doc, state);
+    if (!dialog) return;
+    const active = doc.activeElement;
+    if (active instanceof Node && dialog.contains(active)) return;
+    const control = primaryControl(doc, state);
+    if (control instanceof HTMLElement || control instanceof SVGElement) control.focus();
+  }
 
   function considerComputer(state: GameState): void {
     if (rushing || !computerShouldAct(state)) return;
@@ -147,25 +172,109 @@ function computerShouldAct(state: GameState): boolean {
   return player(state, state.activePlayer)?.kind === "computer";
 }
 
-function paintStatus(phaseNode: HTMLElement | null, reinforcement: HTMLElement | null, state: GameState): void {
+const PHASE_STEPS = [
+  { kind: "quiz", label: "Quiz", optional: false },
+  { kind: "place", label: "Place", optional: false },
+  { kind: "attack", label: "Attack", optional: false },
+  { kind: "occupy", label: "Move-in", optional: true },
+  { kind: "fortify", label: "Fortify", optional: false },
+  { kind: "handoff", label: "Handoff", optional: false },
+] as const;
+
+function paintStatus(doc: Document, phaseNode: HTMLElement | null, reinforcement: HTMLElement | null, state: GameState): void {
   const phase = state.phase;
   if (phaseNode) {
     phaseNode.textContent = phaseLabel(state);
     phaseNode.dataset.step = phase.kind;
+    paintTrack(doc, phaseNode, state);
+    paintAction(doc, phaseNode, state);
   }
   if (!reinforcement) return;
+  const count = ownedCount(state);
+  reinforcement.dataset.count = String(count);
   if (phase.kind === "quiz") {
-    reinforcement.textContent = `Armies to place: not yet. Counties ${phase.baseIncome}, regions ${phase.regionIncome}, question not scored.`;
+    reinforcement.dataset.base = String(phase.baseIncome);
+    reinforcement.dataset.regions = String(phase.regionIncome);
+    reinforcement.dataset.quiz = "";
     delete reinforcement.dataset.remaining;
+    reinforcement.textContent = `Counties ${count}. Base reinforcement ${phase.baseIncome}. Regions ${phase.regionIncome}. Question not scored.`;
     return;
   }
   if (phase.kind === "place") {
-    reinforcement.textContent = `Armies to place: ${phase.remaining}. Counties ${phase.income.base}, regions ${phase.income.regions}, question ${phase.income.quiz}.`;
+    reinforcement.dataset.base = String(phase.income.base);
+    reinforcement.dataset.regions = String(phase.income.regions);
+    reinforcement.dataset.quiz = String(phase.income.quiz);
     reinforcement.dataset.remaining = String(phase.remaining);
+    reinforcement.textContent = `Counties ${count}. Base reinforcement ${phase.income.base}. Regions ${phase.income.regions}. Question ${phase.income.quiz}. Armies to place ${phase.remaining}.`;
     return;
   }
-  reinforcement.textContent = "Armies to place: 0.";
+  delete reinforcement.dataset.base;
+  delete reinforcement.dataset.regions;
+  delete reinforcement.dataset.quiz;
   reinforcement.dataset.remaining = "0";
+  reinforcement.textContent = `Counties ${count}. Armies to place 0.`;
+}
+
+function paintTrack(doc: Document, phaseNode: HTMLElement, state: GameState): void {
+  const parent = phaseNode.parentElement;
+  if (!parent) return;
+  let track = parent.querySelector(".phase-track");
+  if (!(track instanceof HTMLOListElement)) {
+    const created = doc.createElement("ol");
+    created.className = "phase-track";
+    parent.appendChild(created);
+    track = created;
+  }
+  const byKind = new Map<string, HTMLElement>();
+  for (const item of Array.from(track.querySelectorAll("li"))) {
+    if (item instanceof HTMLElement && item.dataset.step) byKind.set(item.dataset.step, item);
+  }
+  for (const step of PHASE_STEPS) {
+    let item = byKind.get(step.kind);
+    if (!item) {
+      item = doc.createElement("li");
+      item.dataset.step = step.kind;
+      track.appendChild(item);
+    }
+    item.textContent = step.label;
+    const on = state.phase.kind === step.kind;
+    if (on) item.setAttribute("aria-current", "step");
+    else item.removeAttribute("aria-current");
+    item.hidden = step.optional && !on;
+    track.appendChild(item);
+  }
+}
+
+function paintAction(doc: Document, phaseNode: HTMLElement, state: GameState): void {
+  const parent = phaseNode.parentElement?.parentElement ?? phaseNode.parentElement;
+  if (!parent) return;
+  let action = parent.querySelector("#phase-action") ?? doc.getElementById("phase-action");
+  if (!(action instanceof HTMLElement)) {
+    action = doc.createElement("p");
+    action.id = "phase-action";
+    action.className = "phase-action";
+    parent.appendChild(action);
+  }
+  action.textContent = actionText(state);
+}
+
+function actionText(state: GameState): string {
+  switch (state.phase.kind) {
+    case "quiz":
+      return "Answer the question, or skip it.";
+    case "place":
+      return "Place armies on counties you hold.";
+    case "attack":
+      return "Attack a bordering county, or stop attacking.";
+    case "occupy":
+      return "Move armies into the county you took.";
+    case "fortify":
+      return "Move armies once, or skip fortify.";
+    case "handoff":
+      return "Pass the screen, then press Ready.";
+    case "over":
+      return "The game is over.";
+  }
 }
 
 function phaseLabel(state: GameState): string {
@@ -182,9 +291,9 @@ function phaseLabel(state: GameState): string {
     case "fortify":
       return `This step: ${name} may move armies once`;
     case "handoff":
-      return "This step: Pass the screen";
+      return `This step: ${name} passes the screen`;
     case "over":
-      return "This step: Game over";
+      return `This step: ${name} finished the game`;
   }
 }
 
@@ -283,6 +392,99 @@ function markOf(state: GameState): string {
 function setStatus(doc: Document, message: string): void {
   const status = doc.getElementById("error-status");
   if (status) status.textContent = message;
+}
+
+function phaseKey(state: GameState): string {
+  const phase = state.phase;
+  if (phase.kind === "quiz") return `quiz:${state.turnSequence}:${phase.pending.questionId}`;
+  if (phase.kind === "occupy") return `occupy:${phase.from}:${phase.to}:${phase.minimum}`;
+  if (phase.kind === "handoff") return `handoff:${state.turnSequence}:${phase.nextPlayer}`;
+  return `${state.turnSequence}:${phase.kind}`;
+}
+
+function phaseDialog(doc: Document, state: GameState): HTMLElement | null {
+  const id = state.phase.kind === "quiz" ? "quiz-dialog" : state.phase.kind === "occupy" ? "occupy-dialog" : state.phase.kind === "handoff" ? "handoff-dialog" : "";
+  if (!id) return null;
+  const dialog = doc.getElementById(id);
+  return dialog instanceof HTMLElement && !dialog.hidden ? dialog : null;
+}
+
+function primaryControl(doc: Document, state: GameState): HTMLElement | SVGElement | null {
+  switch (state.phase.kind) {
+    case "quiz": {
+      const choice = doc.querySelector("#quiz-choices button");
+      if (choice instanceof HTMLButtonElement && !choice.disabled && isShown(choice)) return choice;
+      const skip = doc.getElementById("skip-quiz");
+      return skip instanceof HTMLButtonElement ? skip : null;
+    }
+    case "place": {
+      const map = doc.getElementById("map");
+      if (map instanceof HTMLElement || map instanceof SVGElement) return map;
+      return null;
+    }
+    case "attack": {
+      const button = doc.getElementById("end-attacks");
+      return button instanceof HTMLButtonElement ? button : null;
+    }
+    case "occupy": {
+      const input = doc.querySelector("#occupy-dialog input[name='occupy-count']");
+      return input instanceof HTMLInputElement ? input : null;
+    }
+    case "fortify": {
+      const button = doc.getElementById("end-turn");
+      return button instanceof HTMLButtonElement ? button : null;
+    }
+    case "handoff": {
+      const ready = doc.querySelector("#handoff-dialog .handoff-ready");
+      return ready instanceof HTMLButtonElement ? ready : null;
+    }
+    default:
+      return null;
+  }
+}
+
+function guardDialogKey(doc: Document, dialog: HTMLElement, event: KeyboardEvent, mandatory: boolean): void {
+  if (event.key === "Escape") {
+    if (mandatory) event.preventDefault();
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const items = focusables(dialog);
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (!first || !last) return;
+  const active = doc.activeElement;
+  if (event.shiftKey && active === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && active === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function focusables(root: HTMLElement): HTMLElement[] {
+  const nodes = Array.from(root.querySelectorAll("button, input, select, textarea, [tabindex]"));
+  const items: HTMLElement[] = [];
+  for (const node of nodes) {
+    if (!(node instanceof HTMLElement) || !isShown(node)) continue;
+    if ((node instanceof HTMLButtonElement || node instanceof HTMLInputElement || node instanceof HTMLSelectElement) && node.disabled) continue;
+    items.push(node);
+  }
+  return items;
+}
+
+function isShown(node: HTMLElement): boolean {
+  let current: Element | null = node;
+  while (current) {
+    if (current instanceof HTMLElement && current.hidden) return false;
+    current = current.parentElement;
+  }
+  return true;
+}
+
+function ownedCount(state: GameState): number {
+  return state.holdings.reduce((total, holding) => total + (holding.owner === state.activePlayer ? 1 : 0), 0);
 }
 
 function motionDelay(): number {
