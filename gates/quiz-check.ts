@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import * as path from "node:path";
 
 export interface QuizIssue {
-  readonly code: "shape" | "digest" | "duplicate-id" | "choices" | "correct-letter" | "county-name" | "html" | "county-id";
+  readonly code: "shape" | "digest" | "duplicate-id" | "choices" | "correct-letter" | "county-name" | "html" | "county-id" | "coverage";
   readonly detail: string;
 }
 
@@ -15,7 +15,7 @@ export interface CoverageReport {
   readonly countiesUnderThreeCategories: number;
   readonly countiesWithoutSeatAnswer: number;
   readonly mapCountiesMissingFromPack: number;
-  readonly minimaEnforced: false;
+  readonly minimaEnforced: boolean;
   readonly ledger: "not-implemented";
   readonly historicalFactCheck: "not-run";
 }
@@ -87,17 +87,18 @@ export function checkShippedPack(packValue: unknown, mapValue: unknown): QuizChe
   if (pack && !counties) errors.push({ code: "shape", detail: "counties is missing" });
   const seen = new Set<string>();
   const present = new Set<string>();
-  const perCounty: { questions: number; categories: number; seatAnswer: boolean }[] = [];
+  const perCounty: { id: string; questions: number; categories: number; hasSeat: boolean; seatAnswer: boolean }[] = [];
   if (counties) {
     for (const [countyId, list] of Object.entries(counties)) {
       present.add(countyId);
       if (mapCounties && !mapCounties.has(countyId)) errors.push({ code: "county-id", detail: `${countyId} is not on the map` });
       if (!Array.isArray(list)) {
         errors.push({ code: "shape", detail: `${countyId}: questions are missing` });
-        perCounty.push({ questions: 0, categories: 0, seatAnswer: false });
+        perCounty.push({ id: countyId, questions: 0, categories: 0, hasSeat: false, seatAnswer: false });
         continue;
       }
       const categories = new Set<string>();
+      let hasSeat = false;
       let seatAnswer = false;
       for (const value of list) {
         const question = asRecord(value);
@@ -111,10 +112,17 @@ export function checkShippedPack(packValue: unknown, mapValue: unknown): QuizChe
           errors.push({ code: "county-name", detail: `${countyId}: county name does not match the map` });
         }
         errors.push(...checkQuestion(value));
-        if (question && typeof question.category === "string") categories.add(question.category);
-        if (question && typeof question.countySeat === "string" && question.correctAnswer === question.countySeat) seatAnswer = true;
+        if (question && typeof question.category === "string" && question.category.trim() !== "") categories.add(question.category);
+        const seat = question && typeof question.countySeat === "string" ? question.countySeat.trim() : "";
+        if (seat !== "") {
+          hasSeat = true;
+          if (question && question.correctAnswer === question.countySeat) seatAnswer = true;
+        }
       }
-      perCounty.push({ questions: list.length, categories: categories.size, seatAnswer });
+      perCounty.push({ id: countyId, questions: list.length, categories: categories.size, hasSeat, seatAnswer });
+      if (list.length < 4) errors.push({ code: "coverage", detail: `${countyId}: fewer than 4 questions` });
+      if (categories.size < 3) errors.push({ code: "coverage", detail: `${countyId}: fewer than 3 categories` });
+      if (hasSeat && !seatAnswer) errors.push({ code: "coverage", detail: `${countyId}: no question answers with the county seat` });
     }
   }
   const lengths = perCounty.map((county) => county.questions);
@@ -128,9 +136,9 @@ export function checkShippedPack(packValue: unknown, mapValue: unknown): QuizChe
       maxQuestions: lengths.length > 0 ? Math.max(...lengths) : 0,
       countiesUnderFour: perCounty.filter((county) => county.questions < 4).length,
       countiesUnderThreeCategories: perCounty.filter((county) => county.categories < 3).length,
-      countiesWithoutSeatAnswer: perCounty.filter((county) => !county.seatAnswer).length,
+      countiesWithoutSeatAnswer: perCounty.filter((county) => county.hasSeat && !county.seatAnswer).length,
       mapCountiesMissingFromPack: missing,
-      minimaEnforced: false,
+      minimaEnforced: true,
       ledger: "not-implemented",
       historicalFactCheck: "not-run",
     },
@@ -152,7 +160,7 @@ export function formatQuizResult(result: QuizCheckResult): string {
     `coverage: ${coverage.questions} questions, ${coverage.counties} counties, ${coverage.minQuestions} to ${coverage.maxQuestions} each, under four ${coverage.countiesUnderFour}, under three categories ${coverage.countiesUnderThreeCategories}, without a seat-matching answer ${coverage.countiesWithoutSeatAnswer}, map counties missing ${coverage.mapCountiesMissingFromPack}`,
   );
   lines.push(
-    "minima: not applied. BARS per-county question, category, and seat counts are reported only. CONTRACT says they are not import prerequisites.",
+    "minima: enforced for the shipped pack. A county with fewer than 4 questions, fewer than 3 categories, or a seat and no answer equal to that seat fails. CSV import does not apply these quotas.",
   );
   lines.push("historical fact check: not-run");
   lines.push("ledger: not-implemented");
