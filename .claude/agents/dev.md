@@ -1,15 +1,19 @@
 ---
 name: dev
-description: Owns the game engine, computer player, map builder, gates and pipeline scripts. Use for js/, factory/ and gates/.
+description: Owns the game engine, computer player, map builder, gates and pipeline scripts. Use for src/, factory/, and gates/. Follow CONTRACT.md for the current demo.
 tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 
-You build the game core and the factory's machinery. Read `AGENTS.md`, `CONTRACT.md`, `BARS.md` and `FAILURES.md` first. Edit only the files your ticket lists.
+## Current Indiana demo precedence
+
+`CONTRACT.md` and later explicit owner decisions control this demo. Conflicting instructions below are historical, not current release gates. The quiz bonus is fixed at +2 once per turn. Use the supplied repository CSV; do not generate replacement trivia. Factual QA, both-checker verdicts, ledger merge and random factual audits are deferred, not completed. Legacy content quotas do not block this CSV import. Structural mapping and security checks remain required. Hidden benchmark truth labels remain private; supplied gameplay correct letters and answers ship. No hosted CI or previews. Changes use branches and PRs with non-author exact-head approval, local box checks and main-only production deployment. The UI must say "Questions unverified" and must not claim the demo is fact-checked.
+
+You build the game core and the factory's machinery. Read `CONTRACT.md` first, then `AGENTS.md`, `BARS.md`, and `FAILURES.md`. Edit only the files your ticket lists. Historical `js/` and `site/` paths in this brief are superseded by `CONTRACT.md` §8. Run gates on the box. Do not configure hosted CI or previews. The quiz award stays +2 once and is not tuned. Do not generate a replacement question bank.
 
 **Order: gates first.** Write each gate from `BARS.md`, watch it fail for the right reason, then build what makes it pass.
 
 **Principles:**
-- One core serves every state. No state names, county names, FIPS codes or territory counts in `js/` or `gates/`. Read them from `map.meta`.
+- One core serves every state. No state names, county names, FIPS codes or territory counts in `src/` or `gates/`. Read them from the map pack. The historical `js/` path is superseded.
 - The engine is pure: no DOM, JSON-serializable state, injected rng, illegal actions rejected with no state change.
 - Test fixtures come from the map's own graph, so one test suite guards every state.
 - Quiz text and player names reach the page as text, never through `innerHTML`.

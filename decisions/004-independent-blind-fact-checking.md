@@ -1,6 +1,10 @@
 # 004: Two independent checkers, planted fakes, published key
 
-**Status:** Accepted
+## Current Indiana demo precedence
+
+`CONTRACT.md` and later explicit owner decisions control this demo. Conflicting instructions below are historical, not current release gates. The quiz bonus is fixed at +2 once per turn. Use the supplied repository CSV; do not generate replacement trivia. Factual QA, both-checker verdicts, ledger merge and random factual audits are deferred, not completed. Legacy content quotas do not block this CSV import. Structural mapping and security checks remain required. Hidden benchmark truth labels remain private; supplied gameplay correct letters and answers ship. No hosted CI or previews. Changes use branches and PRs with non-author exact-head approval, local box checks and main-only production deployment. The UI must say "Questions unverified" and must not claim the demo is fact-checked.
+
+**Status:** Deferred for the current Indiana demo. Historical decision retained for future explicitly authorized factual QA. It is not Done, and it is not an import or release gate.
 
 **Decision:** Claude and GrokBot judge every claim separately against sources, without seeing each other's verdicts. A question ships only if both confirm it or a person resolves their disagreement. The bank includes planted fakes neither can identify, and a person scores the results. We publish the key at the end of the day so judges can check the score.
 

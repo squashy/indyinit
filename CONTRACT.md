@@ -3,7 +3,7 @@
 **Status:** LOCAL design draft for PO vetting; not approval to implement, push, deploy, clear holds, or change board state. Existing card statuses are preserved. Reviewed against fresh read-only story snapshot on Nov 7, 2026, America/Indianapolis.  
 **Card:** BTT-1 (`sty_aa5e4c5f`) · Architect: squashy-gb-chuck  
 **Drafted:** 2026-11-07 ~10:22am America/Indianapolis  
-**Specs location (until committed):** `/workspace/battlefor92/scope/`  
+**Specs location:** repository-root `CONTRACT.md`. The earlier draft path `/workspace/battlefor92/scope/` is historical and is not a current file.  
 **Target repo:** https://github.com/squashy/indyinit (public; allowlist/card repo fields may still be unset)
 
 ---
@@ -13,6 +13,12 @@
 > "Approve the proposed Vite layout; authorize Chuck to push the contract and source specs to squashy/indyinit as the first commit; allow merge commits after non-author exact-head approval; keep hosted CI and previews off, using box tests and production deploys from main; sign off BTT-1's approves-readying human step."
 
 Effect on this document: §8 layout is **ADOPTED**. Release/CI in §2 is **DECIDED**: no hosted CI, no Vercel previews; tests run on the box; production deploys from `main`. Merges are merge commits after a non-author APPROVE at the exact head. Items in §11 not covered by this quote stay open.
+
+## Approved CSV scope reconciliation
+
+Joshua approved the following scope through CoS on Nov 7, 2026: BTT-8 owns structural CSV parsing and security tests; BTT-14 is the sole importer; BTT-9 and BTT-10 are optional downstream reports; BTT-11 and BTT-12 factual QA is deferred, not Done. This scope supersedes conflicting historical content quotas, authored-shard requests and checker prerequisites below. It does not change card statuses or authorize unsupported acceptance-criteria edits.
+
+BTT-14's import dependency for this demo is BTT-8, not BTT-11 or BTT-12. BTT-9 and BTT-10 are optional reports on the imported pack and retain their BTT-1 dependencies. BTT-8 retains BTT-1 and BTT-2. This document records that product scope and does not edit the board. Deferred factual QA and optional reports are not import or release prerequisites. BTT-11 and BTT-12 stay deferred and are not Done.
 
 ## 0. Purpose
 
@@ -31,7 +37,7 @@ Reference product (Joshua: “what we are building”): https://battle-for-the-9
 | Maps / victory | **Total** = own all 92; **Quick60** = own **at least 60** counties at end of own turn; **65% of 92 = 59.8, rounded UP = 60** (`ceil(0.65*92)`). **Total92** = all 92; UI may label modes Quick/Total | PO confirmed; AC4 |
 | Stack | **Vite + TypeScript**, plain **DOM/SVG**, static JSON packs | Joshua via CoS ~10:17am ET |
 | Hosting | Static on **Vercel**, **main-only** production | Brief / release plan |
-| Out of scope | No backend, no accounts, no runtime AI. Hosted CI, preview and simulation cuts are **OPEN**, not decided. | Joshua / PO rulings |
+| Out of scope | No backend, no accounts, no runtime AI. Hosted CI and Vercel previews are **off** (Approvals, 10:36am ET). Simulation cuts remain **OPEN**. | Joshua / PO rulings |
 | Fonts / scripts | **System/local fonts only**; no external Google Fonts; no external scripts | BTT-15 AC (supersedes older Bevan/Overpass/Source Serif 4 note) |
 | Visual keep | Parchment/quilt-style county map with labels + army counts; regional bonus panels; phase + trip log; player stats; **separate** county points-of-interest browser (not the quiz) | PO live review |
 | Target | Joshua: **“shoot for 3pm eastern”** — Nov 7, approximately **3:00 PM America/Indianapolis**, a target, not a commitment. Freeze/deploy milestones are unapproved and must not imply a later target. | Joshua |
@@ -49,7 +55,7 @@ Public material is anonymous. No secrets and no named-bot dependencies in produc
 - After main: necessary prod deploy + public gameplay / assets / headers smoke.
 - Few milestone main pushes — do **not** launch one worker per story or auto-push main.
 - **Block release:** privacy, secrets, core gameplay failures.
-- Privacy, secrets and core gameplay remain blocking. **OPEN:** whether hosted CI, previews, simulations or their release quotas are cut; no proposal or stale card text settles this.
+- Privacy, secrets and core gameplay remain blocking. Hosted CI and Vercel previews are **decided off** by the Approvals quote: box tests, then production deploys from `main`. Simulation quotas remain **OPEN**. Stale card text does not reopen the CI decision.
 - Current content scope is **minimal CSV parsing and import**. Independent Q&A verification and fact-checking are **deferred**, not import prerequisites; there are **no fact-check quotas now**. General content/coverage/category/choice policy remains OPEN and must not silently override supplied data.
 
 ---
@@ -76,7 +82,7 @@ Public material is anonymous. No secrets and no named-bot dependencies in produc
 
 - **Joshua supplies questions and answers as a CSV.**
 - **Nobody generates a replacement trivia bank.**
-- See **§5 CSV intake**. Generative drafting on BTT-9/BTT-10 is **superseded in product intent**; remapping those Ready cards is a **PO/product follow-up**, not a silent Architect rewrite of Ready ACs (story edit is Inbox-only).
+- See **§5 CSV intake**. Generative drafting on BTT-9/BTT-10 is superseded by Joshua's approved optional-report scope. Ready-card metadata reconciliation requires a supported authorized route; story edit is Inbox-only. Preserve statuses.
 
 ### 3.5 Confirmed CSV; Joshua rule and architect defaults
 
@@ -138,10 +144,10 @@ Detailed, testable rule decisions are in `decisions/0001-rules.md`. This draft r
 ### 5.1 Confirmed source and exact schema
 
 PO inspection record: `/workspace/traverse-drafts/b92/csv-inspection.json`.
-Shared-path input: `/workspace/battlefor92/inputs/battle-for-the-92-benchmark-1000_nokey.csv`. The CSV stays at this shared box path; it is **not hosted on Traverse**. Traverse stores references/coordination only.
+Canonical importer input: repository-relative `inputs/battle-for-the-92-benchmark-1000_nokey.csv` at the candidate revision. Remote builders must not depend on a shared box path. `/workspace/battlefor92/inputs/battle-for-the-92-benchmark-1000_nokey.csv` records the original intake copy only. Traverse stores references, not the CSV.
 Original source: `C:\Users\josh\claude\robinhood\battle-for-the-92-benchmark-1000_nokey.csv` on **DESKTOP-LRQJSFF**.
 
-Inspection confirms **1,000 rows**, **all 92 Indiana counties**, **UTF-8 with BOM**, comma separator, CRLF; no ragged rows or blank cells. SHA-256: `11d9f4600036c15aad7fa4e5bc14fcfca9a79946d3327e8c2236e324784418fa`. Coverage is 8–13 questions per county. These are PO inspection results, not a new independent content/fact check by this agent. Filename has no policy meaning.
+The original PO intake inspection, not a guarantee about later revisions, confirms **1,000 rows**, **all 92 Indiana counties**, **UTF-8 with BOM**, comma separator, CRLF; no ragged rows or blank cells. Intake SHA-256: `11d9f4600036c15aad7fa4e5bc14fcfca9a79946d3327e8c2236e324784418fa`. Coverage is 8–13 questions per county. These are PO inspection results, not a new independent content/fact check by this agent. Filename has no policy meaning. That intake hash identifies the original inspection copy only. PR 9 (`e3efa86c52ee26c733a128a40f91a53115283af0`, merged as `241642ea1348fae1f8c07363f50cf4ef5db7c326`) corrected supplied gameplay answers for question ids 45, 289 and 356. On main `e014f9d48c32ede212a27b900d949599ad86182d`, which contains that merge, the tracked CSV SHA-256 is `12ecc69109decb249faeafbf558a45b48d82e4e4efb4e9d8cda0dc613ddfee5a`. Checked-in `data/quiz.json` `sourceDigest` equals that tracked digest and does not equal the intake hash. Do not restore the intake copy or treat the intake hash as the current checksum. Later imports record the candidate revision and digest. This documentation edit does not change the CSV and performs no factual QA.
 
 Exact ordered columns:
 
@@ -168,20 +174,22 @@ Mapping to output `QuizQuestion` (draft `src/types.ts`):
 
 Correct answers **ship as gameplay data** for static grading. Strip the initial BOM before matching headers; use a CSV parser supporting quoted commas/escaped quotes rather than splitting on commas. PO found correct-letter mapping consistent and all counties named in prompts; no new fact-check gate is implied.
 
-### 5.2 Single-parser / single-importer dependency flow (proposed implementation)
+### 5.2 Approved single-parser and single-importer ownership
 
-`shared-path CSV → BTT-8 parser → BTT-14 importer → public/data/quiz.json → BTT-9/BTT-10 consumers`
+`inputs/battle-for-the-92-benchmark-1000_nokey.csv → BTT-8 parser → BTT-14 sole importer → one quiz pack → optional BTT-9/BTT-10 reports`
+
+The approved pack name remains `public/data/quiz.json`. That name is not a second file. §8.1 records the tracked path and the coordination still required.
 
 1. **BTT-8 alone owns `factory/parse-quiz-csv.ts`.** Pure function `parseQuizCsv(text: string): { rows: readonly CsvQuestionRow[]; report: CsvValidationReport }`; text in, typed rows plus structural diagnostics out. No file I/O, fetching, output writes or fact-checking. Report row/field errors and missing coverage/categories/choices separately. Use confirmed §5.1 BOM/CSV/header mapping; no invented content or unagreed-column rejection.
-2. **BTT-14 alone owns `factory/import-quiz.ts`.** Build script reads the shared-path CSV, calls BTT-8's parser, maps parsed rows to `QuizQuestion`, and is the **only writer of `public/data/quiz.json`**. It does not implement a second parser. Structural errors use the agreed validation report; fact-checking/checker verdicts never block conversion.
-3. **BTT-9/BTT-10 are downstream consumers only**, for their county ranges. Inputs are only `public/data/quiz.json` and `QuizQuestion` from `src/types.ts`, never raw CSV. No converter, parser, importer or runtime-pack-write duties. Any county-range structural/coverage reports are separate outputs, not prerequisites of import or independent Q&A/fact checks.
+2. **BTT-14 alone owns `factory/import-quiz.ts` and is the sole importer.** The script reads the repository-relative CSV at the candidate revision, calls BTT-8's parser, and maps parsed rows to `QuizQuestion`. It requires explicit `--csv`, `--map`, and `--out`, and it writes only that `--out` path. It does not implement a second parser. Do not create a second pack in order to make the approved name and the tracked path both exist. Structural errors use the agreed validation report. Malformed CSV, invalid county identifiers, duplicate IDs, missing required fields or inconsistent supplied answer mapping block a release-ready output with row and field diagnostics. Do not silently drop or repair rows. Factual truth, source research and checker verdicts are not conversion gates.
+3. **BTT-9/BTT-10 are optional downstream reports**, for their county ranges. They read the single imported pack and `QuizQuestion` from `src/types.ts`, never raw CSV. No converter, parser, importer or runtime-pack-write duties. The optional outputs are `reports/quiz-c1.json` and `reports/quiz-c2.json`. Record the input revision or digest and summarize county coverage and existing structural diagnostics. Do not implement a second parser or schema gate. These reports are not prerequisites of import or release, are not Done, and do not establish historical truth.
 4. **Joshua, 10:27 AM America/Indianapolis:** “don't spend anytime yet on verifying q&a”. Independent checker/verification/fact-check work is **deferred and never blocks conversion**; no fact-check quotas or ship-rule/verdict prerequisites.
 
-`CsvValidationReport` is proposed to contain per-row/field errors, warnings and separate coverage/category/choice summaries; it validates structure/mapping, not historical truth. No parser/importer is implemented by this local design edit.
+`CsvValidationReport` is proposed to contain per-row/field errors, warnings and separate coverage/category/choice summaries; it validates structure/mapping, not historical truth. This documentation edit does not implement or verify the parser or importer.
 
 ### 5.3 Card reconciliation and precedence
 
-Fresh read-only card titles/structured ACs still describe BTT-8 gates/merge code, BTT-9/10 authored county shards and BTT-14 sole assembly. They do not clearly mandate multiple CSV parsers/importers; the single-parser/single-importer proposal preserves BTT-14's sole-writer role. BTT-9/10 consume the imported pack only; their older conversion proposal is removed. Direct user deltas and structured ACs take precedence over proposed §13 implementation details until approved; unresolved AC reconciliation must not be bypassed by status/lane changes. BTT-11/12 independent checker work remains deferred. No new stories or board changes.
+Historical structured ACs may still describe authored shards, both-checker verdicts, research and audit quotas. Joshua's approved CSV scope above supersedes those conflicting requirements in product intent. The board metadata still requires a supported authorized edit; comments and this contract do not rewrite structured ACs. Preserve existing statuses, including Ready factual-QA cards. Do not mark deferred work Done or move cards to Inbox to bypass edit restrictions. Reconcile the existing importer PR, not a duplicate importer story.
 
 ### 5.4 Quota policy — OPEN
 
@@ -253,7 +261,7 @@ Proposed stable DOM contract (BTT-15 creates; BTT-16/17 bind): `#app`, `#setup`,
 
 Minimal imported gameplay data: county binding, stable question id, question text, supplied possible answers and supplied correct-answer mapping. Exact field mapping is settled in §5.1. Category/explanation/source fields are included only if supplied; their absence is reported, not filled or rejected under unagreed quotas. Retain exactly the four supplied choices and correct letter; no one-choice conversion or typed-answer replacement. Correct answers **ship as gameplay data** and are available to the static grader.
 
-Pack is keyed by FIPS with per-county question arrays. No claim ids, independent verdicts, fact checks or person ship rulings are required to import this file. Deferred ledger shapes in the declaration draft are not import requirements.
+Pack is keyed by FIPS with per-county question arrays. No claim ids, independent verdicts, fact checks or person ship rulings are required to import this file. Deferred ledger shapes in the declaration draft are not import requirements. The approved name of this pack is `public/data/quiz.json`. The file checked in on main `e014f9d48c32ede212a27b900d949599ad86182d` is `data/quiz.json`. §8.1. Do not keep both.
 
 ### 7.4 Ledger / claims / verdicts — DEFERRED
 
@@ -261,7 +269,7 @@ The claim shards, checker verdicts, resolutions and strict ship-rule design are 
 
 ### 7.5 CSV (ingress only)
 
-Not shipped to clients. Converted offline into shards / quiz pack.
+The raw CSV is offline ingress, not a runtime dependency. BTT-14 converts it directly into the gameplay quiz pack. Claim shards are deferred and are not intermediate import outputs.
 
 ---
 
@@ -294,7 +302,7 @@ indyinit/
     styles/theme.css
   public/
     assets/**
-    data/quiz.json             # current minimal CSV import output
+    data/quiz.json             # approved destination name; absent on the checked tree; see §8.1
   data/
     regions/in/map.json
   decisions/0001-rules.md
@@ -347,7 +355,22 @@ Path migration cheat-sheet:
 | `factory/build-map.*` | `factory/build-map.ts` (+ helpers under `factory/` owned by same card) |
 | `gates/*` | `gates/*` (TypeScript or colocated fixtures; same card) |
 
-No two cards own one file. Claim shards merge **only** under BTT-14. Runtime quiz destination is **`public/data/quiz.json`** per latest instruction. Map path/layout remains proposed: root map JSON must be imported/bundled by Vite or explicitly moved to public data, never fetched from a non-public root URL. No competing quiz tree. Claim-shard merging is deferred, not a dependency of CSV import.
+No two cards own one file. Claim shards merge **only** under BTT-14. The approved quiz destination name remains **`public/data/quiz.json`**. §8.1 records the tracked pack and does not choose a new path. Map path/layout remains proposed: root map JSON must be imported/bundled by Vite or explicitly moved to public data, never fetched from a non-public root URL. No competing quiz tree. Claim-shard merging is deferred, not a dependency of CSV import.
+
+### 8.1 Verified quiz-pack path distinction
+
+Checked on main `e014f9d48c32ede212a27b900d949599ad86182d`. This edit moves no pack and adopts no new destination.
+
+- The approved destination **name** in §7.3, the cheat-sheet, and §9 remains `public/data/quiz.json`.
+- That path is absent. `public/data/` is absent. `public/` holds assets only.
+- The tracked pack is `data/quiz.json`. Its `sourceDigest` matches the tracked CSV in §5.1, including the PR 9 corrections.
+- Current readers of that tracked file are `tests/quiz.test.ts`, `factory/import-quiz.test.ts`, and `gates/quiz-check.ts`.
+- `factory/import-quiz.ts` writes only the explicit `--out` argument. It has no default path.
+- `vite.config.ts` copies the `data/` directory to `dist/data/` at the end of the build. `docs/btt19-release.md` follows `data/quiz.json` to `dist/data/quiz.json` and states that a pack only under `public/` is not the source that check uses.
+
+BTT-14, the Vite/build owner (BTT-2), and the release check (BTT-19) still have to agree on one destination before any move. `src/main.ts` is not on this main, so this note does not claim a runtime load failure from this tree. Do not create `public/data/quiz.json` as a second maintained pack, and do not treat `data/quiz.json` as a silently approved replacement name.
+
+Reported evidence, not a test run by this documentation edit: CoS reported that dev2's production packaging audit of open PR 12 at `e86012ded097ebb755f0fd7950d36a49c03d5ae7` passed. The report says one copy emits `dist/data`, a fetch returned 200, the corrected CSV digest matched, and the pack covered 92 counties and 1,000 questions. That report describes the tracked `data/` to `dist/data` copy. It does not adopt `data/quiz.json` as the approved destination name, and it does not remove the name `public/data/quiz.json`.
 
 ---
 
@@ -357,8 +380,26 @@ No two cards own one file. Claim shards merge **only** under BTT-14. Runtime qui
 
 ```tsv
 path	card
-scope/CONTRACT.md	BTT-1
+CONTRACT.md	BTT-1
 decisions/0001-rules.md	BTT-1
+SPEC.md	BTT-1
+BARS.md	BTT-1
+AGENTS.md	BTT-1
+CONTRACT.template.md	BTT-1
+decisions/004-independent-blind-fact-checking.md	BTT-1
+decisions/005-gates-before-features.md	BTT-1
+decisions/006-human-approval-boundaries.md	BTT-1
+decisions/007-board-driven-multi-vendor-team.md	BTT-1
+decisions/008-tune-balance-per-state.md	BTT-1
+CLAUDE.md	BTT-1
+README.md	BTT-1
+RUNBOOK.md	BTT-1
+bank/README.md	BTT-1
+.claude/agents/content.md	BTT-1
+.claude/agents/designer.md	BTT-1
+.claude/agents/dev.md	BTT-1
+.claude/agents/fact-checker.md	BTT-1
+inputs/battle-for-the-92-benchmark-1000_nokey.csv	BTT-14
 src/types.ts	BTT-1
 package.json	BTT-2
 tsconfig.json	BTT-2
@@ -427,7 +468,7 @@ release/verification.md	BTT-19
 
 | Card | Owns (exclusive) | Notes |
 |------|------------------|-------|
-| **BTT-1** | `scope/CONTRACT.md`, `decisions/0001-rules.md`, draft `src/types.ts` | Design-only |
+| **BTT-1** | Root docs, decision records, and agent briefs listed as BTT-1 in §9.1, plus draft `src/types.ts` | Design-only for product code |
 | **BTT-2** | Vite skeleton, `package.json`, `tsconfig`, `vercel.json`, lean box gate **runner scripts** | Not product logic |
 | **BTT-3** | `factory/build-map.*`, `regions/in/region.json`, `data/regions/in/map.json`, `gates/map.*` | |
 | **BTT-4** | `gates/rules.*`, `gates/mutants.*` | |
@@ -435,21 +476,21 @@ release/verification.md	BTT-19
 | **BTT-6** | `src/ai/ai.ts` | was `site/js/ai.js` |
 | **BTT-7** | Reserved simulation harness | Cuts/quotas OPEN |
 | **BTT-8** | `factory/parse-quiz-csv.ts`, focused parser/security tests; old ledger/merge files deferred | Sole pure CSV parser |
-| **BTT-9** | `reports/quiz-c1.json`; old claim/draft paths deferred | Imported-quiz consumer only; no raw CSV/conversion |
-| **BTT-10** | `reports/quiz-c2.json`; old claim/draft paths deferred | Imported-quiz consumer only; no raw CSV/conversion |
-| **BTT-11** | `regions/in/verdicts.a.jsonl` | **DEFERRED**, no import dependency |
-| **BTT-12** | `regions/in/verdicts.b.jsonl` | **DEFERRED**, no import dependency |
+| **BTT-9** | `reports/quiz-c1.json`; old claim/draft paths deferred | Optional report; not an import or release prerequisite; not Done |
+| **BTT-10** | `reports/quiz-c2.json`; old claim/draft paths deferred | Optional report; not an import or release prerequisite; not Done |
+| **BTT-11** | `regions/in/verdicts.a.jsonl` | **DEFERRED, not Done**; no import dependency |
+| **BTT-12** | `regions/in/verdicts.b.jsonl` | **DEFERRED, not Done**; no import dependency |
 | **BTT-13** | `src/quiz/quiz.ts` | was `site/js/quiz.js` |
-| **BTT-14** | `public/data/quiz.json`, `factory/import-quiz.ts`; sole minimal importer | No fact-check prerequisite |
+| **BTT-14** | `inputs/battle-for-the-92-benchmark-1000_nokey.csv`, `factory/import-quiz.ts`; sole importer. Approved pack name `public/data/quiz.json` | Stewards the corrected source CSV. Tracked pack path is §8.1, not a second product. No fact-check prerequisite |
 | **BTT-15** | `index.html`, `src/styles/**`, `public/assets/**`, `DESIGN.md` | System fonts |
 | **BTT-16** | `src/ui/setup.ts`, `src/ui/map.ts` | |
 | **BTT-17** | `src/ui/turn.ts`, `quiz-dialog.ts`, `battle.ts`, `src/main.ts` | |
 | **BTT-18** | Optional a11y/responsive | Nonblocking |
 | **BTT-19** | No exclusive product files | Release operator |
 
-Shared claim/shard files are **DEFERRED**; their reserved ownership is not an import requirement. Table paths are future repo-relative; local design files live beside this document under `scope/`. Entries with same-card exact/glob overlap are redundant aliases, not extra owners. No broad `scripts/**` owner may swallow BTT-7's simulation files. BTT-18 reports UI defects to BTT-15/16/17 rather than editing their files. BTT-19 records evidence, not product edits.
+Shared claim/shard files are **DEFERRED**; their reserved ownership is not an import requirement. Paths in this table are repository-relative from the repo root. `CONTRACT.md` is this file; `scope/CONTRACT.md` is not a current path. Entries with same-card exact/glob overlap are redundant aliases, not extra owners. No broad `scripts/**` owner may swallow BTT-7's simulation files. BTT-18 reports UI defects to BTT-15/16/17 rather than editing their files. BTT-19 records evidence, not product edits.
 
-Integration points: BTT-1 owns shared declarations; BTT-2 package scripts/config only; BTT-3 exports map/region packs; BTT-5 owns reducer; BTT-13 owns question selection helpers; BTT-8 owns the sole pure `factory/parse-quiz-csv.ts`; BTT-14 owns the sole build importer and `public/data/quiz.json`; BTT-9/10 read only the imported quiz and shared `QuizQuestion`, never raw CSV; independent verification, fact-checking and ship-rule merge are deferred; BTT-17 composes all modules in `src/main.ts`. UI renderers accept state/view data and dispatch typed actions, never mutate state. Requests to change another owner's file go to that owner; no named bot identity is embedded in code. New files need an ownership reservation before parallel work starts.
+Integration points: BTT-1 owns shared declarations and the root docs in §9.1; BTT-2 package scripts/config only; BTT-3 exports map/region packs; BTT-5 owns reducer; BTT-13 owns question selection helpers; BTT-8 owns the sole pure `factory/parse-quiz-csv.ts`; BTT-14 owns the tracked source CSV and the sole build importer. The approved pack name is `public/data/quiz.json`; the tracked pack path is §8.1 and is not a second product. BTT-9/10 optionally read only the imported quiz and shared `QuizQuestion`, never raw CSV; independent verification, fact-checking and ship-rule merge are deferred and not Done; BTT-17 composes all modules in `src/main.ts`. UI renderers accept state/view data and dispatch typed actions, never mutate state. Requests to change another owner's file go to that owner; no named bot identity is embedded in code. New files need an ownership reservation before parallel work starts.
 
 ---
 
@@ -457,7 +498,7 @@ Integration points: BTT-1 owns shared declarations; BTT-2 package scripts/config
 
 - No `innerHTML` with game/quiz text; no `eval`; no external scripts; no secrets/private notes/rulings in client output.
 - The CSV supplies **questions, possible answers and correct answers**. Correct answers **ship as gameplay data** for static grading. The filename adds no policy semantics.
-- The original **BARS no-key rule concerns hidden true/fake benchmark labels**, not gameplay answer fields. Do not expose those labels or their truth key. **Gameplay correct answers ship**. The source filename itself confers no additional policy meaning.
+- The original **BARS no-key rule concerns hidden true/fake benchmark labels**, not gameplay answer fields. Do not expose those labels or their truth key. **Gameplay correct answers ship**. Security tests must not reject supplied gameplay grading fields as a forbidden answer key. The source filename itself confers no additional policy meaning.
 - Headers via `vercel.json` (BTT-2). Privacy/secrets/core gameplay failures remain blocking.
 
 ---
@@ -467,9 +508,9 @@ Integration points: BTT-1 owns shared declarations; BTT-2 package scripts/config
 1. **Region data:** expected count **8**; names, membership and bonuses remain **OPEN**. No invented specifics or formula.
 2. **General quota policy:** coverage, category, seat and choice minima remain product-policy questions for future inputs; report gaps separately, no unagreed-column rejection or fabrication. This file already covers every county and supplies four choices. **No fact-check quotas now.** Independent verification/fact-checking are deferred, not import prerequisites.
 3. **Fallback adoption:** uniform choice among eligible owned counties is architect interpretation; skip-with-0 if none have questions is an **architect default (not Joshua-approved)**. BARS no-key scope is clarified in §10, not an open gameplay-answer prohibition.
-4. **Release conflict:** Ready card text **forbids hosted CI and previews**, while this contract treats those cuts as **OPEN pending the user’s ruling via CoS**. Do not silently choose either. Simulation/quota cuts and final release evidence also remain OPEN.
+4. **Release:** Hosted CI and Vercel previews are **decided off** by the 10:36am ET approval. The older note that those cuts were OPEN is superseded. Simulation/quota cuts and final release evidence remain OPEN.
 5. **Economy/default adoption:** starting pools, even-deal implementation, automatic initial-army placement, second-seat +15, AI probability, default mode and Total92 timing require adoption. Region bonus data separately OPEN.
-6. **Layout/interfaces:** remaining proposed map/module layout, exclusive ownership and declaration/interface adoption. Quiz output is fixed as `public/data/quiz.json`; deferred ledger types are not import requirements.
+6. **Layout/interfaces:** remaining proposed map/module layout, exclusive ownership and declaration/interface adoption. The approved quiz destination name remains `public/data/quiz.json`; the tracked-path distinction in §8.1 is unresolved and is not a new path. Deferred ledger types are not import requirements.
 7. **Execution authority:** implementation/release operators, merger, human hold and documented AC-update route; no board/external action is authorized here.
 8. **Source/design review:** original SPEC/template/decisions not supplied for this review; human contract/rules review remains outstanding.
 9. **Milestones:** Joshua's **“shoot for 3pm eastern”** means approximately **3:00 PM America/Indianapolis** on Nov 7, not a hard commitment; no approved freeze/deploy timetable.
@@ -491,7 +532,7 @@ Integration points: BTT-1 owns shared declarations; BTT-2 package scripts/config
 
 ## 13. Per-card proposed implementation details and PO AC deltas
 
-This is a **proposed implementation reconciliation**, not a board edit. Each §13.n proposes implementation details and references §9 ownership; it does **not control or override** direct user deltas or structured ACs. **Direct user deltas and structured ACs take precedence until these proposed details are approved**; unresolved conflicts need an authorized reconciliation, not a lane/status bypass. Historical PO notes are context only. Ready text forbids hosted CI/previews; contract cuts remain **OPEN pending the user's ruling via CoS**. **BTT-1 maps to §14.**
+This is a **proposed implementation reconciliation**, not a board edit. Each §13.n proposes implementation details and references §9 ownership; it does **not rewrite** structured card ACs or statuses. Joshua's approved CSV scope and the 10:36am ET decision (no hosted CI, no Vercel previews) supersede conflicting historical checker, shard, and preview requirements in product intent. Other unresolved conflicts need an authorized reconciliation, not a lane/status bypass. Historical PO notes are context only. Simulation cuts remain OPEN. **BTT-1 maps to §14.**
 
 | Card | Proposed detail section | Referenced sections |
 | BTT-1 | §14 | Whole-contract acceptance review |
@@ -517,7 +558,7 @@ This is a **proposed implementation reconciliation**, not a board edit. Each §1
 
 ### 13.2 BTT-2 — proposed implementation detail
 
-Proposed detail references §2 + 8–9 and §9. Vite/TS static build; local typecheck, focused tests, build, full-turn smoke. Hosted CI/preview cuts are OPEN, irrespective of older card wording. Implementation capability owner remains unresolved.
+Proposed detail references §2 + 8–9 and §9. Vite/TS static build; local typecheck, focused tests, build, full-turn smoke. Hosted CI and Vercel previews are decided off (Approvals). Simulation cuts stay OPEN. Implementation capability owner remains unresolved.
 
 **PO CSV AC delta:** none recorded for this card in csvrule-comments.json.
 
@@ -557,25 +598,25 @@ BTT-8 owns **only one pure CSV parser module**, `factory/parse-quiz-csv.ts`, plu
 
 ### 13.9 BTT-9 — proposed implementation detail
 
-For Adams through Jennings, **consume only `public/data/quiz.json` and the shared `QuizQuestion` type**; never read raw CSV. No parser, converter, importer or quiz-pack-write duties. Proposed optional structural/coverage report: `reports/quiz-c1.json`; independent verification/fact-checking remains deferred and cannot block conversion. Old authored-shard/conversion requests are historical and require AC reconciliation, not duplicate import code.
+For Adams through Jennings, **consume only the single imported quiz pack (§8.1) and the shared `QuizQuestion` type**; never read raw CSV. No parser, converter, importer or quiz-pack-write duties. Approved optional structural/coverage report: `reports/quiz-c1.json`; independent verification/fact-checking remains deferred and cannot block conversion. This report is not Done. Old authored-shard/conversion requests are superseded by the approved CSV scope. Structured AC reconciliation still requires supported authorized edits, not duplicate import code.
 
 ### 13.10 BTT-10 — proposed implementation detail
 
-For Johnson through Whitley, **consume only `public/data/quiz.json` and the shared `QuizQuestion` type**; never read raw CSV. No parser, converter, importer or quiz-pack-write duties. Proposed optional structural/coverage report: `reports/quiz-c2.json`; verification/fact-checking remains deferred. Missing-question handling references §3.5: Joshua's other-owned-county rule; uniform eligible-owned choice is architect interpretation, and skip-with-0 if no owned county has questions is **architect default (not Joshua-approved)**.
+For Johnson through Whitley, **consume only the single imported quiz pack (§8.1) and the shared `QuizQuestion` type**; never read raw CSV. No parser, converter, importer or quiz-pack-write duties. Approved optional structural/coverage report: `reports/quiz-c2.json`; verification/fact-checking remains deferred. This report is not Done. Missing-question handling references §3.5: Joshua's other-owned-county rule; uniform eligible-owned choice is architect interpretation, and skip-with-0 if no owned county has questions is **architect default (not Joshua-approved)**.
 
 ### 13.11 BTT-11 — proposed implementation detail — verification DEFERRED
 
-**DEFERRED workstream.** Old content/shard drafting, independent Q&A verification and fact-checking are not import prerequisites. No fact-check quota or required checker verdict applies now. Do not start this work or change the board state. Current CSV flow is BTT-8 parser → BTT-14 importer → `public/data/quiz.json` → BTT-9/10 consumers, using the confirmed §5.1 schema.
+**DEFERRED, not Done.** Old content/shard drafting, independent Q&A verification and fact-checking are not import prerequisites. No fact-check quota or required checker verdict applies now. Do not start this work, mark it Done, or change the board state. Current CSV flow is BTT-8 parser → BTT-14 sole importer → one quiz pack (§8.1) → optional BTT-9/10 reports, using the confirmed §5.1 schema.
 
 **Historical, superseded where inconsistent with latest ruling:**
-**PO CSV AC delta** (cmt_c44a6121): Input changes from author claim shards to the user-supplied CSV (converted per contract). Independence rules stay. Verify supplied questions/answers against sources; source/category columns may not exist in the CSV. Waits on the upload.
+**PO CSV AC delta** (cmt_c44a6121): Input changes from author claim shards to the user-supplied CSV (converted per contract). Independence rules stay. Verify supplied questions/answers against sources; source/category columns may not exist in the CSV. This historical upload wait and verification request no longer applies to the current import scope.
 
 ### 13.12 BTT-12 — proposed implementation detail — verification DEFERRED
 
-**DEFERRED workstream.** Old content/shard drafting, independent Q&A verification and fact-checking are not import prerequisites. No fact-check quota or required checker verdict applies now. Do not start this work or change the board state. Current CSV flow is BTT-8 parser → BTT-14 importer → `public/data/quiz.json` → BTT-9/10 consumers, using the confirmed §5.1 schema.
+**DEFERRED, not Done.** Old content/shard drafting, independent Q&A verification and fact-checking are not import prerequisites. No fact-check quota or required checker verdict applies now. Do not start this work, mark it Done, or change the board state. Current CSV flow is BTT-8 parser → BTT-14 sole importer → one quiz pack (§8.1) → optional BTT-9/10 reports, using the confirmed §5.1 schema.
 
 **Historical, superseded where inconsistent with latest ruling:**
-**PO CSV AC delta** (cmt_684c6ff1): Input changes from author claim shards to the user-supplied CSV (converted per contract). Independence rules stay. Verify supplied questions/answers against sources; source/category columns may not exist in the CSV. Waits on the upload.
+**PO CSV AC delta** (cmt_684c6ff1): Input changes from author claim shards to the user-supplied CSV (converted per contract). Independence rules stay. Verify supplied questions/answers against sources; source/category columns may not exist in the CSV. This historical upload wait and verification request no longer applies to the current import scope.
 
 ### 13.13 BTT-13 — proposed implementation detail
 
@@ -583,7 +624,7 @@ Draw a random owned county first, then a question from its pool. Do not bias tow
 
 ### 13.14 BTT-14 — proposed implementation detail
 
-BTT-14 is the **sole importer**, `factory/import-quiz.ts`: read shared-path CSV, call BTT-8's single pure parser, map typed rows to `QuizQuestion`, and alone write **`public/data/quiz.json`**. No second CSV parser, no BTT-9/10 converter dependency. Correct answers ship. Joshua's 10:27 AM America/Indianapolis deferral: **“don't spend anytime yet on verifying q&a”**. Checker/verification/fact-check work is deferred and **never blocks conversion**; no both-checker-verdict, audit, resolution or ship-rule prerequisite. `resolutions.jsonl` is **human-only and deferred**, never owned/written by BTT-14. Historical cmt_9b097555 verdict wording is superseded.
+BTT-14 is the **sole importer**, `factory/import-quiz.ts`: read the repository-relative CSV at the candidate revision, call BTT-8's single pure parser, map typed rows to `QuizQuestion`, and alone write the one quiz pack. The approved destination name remains `public/data/quiz.json`; the tracked file and the unresolved path split are §8.1. Do not create a second pack and do not overwrite the PR 9 CSV corrections with the intake copy. No second CSV parser, no BTT-9/10 converter dependency. Correct answers ship. Joshua's 10:27 AM America/Indianapolis deferral: **“don't spend anytime yet on verifying q&a”**. Checker/verification/fact-check work is deferred and **never blocks conversion**; no both-checker-verdict, audit, resolution or ship-rule prerequisite. `resolutions.jsonl` is **human-only and deferred**, never owned/written by BTT-14. Historical cmt_9b097555 verdict wording is superseded.
 
 ### 13.15 BTT-15 — proposed implementation detail
 
@@ -611,7 +652,7 @@ Proposed detail references §2 + 6.3 and §9. Real browser checks cover phone, C
 
 ### 13.19 BTT-19 — proposed implementation detail
 
-Proposed detail references §2 + 10 and §9. Release operator records exact combined candidate checks before any authorized main push; production assets/gameplay/headers smoke after authorized deploy. Hosted CI, preview and simulation cuts are **OPEN**; do not treat older current-AC cuts as adopted. Other release evidence needs reconciliation under §11. Design author performs none of these external actions.
+Proposed detail references §2 + 10 and §9. Release operator records exact combined candidate checks before any authorized main push; production assets/gameplay/headers smoke after authorized deploy. Hosted CI and Vercel previews are decided off (Approvals). Simulation cuts remain **OPEN**. Do not treat older card text as reopening hosted CI. Other release evidence needs reconciliation under §11. Design author performs none of these external actions.
 
 **PO CSV AC delta:** none recorded for this card in csvrule-comments.json.
 
@@ -619,7 +660,7 @@ Proposed detail references §2 + 10 and §9. Release operator records exact comb
 
 **BTT-1 → §14**. Proposed implementation details in §13 do not override direct user deltas or structured ACs until approved.
 
-Policy corrected per latest Joshua/PO rulings on Nov 7, 2026, through approximately 10:29 AM America/Indianapolis. Earlier review assertions about mandatory fact-checking or decided release cuts are superseded. The CSV source itself has not been read by this agent; confirmed schema/coverage are taken from PO’s csv-inspection.json.
+Policy through approximately 10:29 AM America/Indianapolis deferred fact-checking and left some release cuts unresolved. The 10:36 AM ET Approvals quote later decided hosted CI and Vercel previews off. Earlier assertions that fact-checking is mandatory are superseded. The intake schema/coverage figures are taken from PO’s csv-inspection.json. §5.1 separates that intake hash from the tracked CSV after PR 9. This section does not itself fact-check the questions.
 
 | Fresh BTT-1 AC | Coverage / remaining review |
 |---|---|
@@ -627,7 +668,7 @@ Policy corrected per latest Joshua/PO rulings on Nov 7, 2026, through approximat
 | AC2: locked held-county +2 once; wrong/skip/repeat/out-of-phase zero | §3, §6.2, decision record §§2–3. No invented human approval. |
 | AC3: proposed economy/setup; region specifics OPEN | §4.1, decision record §§2–4; economy defaults proposed; region names/membership/bonuses OPEN and invented formula removed. |
 | AC4: explicit combat, occupation, fortify, win, AI, autosave, elimination, blitz, missing question | §4, decision record §§3–9; Joshua: draw from another owned county; uniform eligible-owned choice is architect interpretation; skip-with-0 if none have questions is **architect default (not Joshua-approved)**. Full coverage confirmed by PO. |
-| AC5: release cuts OPEN; content quota policy OPEN and fact work deferred; exclusive ownership/no named-bot product dependencies | §§1–2, 5.4, 9–13. Latest rulings override historical card proposals; see §11. |
+| AC5: hosted CI and previews decided off; simulation cuts OPEN; content quota policy OPEN and fact work deferred, not Done; exclusive ownership/no named-bot product dependencies | §§1–2, 5.4, 8.1, 9–13. Latest rulings override historical card proposals; see §11. |
 
 Review performed: fresh read-only `traverse stories list --json`, BTT-1 comments cmt_de1a1438/cmt_b1066d8b/cmt_c045adf1, local plan.json and csvrule-comments.json, public reference page text. Reference text confirms dice, eight regions, +2, reinforcement, fortify and Quick60 end-turn win. It does **not** establish exact starting pools, second-seat +15 or region membership/bonuses. No live game was played in this review; PO's prior +2 observation is attributed, not retested. No claims of original template comparison, complete implementation, executable gates passing, human acceptance or board changes. A person still must read this contract and decision record. Local draft types are not runtime validators.
 
