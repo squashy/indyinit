@@ -1,4 +1,4 @@
-/** Minimal DOM for surface tests. Node has no document, and the suite adds no dependencies. */
+/** Minimal DOM for UI tests. Node has no document, and the suite adds no dependencies. */
 
 type Listener = (event: DomEvent) => void;
 
