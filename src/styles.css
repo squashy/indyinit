@@ -340,19 +340,23 @@ input:focus-visible,
 
 @media (min-width: 821px) {
   .phase-dock {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .phase-dock > section:has(#phase) {
+    display: block;
     flex: none;
+    max-height: none;
+    overflow: visible;
   }
 
   .phase-dialogs {
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: min(28rem, 52dvh);
+    max-height: min(32rem, 58dvh);
+    overflow: auto;
+  }
+
+  #quiz-dialog,
+  #battle-dialog,
+  #occupy-dialog,
+  #handoff-dialog,
+  #winner-dialog {
+    max-height: none;
   }
 }
 
