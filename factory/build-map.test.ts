@@ -5,7 +5,10 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { adjacency, loadAtlas } from "./borders.ts";
 import { atlasJson, buildState } from "./build-map.ts";
+import { embedMap, pageViewBox } from "./embed-map.ts";
 import { GEOMETRY_SOURCE } from "./geometry-source.ts";
+import { northTilt } from "./north-tilt.ts";
+import type { MapPack } from "../src/types.ts";
 import { parseRegionFile } from "./parse-map.ts";
 import { checkMap } from "../gates/map-check.ts";
 
@@ -85,6 +88,17 @@ test("the Indiana pack matches the Census counties and excludes corner touches",
   const issues = checkMap(built.map, built.manifest, { byteLength: built.byteLength, minimumTerritories: 14 });
   assert.deepEqual(issues.filter((issue) => issue.severity === "error"), []);
   assert.equal(built.manifest.geometrySource, GEOMETRY_SOURCE.censusUrl);
+});
+
+test("the page map, the pack and the quiz digest agree, and the map is north-up", () => {
+  const map = JSON.parse(readFileSync(path.join(root, "data", "regions", "in", "map.json"), "utf8")) as MapPack;
+  const html = readFileSync(path.join(root, "index.html"), "utf8");
+  assert.equal(embedMap(html, map), html, "index.html map markup is stale: run npm run build:map");
+  assert.equal(html.includes(`viewBox="${pageViewBox(map).join(" ")}"`), true);
+  const quiz = JSON.parse(readFileSync(path.join(root, "data", "quiz.json"), "utf8")) as { mapDigest: string };
+  assert.equal(quiz.mapDigest, map.digest);
+  assert.equal(GEOMETRY_SOURCE.file, "counties-10m.json");
+  assert.equal(Math.abs(northTilt(map)) < 1, true, `north line tilt ${northTilt(map)} degrees`);
 });
 
 test("an explicit integer bonus is copied and a missing bonus stays zero without being marked reviewed", () => {
