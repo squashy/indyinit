@@ -1,3 +1,4 @@
+import { isComputerTurn } from "./ai/ai.ts";
 import { dispatch, type Session } from "./engine/engine.ts";
 import type { Action } from "./types.ts";
 import { attachPanZoom } from "./panzoom.ts";
@@ -26,8 +27,10 @@ async function boot(): Promise<void> {
     const panZoom = svg instanceof SVGSVGElement ? attachPanZoom(svg) : null;
     let live: Session | null = null;
     let setup: { persist(session: PlaySession): void } | null = null;
+    let driving = false;
     const act = (action: Action): boolean => {
       if (!live) return false;
+      if (isComputerTurn(live.state) && !driving) return false;
       const result = dispatch(live, action);
       if (!result.ok) {
         setStatus(result.error.message);
@@ -43,7 +46,14 @@ async function boot(): Promise<void> {
     };
     const quiz = bindQuiz(document, act);
     const battle = bindBattle(document, act, map);
-    const turn = bindTurn(document, act, map, () => live?.state ?? null);
+    const turn = bindTurn(document, act, map, () => live?.state ?? null, () => live ? live.rng.draw() : 0, (run) => {
+      driving = true;
+      try {
+        run();
+      } finally {
+        driving = false;
+      }
+    });
     const render = (): void => {
       if (!live) return;
       map.show(live.state);
@@ -53,7 +63,7 @@ async function boot(): Promise<void> {
     };
     const column = document.querySelector(".map-column");
     column?.addEventListener("click", () => {
-      if (!live) return;
+      if (!live || isComputerTurn(live.state)) return;
       battle.show(live.state);
       turn.show(live.state);
     });
