@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3e4c4">
+  <meta name="description" content="A shared-screen game on Indiana's 92 counties. A right answer adds 2 armies.">
+  <title>Battle for the 92</title>
+  <link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <a class="skip-link" href="#map">Skip to the map</a>
+    <header class="site-header">
+      <img src="/assets/mark.svg" width="48" height="48" alt="">
+      <div>
+        <h1>Battle for the 92</h1>
+        <p class="lede">Share one screen on Indiana’s 92 counties. A right answer adds 2 armies.</p>
+      </div>
+    </header>
+    <main class="board">
+      <div class="map-column">
+        <svg id="map" viewBox="0 0 600 1038" role="group" aria-label="Indiana county map" tabindex="0">
+          <defs>
+    <pattern id="cue-0" width="11" height="11" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="4" r="2.3" fill="none" stroke="#1a120c" stroke-width="1" stroke-opacity="0.7"/>
+    </pattern>
+    <pattern id="cue-1" width="10" height="8" patternUnits="userSpaceOnUse">
+      <rect width="10" height="3.2" fill="#1a120c" fill-opacity="0.4"/>
+    </pattern>
+    <pattern id="cue-2" width="11" height="11" patternUnits="userSpaceOnUse">
+      <circle cx="3.2" cy="3.2" r="2.2" fill="#1a120c" fill-opacity="0.55"/>
+    </pattern>
+    <pattern id="cue-3" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M-2,2 L2,-2 M0,8 L8,0 M6,10 L10,6" stroke="#1a120c" stroke-width="1.5" stroke-opacity="0.6"/>
+    </pattern>
+    <pattern id="cue-4" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M0,0 L8,8 M8,0 L0,8" stroke="#1a120c" stroke-width="1.25" stroke-opacity="0.55"/>
+    </pattern>
+    <pattern id="cue-5" width="8" height="10" patternUnits="userSpaceOnUse">
+      <rect width="3.1" height="10" fill="#1a120c" fill-opacity="0.42"/>
+    </pattern>
+
+    <path id="county-shape-18001" d="M483.7,216.4L531.7,209.6L537.3,256.5L541.7,294.2L494.3,300.7L483.7,216.4Z"/>
+    <path id="county-shape-18003" d="M432.9,137.6L453.3,135.2L521.6,125.4L522.2,130L529.6,193.5L531.7,209.6L483.7,216.4L437.2,222L435,200.7L429.7,158.7L434.9,158.1L432.9,137.6Z"/>
+    <path id="county-shape-18005" d="M343.6,617.1L367.7,613.7L416.2,607.8L421.5,660.9L401,663.6L402.8,678.2L392.2,686.1L352.3,691.6L351.9,688.1L343.6,617.1Z"/>
+    <path id="county-shape-18007" d="M57.3,364.9L52,305.3L98.2,301.2L128.3,298.3L132.7,340.3L135,361.4L57.6,368.3L57.3,364.9Z"/>
+    <path id="county-shape-18009" d="M426.9,308.8L470.7,303.7L474.8,349.3L472.5,349.5L432.3,354.2L426.9,308.8Z"/>
+    <path id="county-shape-18011" d="M213.1,426.4L294.5,417.6L301.3,479.2L285.7,481.3L219.3,488.4L213.1,426.4Z"/>
+    <path id="county-shape-18013" d="M290,623.7L313.4,620.8L343.6,617.1L351.9,688.1L308.5,693L299.1,694.1L293.7,645.1L290,623.7Z"/>
+    <path id="county-shape-18015" d="M220.4,289.6L230.5,288.6L231.5,299L258.5,296.3L261.5,328L264.4,359.3L207.4,365L204.3,333.7L190.6,334.9L187.7,310.3L190.4,292.5L220.4,289.6Z"/>
+    <path id="county-shape-18017" d="M216.2,247.2L236.4,245.4L289.6,239.9L298.8,323.8L261.5,328L258.5,296.3L231.5,299L230.5,288.6L220.4,289.6L216.2,247.2Z"/>
+    <path id="county-shape-18019" d="M383.5,839.4L382,822.4L401.5,816.7L406.8,801.9L415.7,790.3L456.6,785.4L470,783.8L483,787.3L483.9,802.5L473.2,817.4L454,826.6L450,841.5L445.3,861.4L434.3,870.4L424.2,866.8L422,856.3L428.2,851.2L418.2,839L388.9,842.5L383.5,839.4Z"/>
+    <path id="county-shape-18021" d="M135.7,658.6L130.2,595.2L137.2,594.7L135.5,573.5L169.2,571L171.9,602.7L185.4,601.5L188,633.3L167.8,635.2L171.5,677.5L137.5,679.7L135.7,658.6Z"/>
+    <path id="county-shape-18023" d="M212.4,417.8L207.4,365L264.4,359.3L276.3,358.1L277.4,368.7L289.7,370.9L293.6,409.1L294.5,417.6L213.1,426.4L212.4,417.8Z"/>
+    <path id="county-shape-18025" d="M257.7,858.2L326.3,851.3L325.6,844.4L335.5,843.4L338.7,861L332.4,861.4L339,875.1L336.2,891.2L327.6,903.3L319.2,901.2L320.4,908.2L329,909.7L315.6,923L304.9,920.3L302.9,899.6L282.4,901.5L281.2,887.2L261.2,890L257.7,858.2Z"/>
+    <path id="county-shape-18027" d="M169.4,742.2L205,738.8L207,759.8L203.6,760.2L210.4,835.8L183.1,836.1L176.3,831.2L168.8,837.2L163.4,830.8L151.2,831.7L147.2,810.9L141.3,796.9L144.6,789.8L145.5,765.2L150.6,767.5L161.6,759L169.4,742.2Z"/>
+    <path id="county-shape-18029" d="M527.4,693.6L529.6,605.4L574.3,600.6L579.8,648.9L567.2,662.2L571.4,668.2L558.6,678.5L550.5,679.1L540.8,691.9L527.4,693.6Z"/>
+    <path id="county-shape-18031" d="M416.2,607.8L426,606.7L423.6,581.9L483.6,574.9L488.8,619.6L464.7,640.2L443.4,658L421.5,660.9L416.2,607.8Z"/>
+    <path id="county-shape-18033" d="M445.8,71.9L514.2,63L517.3,88.1L521.6,125.4L453.3,135.2L445.8,71.9Z"/>
+    <path id="county-shape-18035" d="M408.3,356.7L432.3,354.2L472.5,349.5L474.6,367L481.7,422.5L416.7,429.8L408.3,356.7Z"/>
+    <path id="county-shape-18037" d="M183.1,836.1L210.4,835.8L219.3,837.3L225.9,829.1L254.5,826.3L257.7,858.2L261.2,890L261.6,893.7L240.7,895.5L241.9,906.1L200.2,910.5L189.9,911.4L189.3,904.5L183.1,836.1Z"/>
+    <path id="county-shape-18039" d="M287.1,32.3L334.8,27.6L357.8,25L364.8,81.8L367.4,102.7L295.8,110.7L294.8,100.3L287.1,32.3Z"/>
+    <path id="county-shape-18041" d="M473.9,494.2L488.4,492.3L495.1,491.6L496.8,509.2L524,506.3L528.9,551.9L481.6,557.5L473.9,494.2Z"/>
+    <path id="county-shape-18043" d="M376.4,840.2L383.5,839.4L388.9,842.5L418.2,839L428.2,851.2L422,856.3L424.2,866.8L417.5,870.4L416.5,879.5L407,895.1L396.2,894.9L394.8,876.8L387.5,874L378.7,861.4L376.4,840.2Z"/>
+    <path id="county-shape-18045" d="M86.6,451L80,442.6L82.7,435.5L93.6,430L111.5,404.4L131.2,394.8L137.7,387.8L141,424.6L147.2,488L88,493.6L83.7,476L86.6,451Z"/>
+    <path id="county-shape-18047" d="M481.6,557.5L528.9,551.9L569,548.1L574.3,600.6L529.6,605.4L502,608.3L488.8,619.6L483.6,574.9L481.6,557.5Z"/>
+    <path id="county-shape-18049" d="M230.3,182.1L299.3,174.6L301.7,195.9L311.8,194.5L312.9,205.1L325.9,203.6L326.9,214.1L287.5,219.1L289.6,239.9L236.4,245.4L230.3,182.1Z"/>
+    <path id="county-shape-18051" d="M19.9,913.8L25.4,918.2L30.7,902.7L34.3,909.7L38.7,900.8L44.1,907.2L51.3,885.2L61.6,871.7L87.5,860.5L91.4,850.3L105.9,847.9L110.9,838.2L112.4,854.7L123.1,860.9L124.4,875.6L141.2,872.6L144,905.5L145,916.2L117.3,918.8L118,927.5L77.1,930.5L76.4,922.6L55.8,924.2L55.3,917.7L20.9,920.3L19.9,913.8Z"/>
+    <path id="county-shape-18053" d="M350.2,296.5L390.4,291.8L424.2,287.9L426.9,308.8L432.3,354.2L408.3,356.7L357.6,362.6L356.9,355.7L352.6,317.3L350.2,296.5Z"/>
+    <path id="county-shape-18055" d="M137.5,679.7L171.5,677.5L239.2,671.4L243.5,713.4L245.4,734.7L205,738.8L169.4,742.2L143.4,743.8L137.5,679.7Z"/>
+    <path id="county-shape-18057" d="M293.6,409.1L361.7,401.1L368.8,467.7L355.6,473.2L301.3,479.2L294.5,417.6L293.6,409.1Z"/>
+    <path id="county-shape-18059" d="M355.6,473.2L368.8,467.7L420.1,461.5L422,479.2L418.4,479.6L420.7,500.5L414.1,501.3L416.4,522.5L359,529.1L354.5,490.7L355.6,473.2Z"/>
+    <path id="county-shape-18061" d="M335.5,843.4L376.4,840.2L378.7,861.4L387.5,874L394.8,876.8L396.2,894.9L407,895.1L408.2,918.1L402.9,937.7L393.3,940.8L386.2,951.8L372.7,939.6L359.7,941.5L340.8,929.8L339.4,912.7L327.6,903.3L336.2,891.2L339,875.1L332.4,861.4L338.7,861L335.5,843.4Z"/>
+    <path id="county-shape-18063" d="M219.3,488.4L285.7,481.3L292.9,551.9L267.6,555.1L268.3,562.1L233.8,565.5L235.8,558.2L227.5,559L222.2,502.2L220.7,502.4L219.3,488.4Z"/>
+    <path id="county-shape-18065" d="M420.1,461.5L416.7,429.8L481.7,422.5L485.9,439.7L489.7,471.3L486,471.8L488.4,492.3L473.9,494.2L420.7,500.5L418.4,479.6L422,479.2L420.1,461.5Z"/>
+    <path id="county-shape-18067" d="M261.5,328L298.8,323.8L352.6,317.3L356.9,355.7L288.9,363.9L289.7,370.9L277.4,368.7L276.3,358.1L264.4,359.3L261.5,328Z"/>
+    <path id="county-shape-18069" d="M380.4,207.5L435,200.7L437.2,222L444.6,285.4L424.2,287.9L390.4,291.8L380.4,207.5Z"/>
+    <path id="county-shape-18071" d="M308.5,693L351.9,688.1L352.3,691.6L392.2,686.1L402.8,678.2L410.1,741.3L403.3,758.3L395,760.8L376.5,754.5L369.3,758.3L356.3,752.9L349.1,758.8L339.6,754.7L323.3,761.2L316.8,706.3L310.1,707L308.5,693Z"/>
+    <path id="county-shape-18073" d="M86,184.6L95.6,178.1L110.1,165.9L123.1,168.7L140.5,179.3L146.8,174.4L148.3,190.1L154.2,252.9L144,253.9L146,271.9L125.8,273.9L128.3,298.3L98.2,301.2L92.8,259L86,184.6Z"/>
+    <path id="county-shape-18075" d="M472.5,349.5L474.8,349.3L470.7,303.7L494.3,300.7L541.7,294.2L547.5,347.2L548.7,357.5L474.6,367L472.5,349.5Z"/>
+    <path id="county-shape-18077" d="M430.3,737.1L443.4,733.5L454.4,710.8L471.3,708.6L515.5,703.4L521.7,757.3L512.5,748.4L496.5,749.1L478.2,752.8L475.1,763.1L483,787.3L470,783.8L456.6,785.4L454.5,768L432.4,756.2L430.3,737.1Z"/>
+    <path id="county-shape-18079" d="M421.5,660.9L443.4,658L464.7,640.2L471.3,708.6L454.4,710.8L443.4,733.5L430.3,737.1L420.8,734.2L410.1,741.3L402.8,678.2L401,663.6L421.5,660.9Z"/>
+    <path id="county-shape-18081" d="M306.6,550.2L360.3,543.3L367.7,613.7L343.6,617.1L313.4,620.8L306.6,550.2Z"/>
+    <path id="county-shape-18083" d="M75.5,832.9L84,808L96.9,799.5L99.4,779.4L90.8,762.1L90.9,748.6L91.9,749.8L143.5,745.3L143.4,743.8L169.4,742.2L161.6,759L150.6,767.5L145.5,765.2L144.6,789.8L141.3,796.9L147.2,810.9L151.2,831.7L141,841.1L130.5,834L120.5,839L110.9,838.2L105.9,847.9L91.4,850.3L87.5,860.5L61.6,871.7L61.2,857L75.7,847.8L75.5,832.9Z"/>
+    <path id="county-shape-18085" d="M299.3,174.6L303.4,174.1L295.8,110.7L367.4,102.7L371.3,137L374.2,165.1L368.2,165.8L372.1,197.6L325.9,203.6L312.9,205.1L311.8,194.5L301.7,195.9L299.3,174.6Z"/>
+    <path id="county-shape-18087" d="M357.8,25L422.3,17.6L439,15.7L445.8,71.9L364.8,81.8L357.8,25Z"/>
+    <path id="county-shape-18089" d="M39.9,169.5L36.5,127.8L31.7,70.2L41.8,77.9L54.1,75.7L50.7,84.4L68.7,87.6L86.5,85.7L95.6,178.1L86,184.6L78.1,193.3L62.7,200.6L42.8,201.5L39.9,169.5Z"/>
+    <path id="county-shape-18091" d="M135.5,59.8L153.3,46.1L206.2,41L208.3,67.4L215.2,67L217.3,86L211.7,99L213.9,119.9L193.1,122.1L183.6,130.5L178.5,150.6L171.6,160.2L146.8,174.4L135.5,59.8Z"/>
+    <path id="county-shape-18093" d="M245.4,734.7L243.5,713.4L310.1,707L316.8,706.3L323.3,761.2L317.8,769.3L319.1,780.1L250.5,787.5L245.4,734.7Z"/>
+    <path id="county-shape-18095" d="M361.7,401.1L357.6,362.6L408.3,356.7L416.7,429.8L420.1,461.5L368.8,467.7L361.7,401.1Z"/>
+    <path id="county-shape-18097" d="M285.7,481.3L301.3,479.2L355.6,473.2L354.5,490.7L359,529.1L360.3,543.3L306.6,550.2L292.9,551.9L285.7,481.3Z"/>
+    <path id="county-shape-18099" d="M294.8,100.3L295.8,110.7L303.4,174.1L299.3,174.6L230.3,182.1L224.1,118.9L222.9,108.4L294.8,100.3Z"/>
+    <path id="county-shape-18101" d="M205,738.8L245.4,734.7L250.5,787.5L254.5,826.3L225.9,829.1L219.3,837.3L210.4,835.8L203.6,760.2L207,759.8L205,738.8Z"/>
+    <path id="county-shape-18103" d="M289.6,239.9L287.5,219.1L326.9,214.1L336.9,298.2L350.2,296.5L352.6,317.3L298.8,323.8L289.6,239.9Z"/>
+    <path id="county-shape-18105" d="M244.5,626.6L244.7,628.1L290,623.7L293.7,645.1L299.1,694.1L308.5,693L310.1,707L243.5,713.4L239.2,671.4L234.8,630.2L244.5,626.6Z"/>
+    <path id="county-shape-18107" d="M141,424.6L212.4,417.8L213.1,426.4L219.3,488.4L220.7,502.4L163.9,507.5L149,508.7L147.2,488L141,424.6Z"/>
+    <path id="county-shape-18109" d="M233.8,565.5L268.3,562.1L267.6,555.1L292.9,551.9L306.6,550.2L313.4,620.8L290,623.7L244.7,628.1L244.5,626.6L241.4,596.8L231.7,597.8L230.1,585.3L236.1,574L233.8,565.5Z"/>
+    <path id="county-shape-18111" d="M42.8,201.5L62.7,200.6L78.1,193.3L86,184.6L92.8,259L98.2,301.2L52,305.3L46.2,239.1L42.8,201.5Z"/>
+    <path id="county-shape-18113" d="M364.8,81.8L445.8,71.9L453.3,135.2L432.9,137.6L392.3,141.7L391.7,134.6L371.3,137L367.4,102.7L364.8,81.8Z"/>
+    <path id="county-shape-18115" d="M527.3,698.2L527.4,693.6L540.8,691.9L550.5,679.1L558.6,678.5L571.4,668.2L581.2,684.9L576.4,699.4L527.2,704.7L527.3,698.2Z"/>
+    <path id="county-shape-18117" d="M250.5,787.5L319.1,780.1L325.6,844.4L326.3,851.3L257.7,858.2L254.5,826.3L250.5,787.5Z"/>
+    <path id="county-shape-18119" d="M185.4,601.5L231.7,597.8L241.4,596.8L244.5,626.6L234.8,630.2L239.2,671.4L171.5,677.5L167.8,635.2L188,633.3L185.4,601.5Z"/>
+    <path id="county-shape-18121" d="M88,493.6L147.2,488L149,508.7L163.9,507.5L169.2,571L135.5,573.5L102.2,576.5L98.8,565.8L99.7,531.6L96.8,521.9L101.8,514.4L86,498.9L88,493.6Z"/>
+    <path id="county-shape-18123" d="M242.4,956.5L250.2,955.9L247.1,943.9L248.9,932.5L240.6,921.4L241.9,906.1L240.7,895.5L261.6,893.7L261.2,890L281.2,887.2L282.4,901.5L302.9,899.6L304.9,920.3L310.7,928.2L308.2,937.3L301.2,939.2L295.3,944.1L301.1,967.3L286,971.2L284.6,986.7L275.6,991.5L275.6,975.3L262.7,980.4L256.2,976.1L242.4,956.5Z"/>
+    <path id="county-shape-18125" d="M110.9,838.2L120.5,839L130.5,834L141,841.1L151.2,831.7L163.4,830.8L168.8,837.2L176.3,831.2L183.1,836.1L189.3,904.5L147.8,908.6L144,905.5L141.2,872.6L124.4,875.6L123.1,860.9L112.4,854.7L110.9,838.2Z"/>
+    <path id="county-shape-18127" d="M86.5,85.7L104.1,78.8L135.5,59.8L146.8,174.4L140.5,179.3L123.1,168.7L110.1,165.9L95.6,178.1L86.5,85.7Z"/>
+    <path id="county-shape-18129" d="M20.9,920.3L55.3,917.7L55.8,924.2L76.4,922.6L77.1,930.5L76.4,941.2L80.5,996.4L56.8,1003.6L44.2,992.1L38.4,999L37,1006.7L44,1021.5L37.7,1030L21.8,1025.5L8,1004.2L22.5,1002.1L12.4,996.8L21,982.1L14.4,967.8L27.6,959.6L27.8,951.5L20.3,956L26.2,943.8L33.4,940.9L20.9,920.3Z"/>
+    <path id="county-shape-18131" d="M148.3,190.1L230.3,182.1L236.4,245.4L216.2,247.2L154.2,252.9L148.3,190.1Z"/>
+    <path id="county-shape-18133" d="M169.2,571L163.9,507.5L220.7,502.4L222.2,502.2L227.5,559L235.8,558.2L233.8,565.5L236.1,574L230.1,585.3L231.7,597.8L185.4,601.5L171.9,602.7L169.2,571Z"/>
+    <path id="county-shape-18135" d="M474.6,367L548.7,357.5L556.1,431.3L485.9,439.7L481.7,422.5L474.6,367Z"/>
+    <path id="county-shape-18137" d="M464.7,640.2L488.8,619.6L502,608.3L529.6,605.4L527.4,693.6L527.3,698.2L515.5,703.4L471.3,708.6L464.7,640.2Z"/>
+    <path id="county-shape-18139" d="M420.7,500.5L473.9,494.2L481.6,557.5L483.6,574.9L423.6,581.9L416.4,522.5L414.1,501.3L420.7,500.5Z"/>
+    <path id="county-shape-18141" d="M206.2,41L258.4,35.5L287.1,32.3L294.8,100.3L222.9,108.4L224.1,118.9L213.9,119.9L211.7,99L217.3,86L215.2,67L208.3,67.4L206.2,41Z"/>
+    <path id="county-shape-18143" d="M395,760.8L403.3,758.3L410.1,741.3L420.8,734.2L430.3,737.1L432.4,756.2L454.5,768L456.6,785.4L415.7,790.3L406.8,801.9L399.5,799.3L395,760.8Z"/>
+    <path id="county-shape-18145" d="M360.3,543.3L359,529.1L416.4,522.5L423.6,581.9L426,606.7L416.2,607.8L367.7,613.7L360.3,543.3Z"/>
+    <path id="county-shape-18147" d="M200.2,910.5L241.9,906.1L240.6,921.4L248.9,932.5L247.1,943.9L250.2,955.9L242.4,956.5L227.4,970.8L213.5,976.1L203.9,982.8L199.5,1008.8L189.2,1013.9L181.1,1000.9L170.5,1000L161,993.7L160.1,982.5L178.5,949.3L188.7,947.5L192,932.2L202,931.2L200.2,910.5Z"/>
+    <path id="county-shape-18149" d="M146.8,174.4L171.6,160.2L178.5,150.6L183.6,130.5L193.1,122.1L213.9,119.9L224.1,118.9L230.3,182.1L148.3,190.1L146.8,174.4Z"/>
+    <path id="county-shape-18151" d="M439,15.7L504.2,8L509.3,23L514.2,63L445.8,71.9L439,15.7Z"/>
+    <path id="county-shape-18153" d="M64.6,689.9L75.7,674.1L69.5,664.6L135.7,658.6L137.5,679.7L143.4,743.8L143.5,745.3L91.9,749.8L90.9,748.6L92.8,737L80,729.8L79.5,713L65.1,697L64.6,689.9Z"/>
+    <path id="county-shape-18155" d="M527.3,698.2L527.2,704.7L576.4,699.4L592,701.8L591.6,708.4L586.8,713.3L590,726.4L576.2,725.5L552.3,736.3L527.2,757.4L521.7,757.3L515.5,703.4L527.3,698.2Z"/>
+    <path id="county-shape-18157" d="M132.7,340.3L190.6,334.9L204.3,333.7L207.4,365L212.4,417.8L141,424.6L137.7,387.8L135,361.4L132.7,340.3Z"/>
+    <path id="county-shape-18159" d="M356.9,355.7L357.6,362.6L361.7,401.1L293.6,409.1L289.7,370.9L288.9,363.9L356.9,355.7Z"/>
+    <path id="county-shape-18161" d="M524,506.3L523.7,502.7L563.4,498.6L567.7,537.1L569,548.1L528.9,551.9L524,506.3Z"/>
+    <path id="county-shape-18163" d="M77.1,930.5L118,927.5L119.7,959.2L124,958.8L125.8,981.6L115.4,991.1L98.8,975.6L93.6,986.4L101,997.1L98.2,1010.4L87.2,1012.5L86.9,996.3L80.5,996.4L76.4,941.2L77.1,930.5Z"/>
+    <path id="county-shape-18165" d="M63.6,448.1L71.5,452.4L86.6,451L83.7,476L88,493.6L86,498.9L101.8,514.4L96.8,521.9L99.7,531.6L98.8,565.8L102.2,576.5L75.2,579.1L69.1,512.3L63.6,448.1Z"/>
+    <path id="county-shape-18167" d="M78,610.6L75.2,579.1L102.2,576.5L135.5,573.5L137.2,594.7L130.2,595.2L135.7,658.6L69.5,664.6L69,651.6L80.8,642L78,610.6Z"/>
+    <path id="county-shape-18169" d="M325.9,203.6L372.1,197.6L373.5,208.4L380.4,207.5L390.4,291.8L350.2,296.5L336.9,298.2L326.9,214.1L325.9,203.6Z"/>
+    <path id="county-shape-18171" d="M57.6,368.3L135,361.4L137.7,387.8L131.2,394.8L111.5,404.4L93.6,430L82.7,435.5L80,442.6L86.6,451L71.5,452.4L63.6,448.1L57.6,368.3Z"/>
+    <path id="county-shape-18173" d="M118,927.5L117.3,918.8L145,916.2L144,905.5L147.8,908.6L189.3,904.5L189.9,911.4L200.2,910.5L202,931.2L192,932.2L188.7,947.5L178.5,949.3L160.1,982.5L161,993.7L154.3,989.5L139,981.8L125.8,981.6L124,958.8L119.7,959.2L118,927.5Z"/>
+    <path id="county-shape-18175" d="M323.3,761.2L339.6,754.7L349.1,758.8L356.3,752.9L369.3,758.3L376.5,754.5L395,760.8L399.5,799.3L406.8,801.9L401.5,816.7L382,822.4L383.5,839.4L376.4,840.2L335.5,843.4L325.6,844.4L319.1,780.1L317.8,769.3L323.3,761.2Z"/>
+    <path id="county-shape-18177" d="M485.9,439.7L556.1,431.3L558.3,452.7L563.4,498.6L523.7,502.7L524,506.3L496.8,509.2L495.1,491.6L488.4,492.3L486,471.8L489.7,471.3L485.9,439.7Z"/>
+    <path id="county-shape-18179" d="M424.2,287.9L444.6,285.4L437.2,222L483.7,216.4L494.3,300.7L470.7,303.7L426.9,308.8L424.2,287.9Z"/>
+    <path id="county-shape-18181" d="M154.2,252.9L216.2,247.2L220.4,289.6L190.4,292.5L187.7,310.3L190.6,334.9L132.7,340.3L128.3,298.3L125.8,273.9L146,271.9L144,253.9L154.2,252.9Z"/>
+    <path id="county-shape-18183" d="M371.3,137L391.7,134.6L392.3,141.7L432.9,137.6L434.9,158.1L429.7,158.7L435,200.7L380.4,207.5L373.5,208.4L372.1,197.6L368.2,165.8L374.2,165.1L371.3,137Z"/>
+          </defs>
+          <rect class="map-ground" x="0" y="0" width="600" height="1038"></rect>
+          <path class="state-outline" d="M541.7,294.2L547.5,347.2M547.5,347.2L548.7,357.5M522.2,130L521.6,125.4M521.6,125.4L517.3,88.1M504.2,8L439,15.7M439,15.7L422.3,17.6M556.1,431.3L558.3,452.7M558.3,452.7L563.4,498.6M537.3,256.5L531.7,209.6M531.7,209.6L529.6,193.5M522.2,130L529.6,193.5M357.8,25L422.3,17.6M357.8,25L334.8,27.6M569,548.1L574.3,600.6M556.1,431.3L548.7,357.5M57.3,364.9L52,305.3M57.6,368.3L57.3,364.9M521.7,757.3L527.2,757.4L552.3,736.3M496.5,749.1L512.5,748.4L521.7,757.3M509.3,23L504.2,8M69.1,512.3L75.2,579.1M75.2,579.1L78,610.6M80.5,996.4L56.8,1003.6L44.2,992.1L38.4,999M38.4,999L37,1006.7L44,1021.5L37.7,1030L21.8,1025.5M21.8,1025.5L8,1004.2M8,1004.2L22.5,1002.1L12.4,996.8L21,982.1L14.4,967.8L27.6,959.6L27.8,951.5L20.3,956L26.2,943.8L33.4,940.9L20.9,920.3M393.3,940.8L402.9,937.7M275.6,991.5L284.6,986.7L286,971.2L301.1,967.3L295.3,944.1L301.2,939.2M327.6,903.3L319.2,901.2L320.4,908.2L329,909.7L315.6,923L304.9,920.3M424.2,866.8L417.5,870.4L416.5,879.5L407,895.1M571.4,668.2L581.2,684.9L576.4,699.4M213.5,976.1L227.4,970.8L242.4,956.5M242.4,956.5L256.2,976.1L262.7,980.4L275.6,975.3L275.6,991.5M90.8,762.1L99.4,779.4L96.9,799.5L84,808L75.5,832.9M304.9,920.3L310.7,928.2L308.2,937.3L301.2,939.2M90.8,762.1L90.9,748.6M61.6,871.7L61.2,857L75.7,847.8L75.5,832.9M287.1,32.3L334.8,27.6M61.6,871.7L51.3,885.2L44.1,907.2L38.7,900.8L34.3,909.7L30.7,902.7L25.4,918.2L19.9,913.8M64.6,689.9L75.7,674.1L69.5,664.6M90.9,748.6L92.8,737L80,729.8L79.5,713L65.1,697L64.6,689.9M39.9,169.5L36.5,127.8M36.5,127.8L31.7,70.2M31.7,70.2L41.8,77.9L54.1,75.7L50.7,84.4L68.7,87.6L86.5,85.7M42.8,201.5L39.9,169.5M80.5,996.4L86.9,996.3L87.2,1012.5L98.2,1010.4L101,997.1L93.6,986.4L98.8,975.6L115.4,991.1L125.8,981.6M125.8,981.6L139,981.8L154.3,989.5M327.6,903.3L339.4,912.7L340.8,929.8L359.7,941.5L372.7,939.6L386.2,951.8L393.3,940.8M552.3,736.3L576.2,725.5L590,726.4L586.8,713.3L591.6,708.4M517.3,88.1L514.2,63M514.2,63L509.3,23M20.9,920.3L19.9,913.8M154.3,989.5L161,993.7M161,993.7L170.5,1000L181.1,1000.9L189.2,1013.9L199.5,1008.8L203.9,982.8L213.5,976.1M483,787.3L483.9,802.5M483.9,802.5L473.2,817.4L454,826.6L450,841.5M450,841.5L445.3,861.4L434.3,870.4L424.2,866.8M287.1,32.3L258.4,35.5M69.5,664.6L69,651.6L80.8,642L78,610.6M576.4,699.4L592,701.8L591.6,708.4M496.5,749.1L478.2,752.8L475.1,763.1L483,787.3M407,895.1L408.2,918.1L402.9,937.7M569,548.1L567.7,537.1M69.1,512.3L63.6,448.1M42.8,201.5L46.2,239.1M537.3,256.5L541.7,294.2M57.6,368.3L63.6,448.1M567.7,537.1L563.4,498.6M46.2,239.1L52,305.3M206.2,41L258.4,35.5M579.8,648.9L574.3,600.6M571.4,668.2L567.2,662.2L579.8,648.9M86.5,85.7L104.1,78.8L135.5,59.8M206.2,41L153.3,46.1M135.5,59.8L153.3,46.1"></path>
+    <g class="county" data-county-id="18001" tabindex="-1" role="button" aria-label="Adams">
+      <use href="#county-shape-18001" class="county-shape"/>
+      <use href="#county-shape-18001" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18001" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18001" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18001" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18001" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18001" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="512.9" y="247.1" text-anchor="middle" font-size="11">Adams</text>
+      <g class="army-badge" transform="translate(512.9 263.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18003" tabindex="-1" role="button" aria-label="Allen">
+      <use href="#county-shape-18003" class="county-shape"/>
+      <use href="#county-shape-18003" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18003" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18003" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18003" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18003" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18003" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="480.3" y="166.4" text-anchor="middle" font-size="11">Allen</text>
+      <g class="army-badge" transform="translate(480.3 182.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18005" tabindex="-1" role="button" aria-label="Bartholomew">
+      <use href="#county-shape-18005" class="county-shape"/>
+      <use href="#county-shape-18005" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18005" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18005" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18005" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18005" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18005" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="381.3" y="639.1" text-anchor="middle" font-size="7">Bartholomew</text>
+      <g class="army-badge" transform="translate(381.3 655.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18007" tabindex="-1" role="button" aria-label="Benton">
+      <use href="#county-shape-18007" class="county-shape"/>
+      <use href="#county-shape-18007" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18007" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18007" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18007" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18007" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18007" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="93.2" y="325.5" text-anchor="middle" font-size="11">Benton</text>
+      <g class="army-badge" transform="translate(93.2 341.5)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18009" tabindex="-1" role="button" aria-label="Blackford">
+      <use href="#county-shape-18009" class="county-shape"/>
+      <use href="#county-shape-18009" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18009" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18009" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18009" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18009" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18009" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="451.2" y="320.9" text-anchor="middle" font-size="9">Blackford</text>
+      <g class="army-badge" transform="translate(451.2 336.9)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18011" tabindex="-1" role="button" aria-label="Boone">
+      <use href="#county-shape-18011" class="county-shape"/>
+      <use href="#county-shape-18011" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18011" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18011" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18011" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18011" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18011" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="257" y="445.0" text-anchor="middle" font-size="11">Boone</text>
+      <g class="army-badge" transform="translate(257 461.0)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18013" tabindex="-1" role="button" aria-label="Brown">
+      <use href="#county-shape-18013" class="county-shape"/>
+      <use href="#county-shape-18013" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18013" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18013" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18013" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18013" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18013" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="321.4" y="647.7" text-anchor="middle" font-size="11">Brown</text>
+      <g class="army-badge" transform="translate(321.4 663.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18015" tabindex="-1" role="button" aria-label="Carroll">
+      <use href="#county-shape-18015" class="county-shape"/>
+      <use href="#county-shape-18015" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18015" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18015" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18015" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18015" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18015" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="227.1" y="318.1" text-anchor="middle" font-size="9">Carroll</text>
+      <g class="army-badge" transform="translate(227.1 334.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18017" tabindex="-1" role="button" aria-label="Cass">
+      <use href="#county-shape-18017" class="county-shape"/>
+      <use href="#county-shape-18017" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18017" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18017" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18017" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18017" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18017" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="261.7" y="271.0" text-anchor="middle" font-size="11">Cass</text>
+      <g class="army-badge" transform="translate(261.7 287.0)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18019" tabindex="-1" role="button" aria-label="Clark">
+      <use href="#county-shape-18019" class="county-shape"/>
+      <use href="#county-shape-18019" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18019" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18019" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18019" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18019" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18019" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="434.8" y="811.1" text-anchor="middle" font-size="11">Clark</text>
+      <g class="army-badge" transform="translate(434.8 827.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18021" tabindex="-1" role="button" aria-label="Clay">
+      <use href="#county-shape-18021" class="county-shape"/>
+      <use href="#county-shape-18021" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18021" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18021" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18021" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18021" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18021" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="155.4" y="616.1" text-anchor="middle" font-size="11">Clay</text>
+      <g class="army-badge" transform="translate(155.4 632.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18023" tabindex="-1" role="button" aria-label="Clinton">
+      <use href="#county-shape-18023" class="county-shape"/>
+      <use href="#county-shape-18023" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18023" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18023" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18023" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18023" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18023" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="249.7" y="384.4" text-anchor="middle" font-size="9">Clinton</text>
+      <g class="army-badge" transform="translate(249.7 400.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18025" tabindex="-1" role="button" aria-label="Crawford">
+      <use href="#county-shape-18025" class="county-shape"/>
+      <use href="#county-shape-18025" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18025" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18025" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18025" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18025" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18025" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="303" y="870.8" text-anchor="middle" font-size="9">Crawford</text>
+      <g class="army-badge" transform="translate(303 886.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18027" tabindex="-1" role="button" aria-label="Daviess">
+      <use href="#county-shape-18027" class="county-shape"/>
+      <use href="#county-shape-18027" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18027" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18027" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18027" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18027" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18027" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="178.6" y="782.7" text-anchor="middle" font-size="9">Daviess</text>
+      <g class="army-badge" transform="translate(178.6 798.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18029" tabindex="-1" role="button" aria-label="Dearborn">
+      <use href="#county-shape-18029" class="county-shape"/>
+      <use href="#county-shape-18029" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18029" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18029" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18029" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18029" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18029" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="550.9" y="634.6" text-anchor="middle" font-size="9">Dearborn</text>
+      <g class="army-badge" transform="translate(550.9 650.6)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18031" tabindex="-1" role="button" aria-label="Decatur">
+      <use href="#county-shape-18031" class="county-shape"/>
+      <use href="#county-shape-18031" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18031" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18031" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18031" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18031" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18031" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="450.7" y="606.5" text-anchor="middle" font-size="9">Decatur</text>
+      <g class="army-badge" transform="translate(450.7 622.5)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18033" tabindex="-1" role="button" aria-label="DeKalb">
+      <use href="#county-shape-18033" class="county-shape"/>
+      <use href="#county-shape-18033" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18033" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18033" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18033" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18033" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18033" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="483.7" y="90.9" text-anchor="middle" font-size="11">DeKalb</text>
+      <g class="army-badge" transform="translate(483.7 106.9)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18035" tabindex="-1" role="button" aria-label="Delaware">
+      <use href="#county-shape-18035" class="county-shape"/>
+      <use href="#county-shape-18035" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18035" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18035" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18035" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18035" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18035" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="444.8" y="381.7" text-anchor="middle" font-size="9">Delaware</text>
+      <g class="army-badge" transform="translate(444.8 397.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18037" tabindex="-1" role="button" aria-label="Dubois">
+      <use href="#county-shape-18037" class="county-shape"/>
+      <use href="#county-shape-18037" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18037" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18037" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18037" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18037" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18037" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="221.8" y="860.9" text-anchor="middle" font-size="11">Dubois</text>
+      <g class="army-badge" transform="translate(221.8 876.9)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18039" tabindex="-1" role="button" aria-label="Elkhart">
+      <use href="#county-shape-18039" class="county-shape"/>
+      <use href="#county-shape-18039" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18039" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18039" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18039" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18039" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18039" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="327" y="59.8" text-anchor="middle" font-size="9">Elkhart</text>
+      <g class="army-badge" transform="translate(327 75.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18041" tabindex="-1" role="button" aria-label="Fayette">
+      <use href="#county-shape-18041" class="county-shape"/>
+      <use href="#county-shape-18041" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18041" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18041" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18041" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18041" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18041" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="500.1" y="519.4" text-anchor="middle" font-size="9">Fayette</text>
+      <g class="army-badge" transform="translate(500.1 535.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18043" tabindex="-1" role="button" aria-label="Floyd">
+      <use href="#county-shape-18043" class="county-shape"/>
+      <use href="#county-shape-18043" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18043" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18043" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18043" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18043" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18043" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="401.9" y="853.9" text-anchor="middle" font-size="11">Floyd</text>
+      <g class="army-badge" transform="translate(401.9 869.9)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18045" tabindex="-1" role="button" aria-label="Fountain">
+      <use href="#county-shape-18045" class="county-shape"/>
+      <use href="#county-shape-18045" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18045" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18045" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18045" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18045" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18045" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="116.2" y="441.8" text-anchor="middle" font-size="9">Fountain</text>
+      <g class="army-badge" transform="translate(116.2 457.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18047" tabindex="-1" role="button" aria-label="Franklin">
+      <use href="#county-shape-18047" class="county-shape"/>
+      <use href="#county-shape-18047" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18047" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18047" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18047" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18047" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18047" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="527.6" y="571.4" text-anchor="middle" font-size="9">Franklin</text>
+      <g class="army-badge" transform="translate(527.6 587.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18049" tabindex="-1" role="button" aria-label="Fulton">
+      <use href="#county-shape-18049" class="county-shape"/>
+      <use href="#county-shape-18049" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18049" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18049" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18049" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18049" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18049" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="269.4" y="200.4" text-anchor="middle" font-size="11">Fulton</text>
+      <g class="army-badge" transform="translate(269.4 216.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18051" tabindex="-1" role="button" aria-label="Gibson">
+      <use href="#county-shape-18051" class="county-shape"/>
+      <use href="#county-shape-18051" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18051" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18051" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18051" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18051" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18051" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="93.2" y="886.2" text-anchor="middle" font-size="11">Gibson</text>
+      <g class="army-badge" transform="translate(93.2 902.2)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18053" tabindex="-1" role="button" aria-label="Grant">
+      <use href="#county-shape-18053" class="county-shape"/>
+      <use href="#county-shape-18053" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18053" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18053" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18053" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18053" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18053" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="391.1" y="317.3" text-anchor="middle" font-size="11">Grant</text>
+      <g class="army-badge" transform="translate(391.1 333.3)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18055" tabindex="-1" role="button" aria-label="Greene">
+      <use href="#county-shape-18055" class="county-shape"/>
+      <use href="#county-shape-18055" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18055" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18055" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18055" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18055" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18055" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="191.3" y="699.8" text-anchor="middle" font-size="11">Greene</text>
+      <g class="army-badge" transform="translate(191.3 715.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18057" tabindex="-1" role="button" aria-label="Hamilton">
+      <use href="#county-shape-18057" class="county-shape"/>
+      <use href="#county-shape-18057" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18057" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18057" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18057" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18057" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18057" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="331.3" y="432.1" text-anchor="middle" font-size="9">Hamilton</text>
+      <g class="army-badge" transform="translate(331.3 448.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18059" tabindex="-1" role="button" aria-label="Hancock">
+      <use href="#county-shape-18059" class="county-shape"/>
+      <use href="#county-shape-18059" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18059" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18059" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18059" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18059" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18059" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="387.6" y="486.9" text-anchor="middle" font-size="9">Hancock</text>
+      <g class="army-badge" transform="translate(387.6 502.9)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18061" tabindex="-1" role="button" aria-label="Harrison">
+      <use href="#county-shape-18061" class="county-shape"/>
+      <use href="#county-shape-18061" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18061" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18061" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18061" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18061" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18061" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="367.9" y="888.1" text-anchor="middle" font-size="9">Harrison</text>
+      <g class="army-badge" transform="translate(367.9 904.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18063" tabindex="-1" role="button" aria-label="Hendricks">
+      <use href="#county-shape-18063" class="county-shape"/>
+      <use href="#county-shape-18063" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18063" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18063" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18063" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18063" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18063" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="256.3" y="514.1" text-anchor="middle" font-size="9">Hendricks</text>
+      <g class="army-badge" transform="translate(256.3 530.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18065" tabindex="-1" role="button" aria-label="Henry">
+      <use href="#county-shape-18065" class="county-shape"/>
+      <use href="#county-shape-18065" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18065" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18065" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18065" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18065" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18065" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="453" y="453.3" text-anchor="middle" font-size="11">Henry</text>
+      <g class="army-badge" transform="translate(453 469.3)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18067" tabindex="-1" role="button" aria-label="Howard">
+      <use href="#county-shape-18067" class="county-shape"/>
+      <use href="#county-shape-18067" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18067" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18067" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18067" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18067" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18067" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="309.5" y="333.9" text-anchor="middle" font-size="11">Howard</text>
+      <g class="army-badge" transform="translate(309.5 349.9)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18069" tabindex="-1" role="button" aria-label="Huntington">
+      <use href="#county-shape-18069" class="county-shape"/>
+      <use href="#county-shape-18069" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18069" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18069" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18069" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18069" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18069" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="412.6" y="238.3" text-anchor="middle" font-size="7">Huntington</text>
+      <g class="army-badge" transform="translate(412.6 254.3)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18071" tabindex="-1" role="button" aria-label="Jackson">
+      <use href="#county-shape-18071" class="county-shape"/>
+      <use href="#county-shape-18071" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18071" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18071" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18071" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18071" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18071" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="363.1" y="714.2" text-anchor="middle" font-size="9">Jackson</text>
+      <g class="army-badge" transform="translate(363.1 730.2)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18073" tabindex="-1" role="button" aria-label="Jasper">
+      <use href="#county-shape-18073" class="county-shape"/>
+      <use href="#county-shape-18073" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18073" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18073" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18073" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18073" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18073" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="118.7" y="221.7" text-anchor="middle" font-size="11">Jasper</text>
+      <g class="army-badge" transform="translate(118.7 237.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18075" tabindex="-1" role="button" aria-label="Jay">
+      <use href="#county-shape-18075" class="county-shape"/>
+      <use href="#county-shape-18075" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18075" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18075" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18075" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18075" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18075" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="509.2" y="322.9" text-anchor="middle" font-size="11">Jay</text>
+      <g class="army-badge" transform="translate(509.2 338.9)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18077" tabindex="-1" role="button" aria-label="Jefferson">
+      <use href="#county-shape-18077" class="county-shape"/>
+      <use href="#county-shape-18077" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18077" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18077" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18077" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18077" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18077" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="476.1" y="730.9" text-anchor="middle" font-size="9">Jefferson</text>
+      <g class="army-badge" transform="translate(476.1 746.9)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18079" tabindex="-1" role="button" aria-label="Jennings">
+      <use href="#county-shape-18079" class="county-shape"/>
+      <use href="#county-shape-18079" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18079" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18079" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18079" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18079" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18079" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="435.8" y="684.1" text-anchor="middle" font-size="9">Jennings</text>
+      <g class="army-badge" transform="translate(435.8 700.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18081" tabindex="-1" role="button" aria-label="Johnson">
+      <use href="#county-shape-18081" class="county-shape"/>
+      <use href="#county-shape-18081" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18081" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18081" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18081" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18081" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18081" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="337" y="574.1" text-anchor="middle" font-size="9">Johnson</text>
+      <g class="army-badge" transform="translate(337 590.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18083" tabindex="-1" role="button" aria-label="Knox">
+      <use href="#county-shape-18083" class="county-shape"/>
+      <use href="#county-shape-18083" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18083" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18083" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18083" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18083" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18083" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="115.4" y="792.0" text-anchor="middle" font-size="11">Knox</text>
+      <g class="army-badge" transform="translate(115.4 808.0)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18085" tabindex="-1" role="button" aria-label="Kosciusko">
+      <use href="#county-shape-18085" class="county-shape"/>
+      <use href="#county-shape-18085" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18085" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18085" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18085" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18085" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18085" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="335.8" y="145.2" text-anchor="middle" font-size="9">Kosciusko</text>
+      <g class="army-badge" transform="translate(335.8 161.2)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18087" tabindex="-1" role="button" aria-label="LaGrange">
+      <use href="#county-shape-18087" class="county-shape"/>
+      <use href="#county-shape-18087" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18087" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18087" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18087" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18087" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18087" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="401.8" y="40.6" text-anchor="middle" font-size="9">LaGrange</text>
+      <g class="army-badge" transform="translate(401.8 56.6)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18089" tabindex="-1" role="button" aria-label="Lake">
+      <use href="#county-shape-18089" class="county-shape"/>
+      <use href="#county-shape-18089" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18089" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18089" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18089" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18089" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18089" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="62.9" y="130.8" text-anchor="middle" font-size="11">Lake</text>
+      <g class="army-badge" transform="translate(62.9 146.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18091" tabindex="-1" role="button" aria-label="LaPorte">
+      <use href="#county-shape-18091" class="county-shape"/>
+      <use href="#county-shape-18091" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18091" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18091" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18091" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18091" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18091" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="173" y="88.7" text-anchor="middle" font-size="9">LaPorte</text>
+      <g class="army-badge" transform="translate(173 104.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18093" tabindex="-1" role="button" aria-label="Lawrence">
+      <use href="#county-shape-18093" class="county-shape"/>
+      <use href="#county-shape-18093" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18093" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18093" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18093" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18093" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18093" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="283.4" y="738.4" text-anchor="middle" font-size="9">Lawrence</text>
+      <g class="army-badge" transform="translate(283.4 754.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18095" tabindex="-1" role="button" aria-label="Madison">
+      <use href="#county-shape-18095" class="county-shape"/>
+      <use href="#county-shape-18095" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18095" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18095" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18095" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18095" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18095" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="388.8" y="404.3" text-anchor="middle" font-size="9">Madison</text>
+      <g class="army-badge" transform="translate(388.8 420.3)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18097" tabindex="-1" role="button" aria-label="Marion">
+      <use href="#county-shape-18097" class="county-shape"/>
+      <use href="#county-shape-18097" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18097" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18097" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18097" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18097" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18097" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="323" y="504.3" text-anchor="middle" font-size="11">Marion</text>
+      <g class="army-badge" transform="translate(323 520.3)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18099" tabindex="-1" role="button" aria-label="Marshall">
+      <use href="#county-shape-18099" class="county-shape"/>
+      <use href="#county-shape-18099" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18099" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18099" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18099" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18099" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18099" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="262.9" y="133.4" text-anchor="middle" font-size="9">Marshall</text>
+      <g class="army-badge" transform="translate(262.9 149.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18101" tabindex="-1" role="button" aria-label="Martin">
+      <use href="#county-shape-18101" class="county-shape"/>
+      <use href="#county-shape-18101" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18101" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18101" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18101" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18101" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18101" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="228.1" y="776.4" text-anchor="middle" font-size="11">Martin</text>
+      <g class="army-badge" transform="translate(228.1 792.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18103" tabindex="-1" role="button" aria-label="Miami">
+      <use href="#county-shape-18103" class="county-shape"/>
+      <use href="#county-shape-18103" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18103" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18103" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18103" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18103" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18103" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="315.1" y="263.6" text-anchor="middle" font-size="11">Miami</text>
+      <g class="army-badge" transform="translate(315.1 279.6)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18105" tabindex="-1" role="button" aria-label="Monroe">
+      <use href="#county-shape-18105" class="county-shape"/>
+      <use href="#county-shape-18105" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18105" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18105" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18105" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18105" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18105" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="268.5" y="661.5" text-anchor="middle" font-size="11">Monroe</text>
+      <g class="army-badge" transform="translate(268.5 677.5)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18107" tabindex="-1" role="button" aria-label="Montgomery">
+      <use href="#county-shape-18107" class="county-shape"/>
+      <use href="#county-shape-18107" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18107" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18107" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18107" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18107" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18107" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="180.8" y="455.4" text-anchor="middle" font-size="7">Montgomery</text>
+      <g class="army-badge" transform="translate(180.8 471.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18109" tabindex="-1" role="button" aria-label="Morgan">
+      <use href="#county-shape-18109" class="county-shape"/>
+      <use href="#county-shape-18109" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18109" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18109" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18109" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18109" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18109" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="274.8" y="582.5" text-anchor="middle" font-size="11">Morgan</text>
+      <g class="army-badge" transform="translate(274.8 598.5)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18111" tabindex="-1" role="button" aria-label="Newton">
+      <use href="#county-shape-18111" class="county-shape"/>
+      <use href="#county-shape-18111" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18111" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18111" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18111" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18111" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18111" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="70.1" y="242.5" text-anchor="middle" font-size="11">Newton</text>
+      <g class="army-badge" transform="translate(70.1 258.5)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18113" tabindex="-1" role="button" aria-label="Noble">
+      <use href="#county-shape-18113" class="county-shape"/>
+      <use href="#county-shape-18113" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18113" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18113" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18113" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18113" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18113" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="410" y="99.4" text-anchor="middle" font-size="11">Noble</text>
+      <g class="army-badge" transform="translate(410 115.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18115" tabindex="-1" role="button" aria-label="Ohio">
+      <use href="#county-shape-18115" class="county-shape"/>
+      <use href="#county-shape-18115" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18115" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18115" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18115" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18115" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18115" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="557.6" y="682.1" text-anchor="middle" font-size="11">Ohio</text>
+      <g class="army-badge" transform="translate(557.6 698.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18117" tabindex="-1" role="button" aria-label="Orange">
+      <use href="#county-shape-18117" class="county-shape"/>
+      <use href="#county-shape-18117" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18117" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18117" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18117" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18117" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18117" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="288.4" y="811.3" text-anchor="middle" font-size="11">Orange</text>
+      <g class="army-badge" transform="translate(288.4 827.3)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18119" tabindex="-1" role="button" aria-label="Owen">
+      <use href="#county-shape-18119" class="county-shape"/>
+      <use href="#county-shape-18119" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18119" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18119" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18119" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18119" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18119" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="207.7" y="630.6" text-anchor="middle" font-size="11">Owen</text>
+      <g class="army-badge" transform="translate(207.7 646.6)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18121" tabindex="-1" role="button" aria-label="Parke">
+      <use href="#county-shape-18121" class="county-shape"/>
+      <use href="#county-shape-18121" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18121" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18121" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18121" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18121" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18121" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="130.2" y="525.4" text-anchor="middle" font-size="11">Parke</text>
+      <g class="army-badge" transform="translate(130.2 541.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18123" tabindex="-1" role="button" aria-label="Perry">
+      <use href="#county-shape-18123" class="county-shape"/>
+      <use href="#county-shape-18123" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18123" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18123" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18123" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18123" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18123" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="273.3" y="925.7" text-anchor="middle" font-size="11">Perry</text>
+      <g class="army-badge" transform="translate(273.3 941.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18125" tabindex="-1" role="button" aria-label="Pike">
+      <use href="#county-shape-18125" class="county-shape"/>
+      <use href="#county-shape-18125" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18125" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18125" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18125" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18125" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18125" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="156.3" y="859.0" text-anchor="middle" font-size="11">Pike</text>
+      <g class="army-badge" transform="translate(156.3 875.0)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18127" tabindex="-1" role="button" aria-label="Porter">
+      <use href="#county-shape-18127" class="county-shape"/>
+      <use href="#county-shape-18127" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18127" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18127" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18127" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18127" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18127" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="117.3" y="114.8" text-anchor="middle" font-size="11">Porter</text>
+      <g class="army-badge" transform="translate(117.3 130.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18129" tabindex="-1" role="button" aria-label="Posey">
+      <use href="#county-shape-18129" class="county-shape"/>
+      <use href="#county-shape-18129" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18129" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18129" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18129" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18129" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18129" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="46.7" y="961.0" text-anchor="middle" font-size="11">Posey</text>
+      <g class="army-badge" transform="translate(46.7 977.0)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18131" tabindex="-1" role="button" aria-label="Pulaski">
+      <use href="#county-shape-18131" class="county-shape"/>
+      <use href="#county-shape-18131" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18131" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18131" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18131" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18131" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18131" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="192.3" y="209.6" text-anchor="middle" font-size="9">Pulaski</text>
+      <g class="army-badge" transform="translate(192.3 225.6)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18133" tabindex="-1" role="button" aria-label="Putnam">
+      <use href="#county-shape-18133" class="county-shape"/>
+      <use href="#county-shape-18133" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18133" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18133" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18133" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18133" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18133" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="198.2" y="545.1" text-anchor="middle" font-size="11">Putnam</text>
+      <g class="army-badge" transform="translate(198.2 561.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18135" tabindex="-1" role="button" aria-label="Randolph">
+      <use href="#county-shape-18135" class="county-shape"/>
+      <use href="#county-shape-18135" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18135" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18135" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18135" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18135" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18135" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="516" y="390.7" text-anchor="middle" font-size="9">Randolph</text>
+      <g class="army-badge" transform="translate(516 406.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18137" tabindex="-1" role="button" aria-label="Ripley">
+      <use href="#county-shape-18137" class="county-shape"/>
+      <use href="#county-shape-18137" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18137" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18137" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18137" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18137" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18137" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="499.5" y="651.1" text-anchor="middle" font-size="11">Ripley</text>
+      <g class="army-badge" transform="translate(499.5 667.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18139" tabindex="-1" role="button" aria-label="Rush">
+      <use href="#county-shape-18139" class="county-shape"/>
+      <use href="#county-shape-18139" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18139" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18139" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18139" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18139" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18139" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="448.8" y="530.1" text-anchor="middle" font-size="11">Rush</text>
+      <g class="army-badge" transform="translate(448.8 546.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18141" tabindex="-1" role="button" aria-label="St. Joseph">
+      <use href="#county-shape-18141" class="county-shape"/>
+      <use href="#county-shape-18141" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18141" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18141" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18141" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18141" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18141" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="250.6" y="63.4" text-anchor="middle" font-size="7">St. Joseph</text>
+      <g class="army-badge" transform="translate(250.6 79.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18143" tabindex="-1" role="button" aria-label="Scott">
+      <use href="#county-shape-18143" class="county-shape"/>
+      <use href="#county-shape-18143" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18143" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18143" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18143" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18143" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18143" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="422" y="761.6" text-anchor="middle" font-size="11">Scott</text>
+      <g class="army-badge" transform="translate(422 777.6)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18145" tabindex="-1" role="button" aria-label="Shelby">
+      <use href="#county-shape-18145" class="county-shape"/>
+      <use href="#county-shape-18145" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18145" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18145" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18145" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18145" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18145" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="392.3" y="560.1" text-anchor="middle" font-size="11">Shelby</text>
+      <g class="army-badge" transform="translate(392.3 576.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18147" tabindex="-1" role="button" aria-label="Spencer">
+      <use href="#county-shape-18147" class="county-shape"/>
+      <use href="#county-shape-18147" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18147" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18147" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18147" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18147" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18147" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="206.1" y="948.1" text-anchor="middle" font-size="9">Spencer</text>
+      <g class="army-badge" transform="translate(206.1 964.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18149" tabindex="-1" role="button" aria-label="Starke">
+      <use href="#county-shape-18149" class="county-shape"/>
+      <use href="#county-shape-18149" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18149" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18149" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18149" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18149" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18149" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="196" y="150.8" text-anchor="middle" font-size="11">Starke</text>
+      <g class="army-badge" transform="translate(196 166.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18151" tabindex="-1" role="button" aria-label="Steuben">
+      <use href="#county-shape-18151" class="county-shape"/>
+      <use href="#county-shape-18151" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18151" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18151" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18151" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18151" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18151" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="476.3" y="31.8" text-anchor="middle" font-size="9">Steuben</text>
+      <g class="army-badge" transform="translate(476.3 47.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18153" tabindex="-1" role="button" aria-label="Sullivan">
+      <use href="#county-shape-18153" class="county-shape"/>
+      <use href="#county-shape-18153" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18153" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18153" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18153" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18153" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18153" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="107.7" y="694.8" text-anchor="middle" font-size="9">Sullivan</text>
+      <g class="army-badge" transform="translate(107.7 710.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18155" tabindex="-1" role="button" aria-label="Switzerland">
+      <use href="#county-shape-18155" class="county-shape"/>
+      <use href="#county-shape-18155" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18155" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18155" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18155" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18155" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18155" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="548.3" y="713.3" text-anchor="middle" font-size="7">Switzerland</text>
+      <g class="army-badge" transform="translate(548.3 729.3)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18157" tabindex="-1" role="button" aria-label="Tippecanoe">
+      <use href="#county-shape-18157" class="county-shape"/>
+      <use href="#county-shape-18157" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18157" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18157" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18157" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18157" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18157" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="172.7" y="371.1" text-anchor="middle" font-size="7">Tippecanoe</text>
+      <g class="army-badge" transform="translate(172.7 387.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18159" tabindex="-1" role="button" aria-label="Tipton">
+      <use href="#county-shape-18159" class="county-shape"/>
+      <use href="#county-shape-18159" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18159" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18159" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18159" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18159" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18159" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="325.3" y="374.5" text-anchor="middle" font-size="11">Tipton</text>
+      <g class="army-badge" transform="translate(325.3 390.5)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18161" tabindex="-1" role="button" aria-label="Union">
+      <use href="#county-shape-18161" class="county-shape"/>
+      <use href="#county-shape-18161" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18161" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18161" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18161" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18161" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18161" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="546.2" y="517.4" text-anchor="middle" font-size="11">Union</text>
+      <g class="army-badge" transform="translate(546.2 533.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18163" tabindex="-1" role="button" aria-label="Vanderburgh">
+      <use href="#county-shape-18163" class="county-shape"/>
+      <use href="#county-shape-18163" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18163" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18163" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18163" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18163" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18163" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="98.9" y="954.8" text-anchor="middle" font-size="7">Vanderburgh</text>
+      <g class="army-badge" transform="translate(98.9 970.8)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18165" tabindex="-1" role="button" aria-label="Vermillion">
+      <use href="#county-shape-18165" class="county-shape"/>
+      <use href="#county-shape-18165" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18165" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18165" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18165" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18165" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18165" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="82.1" y="510.7" text-anchor="middle" font-size="7">Vermillion</text>
+      <g class="army-badge" transform="translate(82.1 526.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18167" tabindex="-1" role="button" aria-label="Vigo">
+      <use href="#county-shape-18167" class="county-shape"/>
+      <use href="#county-shape-18167" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18167" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18167" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18167" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18167" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18167" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="105" y="611.4" text-anchor="middle" font-size="11">Vigo</text>
+      <g class="army-badge" transform="translate(105 627.4)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18169" tabindex="-1" role="button" aria-label="Wabash">
+      <use href="#county-shape-18169" class="county-shape"/>
+      <use href="#county-shape-18169" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18169" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18169" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18169" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18169" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18169" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="357.8" y="240.2" text-anchor="middle" font-size="11">Wabash</text>
+      <g class="army-badge" transform="translate(357.8 256.2)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18171" tabindex="-1" role="button" aria-label="Warren">
+      <use href="#county-shape-18171" class="county-shape"/>
+      <use href="#county-shape-18171" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18171" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18171" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18171" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18171" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18171" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="91.3" y="389.1" text-anchor="middle" font-size="11">Warren</text>
+      <g class="army-badge" transform="translate(91.3 405.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18173" tabindex="-1" role="button" aria-label="Warrick">
+      <use href="#county-shape-18173" class="county-shape"/>
+      <use href="#county-shape-18173" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18173" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18173" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18173" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18173" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18173" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="155.3" y="933.7" text-anchor="middle" font-size="9">Warrick</text>
+      <g class="army-badge" transform="translate(155.3 949.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18175" tabindex="-1" role="button" aria-label="Washington">
+      <use href="#county-shape-18175" class="county-shape"/>
+      <use href="#county-shape-18175" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18175" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18175" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18175" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18175" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18175" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="358.4" y="789.6" text-anchor="middle" font-size="7">Washington</text>
+      <g class="army-badge" transform="translate(358.4 805.6)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18177" tabindex="-1" role="button" aria-label="Wayne">
+      <use href="#county-shape-18177" class="county-shape"/>
+      <use href="#county-shape-18177" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18177" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18177" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18177" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18177" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18177" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="524.2" y="461.5" text-anchor="middle" font-size="11">Wayne</text>
+      <g class="army-badge" transform="translate(524.2 477.5)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18179" tabindex="-1" role="button" aria-label="Wells">
+      <use href="#county-shape-18179" class="county-shape"/>
+      <use href="#county-shape-18179" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18179" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18179" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18179" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18179" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18179" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="462.7" y="257.0" text-anchor="middle" font-size="11">Wells</text>
+      <g class="army-badge" transform="translate(462.7 273.0)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18181" tabindex="-1" role="button" aria-label="White">
+      <use href="#county-shape-18181" class="county-shape"/>
+      <use href="#county-shape-18181" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18181" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18181" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18181" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18181" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18181" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="169.4" y="283.1" text-anchor="middle" font-size="11">White</text>
+      <g class="army-badge" transform="translate(169.4 299.1)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+    <g class="county" data-county-id="18183" tabindex="-1" role="button" aria-label="Whitley">
+      <use href="#county-shape-18183" class="county-shape"/>
+      <use href="#county-shape-18183" class="county-cue" data-cue="0" fill="url(#cue-0)"/>
+      <use href="#county-shape-18183" class="county-cue" data-cue="1" fill="url(#cue-1)"/>
+      <use href="#county-shape-18183" class="county-cue" data-cue="2" fill="url(#cue-2)"/>
+      <use href="#county-shape-18183" class="county-cue" data-cue="3" fill="url(#cue-3)"/>
+      <use href="#county-shape-18183" class="county-cue" data-cue="4" fill="url(#cue-4)"/>
+      <use href="#county-shape-18183" class="county-cue" data-cue="5" fill="url(#cue-5)"/>
+      <text class="county-label" x="401.4" y="163.7" text-anchor="middle" font-size="9">Whitley</text>
+      <g class="army-badge" transform="translate(401.4 179.7)">
+        <circle class="army-badge-shape" r="8"/>
+        <text class="army-badge-count" text-anchor="middle" dy="3.2" font-size="9">–</text>
+      </g>
+    </g>
+
+        </svg>
+      </div>
+      <div class="side">
+        <p id="error-status" role="status" aria-live="assertive"></p>
+        <section id="setup" class="card" aria-label="Set up the game">
+          <h2>Set up</h2>
+          <p>Choose 2 to 6 players. Type a name for each person or computer who is playing.</p>
+          <ol id="player-list">
+            <li data-owner="0">
+              <span class="player-swatch" data-owner="0" aria-hidden="true"></span>
+              <label class="name-field">Seat 1, rings
+                <input type="text" name="player-name-0" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-0" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-0" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="1">
+              <span class="player-swatch" data-owner="1" aria-hidden="true"></span>
+              <label class="name-field">Seat 2, stripes
+                <input type="text" name="player-name-1" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-1" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-1" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="2">
+              <span class="player-swatch" data-owner="2" aria-hidden="true"></span>
+              <label class="name-field">Seat 3, dots
+                <input type="text" name="player-name-2" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-2" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-2" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="3">
+              <span class="player-swatch" data-owner="3" aria-hidden="true"></span>
+              <label class="name-field">Seat 4, diagonal
+                <input type="text" name="player-name-3" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-3" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-3" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="4">
+              <span class="player-swatch" data-owner="4" aria-hidden="true"></span>
+              <label class="name-field">Seat 5, crosshatch
+                <input type="text" name="player-name-4" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-4" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-4" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="5">
+              <span class="player-swatch" data-owner="5" aria-hidden="true"></span>
+              <label class="name-field">Seat 6, bars
+                <input type="text" name="player-name-5" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-5" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-5" value="computer"> Computer</label>
+              </div>
+            </li>
+          </ol>
+          <fieldset id="mode">
+            <legend>How you win</legend>
+            <label><input type="radio" name="win-mode" value="quick60" checked> Quick — at least 60 counties</label>
+            <label><input type="radio" name="win-mode" value="total92"> Total — all 92 counties</label>
+          </fieldset>
+          <div class="setup-actions">
+            <button type="button" id="start-game">Start game</button>
+            <button type="button" id="continue-game" class="secondary">Continue game</button>
+          </div>
+        </section>
+        <details class="card how-to" open>
+          <summary>How to play</summary>
+          <ol>
+            <li>Sit together at this screen. Play with 2 to 6 players. A player is a person or the computer.</li>
+            <li>The game deals all 92 counties at random. You do not pick your counties.</li>
+            <li>On your turn, the game picks one county you own and asks a question.</li>
+            <li>A right answer adds exactly 2 armies, one time, before you place armies. A wrong answer adds 0. Skip adds 0. You still see the right answer.</li>
+            <li>Place the new armies on counties you own.</li>
+            <li>You may attack a county that shares a side with yours if someone else owns it. Touching only at a corner does not count. You roll up to 3 dice. The defender rolls up to 2. The higher number wins that roll. A tie goes to the defender.</li>
+            <li>If you take a county, move armies in before you do anything else. Leave at least 1 army behind.</li>
+            <li>Then you may move armies one time through counties you own, or you may skip that move.</li>
+            <li>Pass the screen. A player with no counties is skipped.</li>
+            <li>Quick: have at least 60 counties when your turn ends. Total: own all 92 counties.</li>
+          </ol>
+          <p>The map shows who owns a county and how many armies sit there. “This step” tells you what to do now. Places in this county is for reading. It is not the quiz. The trip log writes what already happened.</p>
+        </details>
+        <section class="card" aria-label="This step">
+          <h2>This step</h2>
+          <div class="status-bar">
+            <p id="phase">This step: Setup</p>
+            <p id="reinforcement-count">Armies to place: 0</p>
+          </div>
+          <div class="turn-actions">
+            <button type="button" id="end-attacks" class="secondary">Stop attacking</button>
+            <button type="button" id="end-turn">End turn</button>
+          </div>
+        </section>
+        <section id="player-stats" class="card" aria-label="Players">
+          <h2>Players</h2>
+          <p>Each seat has its own color and its own pattern. The pattern still shows if the colors are hard to tell apart.</p>
+          <ul class="seat-key">
+          <li data-owner="0">
+            <span class="player-swatch" data-owner="0" aria-hidden="true"></span>
+            <span>Seat 1 · rings</span>
+          </li>
+          <li data-owner="1">
+            <span class="player-swatch" data-owner="1" aria-hidden="true"></span>
+            <span>Seat 2 · stripes</span>
+          </li>
+          <li data-owner="2">
+            <span class="player-swatch" data-owner="2" aria-hidden="true"></span>
+            <span>Seat 3 · dots</span>
+          </li>
+          <li data-owner="3">
+            <span class="player-swatch" data-owner="3" aria-hidden="true"></span>
+            <span>Seat 4 · diagonal</span>
+          </li>
+          <li data-owner="4">
+            <span class="player-swatch" data-owner="4" aria-hidden="true"></span>
+            <span>Seat 5 · crosshatch</span>
+          </li>
+          <li data-owner="5">
+            <span class="player-swatch" data-owner="5" aria-hidden="true"></span>
+            <span>Seat 6 · bars</span>
+          </li>
+          </ul>
+          <h3>Map marks</h3>
+          <ul class="map-marks">
+            <li><span class="mark-sample selected" aria-hidden="true"></span> Thick dark edge: the county you picked.</li>
+            <li><span class="mark-sample source" aria-hidden="true"></span> Dashed edge: armies leave from here.</li>
+            <li><span class="mark-sample target" aria-hidden="true"></span> Dark red edge: you are aiming here.</li>
+            <li><span class="mark-sample quiz" aria-hidden="true"></span> Dotted dark edge: the quiz county. The question sits beside the map and does not cover it.</li>
+          </ul>
+        </section>
+        <section id="regions" class="card" aria-label="Regions">
+          <h2>Regions</h2>
+          <p>Own every county in a region to earn that region’s bonus armies. The list below fills in from the map pack. Numbers are not guessed.</p>
+          <ul></ul>
+        </section>
+        <section id="county-info" class="card" aria-label="Places in this county">
+          <h2>Places in this county</h2>
+          <p>This is not the quiz. Choose a county to read facts that came with the map. If that county has no facts yet, this box stays empty.</p>
+        </section>
+        <section id="trip-log" class="card" role="log" aria-live="polite" aria-relevant="additions" aria-label="Trip log">
+          <h2>Trip log</h2>
+          <ol>
+            <li>Nothing has happened yet.</li>
+          </ol>
+        </section>
+        <section id="quiz-dialog" class="card" hidden role="dialog" aria-modal="false" aria-labelledby="quiz-county">
+          <h2 id="quiz-county">County</h2>
+          <p id="quiz-question"></p>
+          <div id="quiz-choices" role="group" aria-label="Answer choices"></div>
+          <p id="quiz-result" aria-live="polite"></p>
+          <button type="button" id="skip-quiz" class="secondary">Skip</button>
+          <p>The dotted county stays on the map. This box does not cover it.</p>
+        </section>
+        <section id="battle-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Battle">
+          <h2>Battle</h2>
+          <p class="battle-matchup"></p>
+          <p class="dice attack-dice"></p>
+          <p class="dice defend-dice"></p>
+          <p class="battle-outcome"></p>
+        </section>
+        <section id="occupy-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Move armies in">
+          <h2>Move armies in</h2>
+          <p>Move at least as many armies as the dice you rolled. Leave at least 1 army behind.</p>
+          <label>Armies to move
+            <input type="number" name="occupy-count" min="1" step="1" inputmode="numeric">
+          </label>
+        </section>
+        <section id="handoff-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Pass the screen">
+          <h2>Pass the screen</h2>
+          <p>Hand the screen to the next player.</p>
+          <button type="button" class="handoff-ready">Ready</button>
+        </section>
+        <section id="winner-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Winner">
+          <h2>Winner</h2>
+          <p></p>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
