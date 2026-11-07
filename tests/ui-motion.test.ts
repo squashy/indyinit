@@ -79,24 +79,28 @@ test("a correct quiz credits 2 once, and a wrong or skipped quiz credits 0", () 
   assert.match(skipped.doc.getElementById("quiz-result")?.textContent ?? "", /0/);
 });
 
-test("quiz focus starts on the first choice and Tab is not trapped", () => {
+test("quiz focus starts on the first choice and Tab stays in the dialog", () => {
   const harness = quizHarness(false);
   harness.show(harness.state);
   const first = harness.choice(0);
   const skip = harness.doc.getElementById("skip-quiz");
+  const dialog = harness.doc.getElementById("quiz-dialog");
   assert.equal(harness.doc.activeElement === first, true);
+  assert.equal(dialog?.tagName, "DIALOG");
+  assert.equal(dialog?.getAttribute("open") !== null, true);
   assert.ok(skip instanceof DomButton);
   skip.focus();
   skip.dispatchEvent(new DomKeyboardEvent("keydown", { key: "Tab" }));
-  assert.equal(harness.doc.activeElement === skip, true);
+  assert.equal(harness.doc.activeElement === first, true);
   first.focus();
   first.dispatchEvent(new DomKeyboardEvent("keydown", { key: "Tab", shiftKey: true }));
-  assert.equal(harness.doc.activeElement === first, true);
+  assert.equal(harness.doc.activeElement === skip, true);
   const calls = harness.calls;
   first.dispatchEvent(new DomKeyboardEvent("keydown", { key: "Escape" }));
   assert.equal(harness.calls, calls);
   assert.equal(harness.live.state.phase.kind, "quiz");
   assert.equal(first.disabled, false);
+  assert.equal(dialog?.hidden, false);
 });
 
 test("quiz and battle input lock only the pending action and a rejection can be retried", () => {

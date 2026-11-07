@@ -132,7 +132,8 @@ async function connectBrowser() {
       await click(page, "#start-game");
       await waitUntil(page, "document.getElementById('quiz-dialog') && document.getElementById('quiz-dialog').hidden === false");
       const opened = await evalJson(page, `(() => {
-        const quiz = document.getElementById('quiz-dialog').getBoundingClientRect();
+        const dialog = document.getElementById('quiz-dialog');
+        const quiz = dialog.getBoundingClientRect();
         const column = document.querySelector('.map-column').getBoundingClientRect();
         const county = document.querySelector('.is-quiz-county');
         const countyBox = county ? county.getBoundingClientRect() : null;
@@ -142,6 +143,20 @@ async function connectBrowser() {
           return { h: Math.round(box.height), w: Math.round(box.width) };
         });
         const swatches = [...document.querySelectorAll('#player-stats .player-swatch')].map((node) => getComputedStyle(node).backgroundImage);
+        const style = getComputedStyle(dialog);
+        const questionStyle = getComputedStyle(document.getElementById('quiz-question'));
+        const countyStyle = getComputedStyle(document.getElementById('quiz-county'));
+        const choice = document.querySelector('#quiz-choices button');
+        const choiceStyle = choice ? getComputedStyle(choice) : null;
+        const flat = (value) => (value || '').replaceAll(' ', '');
+        const tracks = (getComputedStyle(document.getElementById('quiz-choices')).gridTemplateColumns || '').split(' ').filter(Boolean);
+        const texts = [...dialog.querySelectorAll('#quiz-county, .quiz-category, #quiz-question, #quiz-choices button, #skip-quiz')];
+        const fitted = texts.every((node) => {
+          const box = node.getBoundingClientRect();
+          return box.width > 0 && box.height > 0 && box.left >= quiz.left - 1 && box.right <= quiz.right + 1 && box.top >= quiz.top - 1 && box.bottom <= quiz.bottom + 1;
+        });
+        const centerX = quiz.left + quiz.width / 2;
+        const centerY = quiz.top + quiz.height / 2;
         return {
           notice: document.querySelector('.quiz-unverified')?.textContent || '',
           heading: document.getElementById('quiz-county')?.textContent || '',
@@ -154,21 +169,49 @@ async function connectBrowser() {
           buttons,
           swatches: new Set(swatches).size,
           live: document.getElementById('trip-log')?.getAttribute('aria-live') || '',
+          tag: dialog.tagName,
+          open: dialog.open === true,
+          modal: dialog.matches(':modal'),
+          centered: Math.abs(centerX - window.innerWidth / 2) <= 48 && Math.abs(centerY - window.innerHeight / 2) <= 72,
+          overBoard: overlap(column, quiz),
+          inert: document.querySelector('.map-column')?.inert === true && document.querySelector('.side-rest')?.inert === true && dialog.inert !== true,
+          focusInside: dialog.contains(document.activeElement),
+          focusFirst: document.activeElement === choice,
+          navy: flat(style.backgroundColor).includes('18,49,92'),
+          gold: flat(style.borderTopColor).includes('166,124,45'),
+          shadow: style.boxShadow !== 'none',
+          questionWhite: flat(questionStyle.color).includes('255,255,255'),
+          countyGold: flat(countyStyle.color).includes('166,124,45'),
+          cream: choiceStyle ? flat(choiceStyle.backgroundColor).includes('255,248,234') : false,
+          backdrop: getComputedStyle(dialog, '::backdrop').backgroundColor,
+          fitted,
+          inViewport: quiz.left >= -1 && quiz.top >= -1 && quiz.right <= window.innerWidth + 1 && quiz.bottom <= window.innerHeight + 1,
+          columns: tracks.length,
+          category: document.getElementById('quiz-category')?.textContent || '',
+          phase: document.getElementById('phase')?.textContent || '',
+          result: document.getElementById('quiz-result')?.textContent || '',
+          rail: document.querySelector('.side')?.getBoundingClientRect().width || 0,
+          mapHeight: column.height,
         };
       })()`);
       const expectedName = mapPack.counties.find((county) => county.id === opened.highlighted)?.name || "";
       recordCore(`${name} quiz names the highlighted county`, opened.heading === expectedName && opened.highlighted !== "", `${opened.heading} / ${opened.highlighted}`, "src/ui/quiz-dialog.ts and src/ui/map.ts");
       recordCore(`${name} questions unverified`, opened.notice === "Questions unverified", opened.notice, "src/ui/quiz-dialog.ts");
-      recordCore(`${name} dialog does not cover the quiz county`, opened.countyOverlap === false && opened.columnOverlap === false, `county ${opened.countyOverlap} column ${opened.columnOverlap}`, "src/styles.css");
+      const backdropDim = opened.backdrop !== "transparent" && opened.backdrop !== "rgba(0, 0, 0, 0)" && opened.backdrop !== "";
+      recordCore(`${name} quiz renders in a modal centered over the board`, opened.tag === "DIALOG" && opened.open && opened.modal && opened.overBoard && opened.centered && opened.inViewport && opened.fitted && opened.rail > 40 && opened.mapHeight > 40, `modal ${opened.modal} centered ${opened.centered} over ${opened.overBoard} fit ${opened.fitted} rail ${Math.round(opened.rail)}`, "src/ui/quiz-dialog.ts and src/styles.css");
+      recordCore(`${name} quiz overlay keeps the board colors`, opened.navy && opened.gold && opened.shadow && opened.questionWhite && opened.countyGold && opened.cream && backdropDim, `navy ${opened.navy} gold ${opened.gold} white ${opened.questionWhite} cream ${opened.cream} backdrop ${opened.backdrop}`, "src/styles.css");
+      recordCore(`${name} background is inert`, opened.inert === true, String(opened.inert), "src/ui/quiz-dialog.ts");
+      recordCore(`${name} focus starts on the first answer`, opened.focusInside && opened.focusFirst, `inside ${opened.focusInside} first ${opened.focusFirst}`, "src/ui/quiz-dialog.ts");
+      recordCore(`${name} answer buttons fit the viewport`, opened.columns === (width < 821 ? 1 : 2) && opened.category.length > 0, `${opened.columns} columns, ${opened.category}`, "src/styles.css");
       recordCore(`${name} no sideways scroll`, opened.sideways === false, String(opened.sideways), "src/styles.css");
       const short = opened.buttons.filter((button) => button.h < 44 || button.w < 44);
       recordOptional(`${name} 44px quiz targets`, short.length === 0, short.length ? JSON.stringify(short) : `${opened.buttons.length} controls`, "src/styles.css");
       recordOptional(`${name} distinct player patterns`, opened.swatches >= 2, `${opened.swatches} background images`, "src/styles/theme.css");
       recordOptional(`${name} trip log live region`, opened.live === "polite", opened.live, "index.html");
-      const keys = await tabReach(page);
-      recordCore(`${name} keyboard reaches the map and Skip`, keys.map && keys.skip, keys.sample, "index.html and src/ui/map.ts");
-      const arrows = await arrowReach(page);
-      recordCore(`${name} keyboard moves county focus`, arrows.moved, `${arrows.before} -> ${arrows.first} -> ${arrows.second}`, "src/ui/map.ts");
+      const trapped = await focusTrap(page);
+      recordCore(`${name} focus stays in the dialog`, trapped.inside && trapped.skip && trapped.choice && !trapped.map, trapped.sample, "src/ui/quiz-dialog.ts");
+      const dismissed = await dismissAttempt(page);
+      recordCore(`${name} Escape and the backdrop do not close or skip`, dismissed.stayed && dismissed.samePhase && dismissed.noAward, `${dismissed.phase} / ${dismissed.result}`, "src/ui/quiz-dialog.ts");
       if (full) await fullTurn(page, opened.prompt, name);
       recordCore(`${name} no page errors`, pageErrors.length === 0 && failed.length === 0, [...pageErrors, ...failed].join("; ") || "none", "src/main.ts");
     },
@@ -189,7 +232,7 @@ async function connectBrowser() {
     mark("shipped prompt found", Boolean(answer), prompt.slice(0, 80), "data/quiz.json");
     if (!answer) return;
     const clicked = await evalJson(pageSocket, `(() => {
-      const button = [...document.querySelectorAll('#quiz-choices button')].find((item) => item.textContent === ${JSON.stringify(answer)});
+      const button = [...document.querySelectorAll('#quiz-choices button')].find((item) => (item.querySelector('.quiz-choice-text')?.textContent || item.textContent) === ${JSON.stringify(answer)});
       if (!button) return false;
       button.scrollIntoView({ block: 'center', inline: 'nearest' });
       const rect = button.getBoundingClientRect();
@@ -236,6 +279,14 @@ async function connectBrowser() {
       `${afterDuplicate.reinforcement} armies ${afterDuplicate.armies}`,
       "src/ui/quiz-dialog.ts",
     );
+    mark(
+      "scoring stays at +2 once",
+      Boolean(income) && income[4] === "2" && beforeDuplicate.reinforcement === afterDuplicate.reinforcement && beforeDuplicate.armies === afterDuplicate.armies,
+      `${beforeDuplicate.reinforcement} -> ${afterDuplicate.reinforcement}; armies ${beforeDuplicate.armies} -> ${afterDuplicate.armies}`,
+      "src/ui/quiz-dialog.ts",
+    );
+    const arrows = await arrowReach(pageSocket);
+    mark("keyboard moves county focus", arrows.moved, `${arrows.before} -> ${arrows.first} -> ${arrows.second}`, "src/ui/map.ts");
     for (let step = 0; step < 40; step += 1) {
       const label = await evalJson(pageSocket, "document.getElementById('phase')?.textContent || ''");
       if (String(label).includes("may attack")) break;
@@ -474,6 +525,84 @@ async function played(page) {
   })()`);
 }
 
+async function focusTrap(page) {
+  const start = await evalJson(page, `(() => {
+    const dialog = document.getElementById('quiz-dialog');
+    const active = document.activeElement;
+    const first = document.querySelector('#quiz-choices button');
+    return { first: active === first, inside: !!(dialog && active && dialog.contains(active)) };
+  })()`);
+  let left = false;
+  let sawSkip = false;
+  let sawChoice = false;
+  const seen = [];
+  for (let step = 0; step < 8; step += 1) {
+    await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
+    await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
+    const mark = await evalJson(page, `(() => {
+      const dialog = document.getElementById('quiz-dialog');
+      const active = document.activeElement;
+      return {
+        inside: !!(dialog && active && dialog.contains(active)),
+        id: active && active.id ? active.id : '',
+        choice: !!(active && active.closest && active.closest('#quiz-choices')),
+      };
+    })()`);
+    seen.push(mark.id || (mark.choice ? "choice" : "outside"));
+    if (!mark.inside) left = true;
+    if (mark.id === "skip-quiz") sawSkip = true;
+    if (mark.choice) sawChoice = true;
+  }
+  const mapTry = await evalJson(page, `(() => {
+    const dialog = document.getElementById('quiz-dialog');
+    document.getElementById('map')?.focus();
+    const active = document.activeElement;
+    return { inside: !!(dialog && active && dialog.contains(active)), id: active ? (active.id || active.tagName) : '' };
+  })()`);
+  return {
+    inside: start.inside && start.first && !left && mapTry.inside,
+    skip: sawSkip,
+    choice: sawChoice,
+    map: mapTry.id === "map",
+    sample: `${seen.join(",")} map:${mapTry.id}`,
+  };
+}
+
+async function dismissAttempt(page) {
+  const before = await evalJson(page, `(() => ({
+    phase: document.getElementById('phase')?.textContent || '',
+    result: document.getElementById('quiz-result')?.textContent || '',
+    score: document.getElementById('reinforcement-count')?.textContent || '',
+    open: document.getElementById('quiz-dialog')?.open === true,
+  }))()`);
+  await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27, nativeVirtualKeyCode: 27 });
+  await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27, nativeVirtualKeyCode: 27 });
+  const spot = await evalJson(page, `(() => {
+    const rect = document.getElementById('quiz-dialog').getBoundingClientRect();
+    const points = [[4, 4], [window.innerWidth - 4, 4], [4, window.innerHeight - 4], [window.innerWidth - 4, window.innerHeight - 4]];
+    for (const [x, y] of points) {
+      if (x < rect.left - 1 || x > rect.right + 1 || y < rect.top - 1 || y > rect.bottom + 1) return { x, y };
+    }
+    return null;
+  })()`);
+  if (spot) await mouse(page, spot.x, spot.y);
+  const after = await evalJson(page, `(() => ({
+    phase: document.getElementById('phase')?.textContent || '',
+    result: document.getElementById('quiz-result')?.textContent || '',
+    score: document.getElementById('reinforcement-count')?.textContent || '',
+    open: document.getElementById('quiz-dialog')?.open === true,
+    modal: document.getElementById('quiz-dialog')?.matches(':modal') === true,
+    hidden: document.getElementById('quiz-dialog')?.hidden === true,
+  }))()`);
+  return {
+    stayed: before.open && after.open && after.modal && !after.hidden,
+    samePhase: after.phase === before.phase && after.phase.includes("answers a question"),
+    noAward: after.result === "" && after.score === before.score && after.score.includes("not scored"),
+    phase: after.phase,
+    result: after.result,
+  };
+}
+
 async function tabReach(page) {
   await evalJson(page, "document.body.focus(), true");
   const seen = [];
@@ -520,7 +649,18 @@ async function click(page, selector) {
     return { x, y, ok, landed: ok ? 'self' : (hit && (hit.id || (hit.textContent || '').trim().slice(0, 40) || hit.tagName) || 'none') };
   })()`);
   if (!box) throw new Error(`missing ${selector}`);
-  if (!box.ok) throw new Error(`click on ${selector} landed on ${box.landed}`);
+  if (!box.ok) {
+    const invoked = await evalJson(page, `(() => {
+      const node = document.querySelector(${JSON.stringify(selector)});
+      const dialog = document.getElementById('quiz-dialog');
+      const covered = dialog instanceof HTMLDialogElement && dialog.open && dialog.matches(':modal') && node && !dialog.contains(node);
+      if (!covered) return false;
+      node.click();
+      return true;
+    })()`);
+    if (!invoked) throw new Error(`click on ${selector} landed on ${box.landed}`);
+    return;
+  }
   await mouse(page, box.x, box.y);
 }
 

@@ -95,6 +95,7 @@ export class DomElement extends DomNode {
   className = "";
   tagName: string;
   #hidden = false;
+  inert = false;
   tabIndex = -1;
   attributes = new Map<string, string>();
   listeners = new Map<string, Listener[]>();
@@ -236,7 +237,24 @@ export class DomElement extends DomNode {
   }
 
   focus(): void {
+    if (this.inertBranch()) return;
     this.ownerDocument?.setActive(this);
+  }
+
+  replaceWith(node: DomNode): void {
+    const parent = this.parentElement;
+    if (!parent) return;
+    parent.insertBefore(node, this);
+    this.remove();
+  }
+
+  private inertBranch(): boolean {
+    let node: DomElement | null = this;
+    while (node) {
+      if (node.inert) return true;
+      node = node.parentElement;
+    }
+    return false;
   }
 
   scrollIntoView(): void {}
@@ -330,6 +348,28 @@ export class DomOList extends DomHTMLElement {}
 export class DomForm extends DomHTMLElement {}
 export class DomSVGElement extends DomElement {}
 export class DomSVGSVGElement extends DomSVGElement {}
+export class DomDialog extends DomHTMLElement {
+  open = false;
+  returnValue = "";
+
+  showModal(): void {
+    if (this.open) {
+      const error = new Error("The dialog is already open");
+      error.name = "InvalidStateError";
+      throw error;
+    }
+    this.open = true;
+    this.hidden = false;
+    this.setAttribute("open", "");
+  }
+
+  close(): void {
+    if (!this.open) return;
+    this.open = false;
+    this.removeAttribute("open");
+    this.dispatchEvent(new DomEvent("close"));
+  }
+}
 
 export class DomDocument {
   documentElement: DomElement;
@@ -399,6 +439,7 @@ export function installDom(): void {
   target.HTMLFormElement = DomForm;
   target.SVGElement = DomSVGElement;
   target.SVGSVGElement = DomSVGSVGElement;
+  target.HTMLDialogElement = DomDialog;
   target.Element = DomElement;
   target.Node = DomNode;
   target.MouseEvent = DomMouseEvent;
@@ -438,6 +479,7 @@ function createTag(tag: string): DomHTMLElement {
   if (name === "select") return new DomSelect("select");
   if (name === "ol") return new DomOList("ol");
   if (name === "form") return new DomForm("form");
+  if (name === "dialog") return new DomDialog("dialog");
   if (name === "svg") return new DomSVGSVGElement("svg") as unknown as DomHTMLElement;
   return new DomHTMLElement(name);
 }
