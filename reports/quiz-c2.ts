@@ -128,8 +128,8 @@ export interface QuizC2Report {
   readonly diagnostics: {
     readonly checker: "gates/quiz-check.ts checkShippedPack";
     readonly scope: "pack-level failures, Johnson through Whitley entries, and range question ids repeated outside the range";
-    readonly minimaNote: "minimaEnforced is false. Coverage fields from the existing checker are counts, not quotas.";
-    readonly minimaEnforced: false;
+    readonly minimaNote: "The shipped pack gate rejects a county under 4 questions, under 3 categories, or with no answer equal to a non-blank county seat. A blank or missing seat does not skip that rule. This report does not check facts.";
+    readonly minimaEnforced: boolean;
     readonly historicalFactCheck: "not-run";
     readonly ledger: "not-implemented";
     readonly errors: readonly Issue[];
@@ -305,8 +305,8 @@ export function buildQuizC2Report(packValue: unknown, mapValue: unknown, input: 
     diagnostics: {
       checker: "gates/quiz-check.ts checkShippedPack",
       scope: "pack-level failures, Johnson through Whitley entries, and range question ids repeated outside the range",
-      minimaNote: "minimaEnforced is false. Coverage fields from the existing checker are counts, not quotas.",
-      minimaEnforced: false,
+      minimaNote: "The shipped pack gate rejects a county under 4 questions, under 3 categories, or with no answer equal to a non-blank county seat. A blank or missing seat does not skip that rule. This report does not check facts.",
+      minimaEnforced: slice.coverage.minimaEnforced,
       historicalFactCheck: "not-run",
       ledger: "not-implemented",
       errors,

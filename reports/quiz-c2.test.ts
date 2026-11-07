@@ -24,7 +24,7 @@ const MAP_PATH = "data/regions/in/map.json";
 const CSV_PATH = "inputs/battle-for-the-92-benchmark-1000_nokey.csv";
 const REPORT_PATH = "reports/quiz-c2.json";
 const PR9_SOURCE_DIGEST = "12ecc69109decb249faeafbf558a45b48d82e4e4efb4e9d8cda0dc613ddfee5a";
-const PACK_REVISION = "e3efa86c52ee26c733a128a40f91a53115283af0";
+const PACK_REVISION = "86d2f98635b75f47576d7f6500f3cb7c92105535";
 
 const RANGE: readonly (readonly [string, string])[] = [
   ["Johnson", "18081"],
@@ -112,8 +112,8 @@ test("the tracked pack report matches an independent count and keeps the PR 9 di
   assert.equal(report.factualQa.status, "deferred");
   assert.equal(report.factualQa.disclosure, FACTUAL_QA_DISCLOSURE);
   assert.equal(report.minima, "not applied");
-  assert.equal(report.diagnostics.minimaEnforced, false);
-  assert.equal(report.diagnostics.coverage.minimaEnforced, false);
+  assert.equal(report.diagnostics.minimaEnforced, true);
+  assert.equal(report.diagnostics.coverage.minimaEnforced, true);
   assert.equal(report.diagnostics.historicalFactCheck, "not-run");
   assert.equal(report.diagnostics.coverage.historicalFactCheck, "not-run");
   assert.deepEqual(

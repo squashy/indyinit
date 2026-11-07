@@ -10,6 +10,7 @@ import { bindQuiz } from "./ui/quiz-dialog.ts";
 import { bindScreens, initialScreen } from "./ui/screens.ts";
 import { bindSetup, hasSavedGame, readGamePacks, type PlaySession } from "./ui/setup.ts";
 import { bindTurn } from "./ui/turn.ts";
+import { bindOnline } from "./ui/online.ts";
 
 void boot();
 
@@ -81,6 +82,7 @@ async function boot(): Promise<void> {
       },
     });
     screens.show(initialScreen());
+    bindOnline(document);
     document.documentElement.dataset.booted = "true";
   } catch (error) {
     setStatus(error instanceof Error ? error.message : "The game could not load.");
