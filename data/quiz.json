@@ -1,7 +1,7 @@
 {
   "version": 1,
   "mapDigest": "bdfc6a3ab0dc9b47554a92be0e65bd86c44919651148cfdfdb9dc1bb277e2013",
-  "sourceDigest": "11d9f4600036c15aad7fa4e5bc14fcfca9a79946d3327e8c2236e324784418fa",
+  "sourceDigest": "12ecc69109decb249faeafbf558a45b48d82e4e4efb4e9d8cda0dc613ddfee5a",
   "counties": {
     "18001": [
       {
@@ -11224,9 +11224,9 @@
           "C": "William Lowe Bryan",
           "D": "Herman B Wells"
         },
-        "correctLetter": "D",
-        "correctAnswer": "Herman B Wells",
-        "explanation": "Herman B Wells was the university's first president and guided it as it grew out of its beginnings as a small state seminary."
+        "correctLetter": "A",
+        "correctAnswer": "Andrew Wylie",
+        "explanation": "Andrew Wylie became the first president of Indiana University in 1829."
       },
       {
         "kind": "multipleChoice",
@@ -16834,9 +16834,9 @@
           "C": "A U.S. Senator",
           "D": "Postmaster General"
         },
-        "correctLetter": "C",
-        "correctAnswer": "A U.S. Senator",
-        "explanation": "After commanding troops for the Union, Dumont was elected by Indiana's legislature to the U.S. Senate, where he represented the state."
+        "correctLetter": "A",
+        "correctAnswer": "A member of the U.S. House",
+        "explanation": "Ebenezer Dumont served in the U.S. House from 1863 to 1867."
       },
       {
         "kind": "multipleChoice",
@@ -16996,9 +16996,9 @@
           "C": "Secretary of the Treasury",
           "D": "Commissioner of Patents"
         },
-        "correctLetter": "B",
-        "correctAnswer": "Postmaster General",
-        "explanation": "Ellsworth lived from 1791 to 1868 and promoted settlement around Lafayette after a career in public service."
+        "correctLetter": "D",
+        "correctAnswer": "Commissioner of Patents",
+        "explanation": "Henry L. Ellsworth was the first Commissioner of Patents and died in 1858."
       },
       {
         "kind": "multipleChoice",

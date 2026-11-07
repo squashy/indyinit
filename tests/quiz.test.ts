@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import type { CountyId, QuestionId, QuizPack, QuizQuestion, RngSnapshot } from "../src/types.ts";
+import { fileURLToPath } from "node:url";
+import * as path from "node:path";
+import type { ChoiceLetter, CountyId, QuestionId, QuizPack, QuizQuestion, RngSnapshot } from "../src/types.ts";
 import { displayedChoices, prepareQuestion } from "../src/quiz/quiz.ts";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 const adams = "18001" as CountyId;
 const allen = "18003" as CountyId;
@@ -37,6 +42,26 @@ test("questions are not repeated until that county's pool is exhausted", () => {
   const third = prepareQuestion(adams, pack, [first.questionId, second.questionId], 3, () => 0);
   assert.ok(third);
   assert.equal(third.countyId, adams);
+});
+
+test("corrected keys stay pinned for questions 45, 289, and 356", () => {
+  const pack = JSON.parse(readFileSync(path.join(root, "data", "quiz.json"), "utf8")) as QuizPack;
+  const byId = new Map<string, QuizQuestion>();
+  for (const questions of Object.values(pack.counties)) {
+    for (const question of questions) byId.set(question.id, question);
+  }
+  const expected: readonly { id: string; letter: ChoiceLetter; answer: string }[] = [
+    { id: "45", letter: "D", answer: "Commissioner of Patents" },
+    { id: "289", letter: "A", answer: "A member of the U.S. House" },
+    { id: "356", letter: "A", answer: "Andrew Wylie" },
+  ];
+  for (const item of expected) {
+    const question = byId.get(item.id);
+    assert.ok(question, item.id);
+    assert.equal(question.choices[item.letter], item.answer);
+    assert.equal(question.correctLetter, item.letter);
+    assert.equal(question.correctAnswer, item.answer);
+  }
 });
 
 test("a county with no questions returns null and does not draw", () => {
