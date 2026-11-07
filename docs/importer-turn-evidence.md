@@ -58,7 +58,7 @@ Current main is later than that tree. The fresh browser session below is this co
 | Attack and occupy | Phase became move-in, then attack again after the move-in button |
 | Fortify | After stop-attacking, Adams `18001` went from 17 to 16 and Allen `18003` from 1 to 2. Phase then said pass the screen |
 | Handoff | `Hand the screen to Ben.` |
-| Second seat, wrong | Clay, highlighted `18151`. `Not this time. The answer is The Lincoln Highway. You get 0 armies.` The supplied explanation was on screen. Reinforcement `Armies to place: 15. Counties 15, regions 0, question 0.` |
+| Second seat, wrong | Clay, highlighted `18021`. `Not this time. The answer is The Lincoln Highway. You get 0 armies.` The supplied explanation was on screen. Reinforcement `Armies to place: 15. Counties 15, regions 0, question 0.` |
 
 Screenshots: `docs/evidence/01-quiz.png`, `02-correct.png`, `03-fortify.png`, `04-handoff.png`, `05-wrong.png`.
 
