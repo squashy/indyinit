@@ -139,8 +139,9 @@ test("visible letters stay A-D in reading order while grading follows the shuffl
   const order = ["C", "A", "D", "B"] as const;
   const correct = openQuiz(false, order);
   correct.show(correct.state);
-  if (correct.live.state.phase.kind !== "quiz") return;
-  assert.deepEqual([...correct.live.state.phase.pending.choiceOrder], [...order]);
+  const phase = correct.live.state.phase;
+  assert.equal(phase.kind, "quiz");
+  if (phase.kind === "quiz") assert.deepEqual([...phase.pending.choiceOrder], [...order]);
   assert.deepEqual(
     [...correct.doc.querySelectorAll(".quiz-letter")].map((node) => node.textContent),
     ["A", "B", "C", "D"],
@@ -167,7 +168,9 @@ test("visible letters stay A-D in reading order while grading follows the shuffl
   const wrong = openQuiz(false, order);
   wrong.show(wrong.state);
   wrong.choice(0).click();
-  assert.deepEqual(wrong.actions[0]?.answer, { kind: "choice", index: 0 });
+  const sent = wrong.actions[0];
+  assert.equal(sent?.kind, "answerQuiz");
+  if (sent?.kind === "answerQuiz") assert.deepEqual(sent.answer, { kind: "choice", index: 0 });
   assert.equal(wrong.live.state.phase.kind, "place");
   if (wrong.live.state.phase.kind !== "place") return;
   assert.equal(wrong.live.state.phase.income.quiz, 0);
