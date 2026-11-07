@@ -433,8 +433,8 @@ function primaryControl(doc: Document, state: GameState): HTMLElement | SVGEleme
       return skip instanceof HTMLButtonElement ? skip : null;
     }
     case "place": {
-      const map = doc.getElementById("map");
-      if (map instanceof HTMLElement || map instanceof SVGElement) return map;
+      const map = doc.querySelector("#map");
+      if (map instanceof SVGElement || map instanceof HTMLElement) return map;
       return null;
     }
     case "attack": {

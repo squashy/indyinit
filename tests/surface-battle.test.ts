@@ -115,11 +115,12 @@ test("move-in rejects a bad count once, keeps the county, and ignores a second c
   assert.match(harness.doc.getElementById("occupy-dialog")?.textContent ?? "", /cannot/);
   assert.equal(harness.doc.getElementById("occupy-dialog")?.hidden, false);
 
+  if (fought.phase.kind !== "occupy") return;
+  const fromId = fought.phase.from;
   const broken = {
     ...fought,
-    holdings: fought.holdings.filter((holding) => holding.countyId !== fought.phase.from),
+    holdings: fought.holdings.filter((holding) => holding.countyId !== fromId),
   };
-  if (broken.phase.kind !== "occupy") return;
   harness.show(broken);
   assert.equal(moveButton(harness.doc).disabled, true);
   input.focus();

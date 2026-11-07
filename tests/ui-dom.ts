@@ -7,7 +7,7 @@ export class DomEvent {
   cancelable = true;
   defaultPrevented = false;
   target: DomNode | null = null;
-  currentTarget: DomNode | null = null;
+  currentTarget: DomNode | DomDocument | null = null;
   type: string;
   constructor(type: string, init: { bubbles?: boolean } = {}) {
     this.type = type;
