@@ -25,9 +25,67 @@ export function bindOnline(doc: Document, fetcher: typeof fetch = globalThis.fet
       const response = await fetcher("/api/health/db");
       if (!response.ok) return;
       panel.hidden = false;
+      if (gameId) await restore(gameId);
     } catch {
       panel.hidden = true;
     }
+  }
+
+  async function restore(id: string): Promise<void> {
+    const token = readSeat(doc, id);
+    if (!token) return;
+    const response = await post(`/api/games/${id}/rejoin`, { seatToken: token });
+    if (!response || response.status !== 200) {
+      const body = response ? await response.json() as { explanation?: unknown } : null;
+      say(typeof body?.explanation === "string" ? body.explanation : "This seat could not rejoin.");
+      return;
+    }
+    const body = await response.json() as { seatIndex?: unknown };
+    if (typeof body.seatIndex === "number") say(`You are still seat ${body.seatIndex + 1}.`);
+    watch(id);
+  }
+
+  function watch(id: string): void {
+    let since = 0;
+    let wait = 1500;
+    const tick = (): void => {
+      window.setTimeout(() => {
+        void pull();
+      }, wait);
+    };
+    const pull = async (): Promise<void> => {
+      if (doc.visibilityState === "hidden") {
+        tick();
+        return;
+      }
+      try {
+        const response = await fetcher(`/api/games/${id}?since=${since}`);
+        if (!response.ok) {
+          const body = await response.json() as { explanation?: unknown };
+          say(typeof body.explanation === "string" ? body.explanation : "The shared table is unavailable.");
+          wait = Math.min(wait * 2, 12000);
+        } else {
+          const body = await response.json() as { game?: { version?: unknown; play?: { phase?: unknown; activePlayer?: unknown; remaining?: unknown; armies?: unknown } | null } };
+          const version = body.game?.version;
+          if (typeof version === "number") since = version;
+          const view = doc.getElementById("online-view");
+          const play = body.game?.play;
+          if (view) {
+            const phase = play && typeof play.phase === "string" ? play.phase : "lobby";
+            const player = play && typeof play.activePlayer === "number" ? play.activePlayer + 1 : 0;
+            const remaining = play && typeof play.remaining === "number" ? ` ${play.remaining} to place.` : "";
+            const armies = play && Array.isArray(play.armies) ? play.armies.reduce((sum: number, item: unknown) => sum + (typeof item === "object" && item !== null && typeof (item as { armies?: unknown }).armies === "number" ? (item as { armies: number }).armies : 0), 0) : 0;
+            view.textContent = `Revision ${typeof version === "number" ? version : 0}. Player ${player}. ${phase}.${remaining} Armies ${armies}.`;
+          }
+          wait = 1500;
+        }
+      } catch {
+        say("The shared table is down. You can still play on this screen.");
+        wait = Math.min(wait * 2, 12000);
+      }
+      tick();
+    };
+    void pull();
   }
 
   async function onCreate(): Promise<void> {
@@ -44,6 +102,7 @@ export function bindOnline(doc: Document, fetcher: typeof fetch = globalThis.fet
       saveSeat(doc, body.gameId, body.seatToken);
       if (share) share.textContent = publicShareUrl(doc.location.origin, body.gameId);
       say("Share that address. It does not contain your seat key.");
+      watch(body.gameId);
       return;
     }
     say(response.status === 400 ? "Use 2 to 6 seats and type your name." : "The shared table did not open.");
@@ -64,6 +123,7 @@ export function bindOnline(doc: Document, fetcher: typeof fetch = globalThis.fet
       }
       saveSeat(doc, gameId, body.seatToken);
       say(`You joined seat ${body.seatIndex + 1}.`);
+      watch(gameId);
       return;
     }
     if (response.status === 409) {
@@ -100,5 +160,13 @@ function saveSeat(doc: Document, gameId: string, seatToken: string): void {
     doc.defaultView?.localStorage.setItem(seatStorageKey(gameId), seatToken);
   } catch {
     return;
+  }
+}
+
+function readSeat(doc: Document, gameId: string): string | null {
+  try {
+    return doc.defaultView?.localStorage.getItem(seatStorageKey(gameId)) ?? null;
+  } catch {
+    return null;
   }
 }

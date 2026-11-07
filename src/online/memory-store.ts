@@ -5,6 +5,12 @@ export interface SeatSlot {
   readonly tokenHash: string;
 }
 
+export interface AppliedIntent {
+  readonly version: number;
+  readonly seat: number;
+  readonly action: string;
+}
+
 export interface OnlineDocument {
   readonly id: string;
   readonly version: number;
@@ -13,6 +19,15 @@ export interface OnlineDocument {
   readonly seats: readonly (SeatSlot | null)[];
   readonly inviteHash: string;
   readonly seed: string;
+  readonly expiresAt: number;
+  readonly applied: Readonly<Record<string, AppliedIntent>>;
+  readonly play: StoredPlay | null;
+  readonly revisions: readonly { readonly version: number; readonly play: unknown }[];
+}
+
+export interface StoredPlay {
+  readonly state: import("../types.ts").GameState;
+  readonly rng: import("../types.ts").RngSnapshot;
 }
 
 export interface OnlineStore {
@@ -24,9 +39,14 @@ export interface OnlineStore {
 
 export class MemoryStore implements OnlineStore {
   private readonly docs = new Map<string, OnlineDocument>();
+  private closed = false;
+
+  fail(): void {
+    this.closed = true;
+  }
 
   async ping(): Promise<boolean> {
-    return true;
+    return !this.closed;
   }
 
   async read(id: string): Promise<OnlineDocument | null> {
