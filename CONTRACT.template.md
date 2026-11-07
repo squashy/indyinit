@@ -1,5 +1,9 @@
 # Build contract template
 
+## Current Indiana demo precedence
+
+`CONTRACT.md` and later explicit owner decisions control this demo. Conflicting instructions below are historical, not current release gates. The quiz bonus is fixed at +2 once per turn. Use the supplied repository CSV; do not generate replacement trivia. Factual QA, both-checker verdicts, ledger merge and random factual audits are deferred, not completed. Legacy content quotas do not block this CSV import. Structural mapping and security checks remain required. Hidden benchmark truth labels remain private; supplied gameplay correct letters and answers ship. No hosted CI or previews. Changes use branches and PRs with non-author exact-head approval, local box checks and main-only production deployment. The UI must say "Questions unverified" and must not claim the demo is fact-checked.
+
 Copied to `CONTRACT.md` by the first ticket. It is how agents from different tools work in parallel without colliding. Reusable for another project: keep the structure and replace the formats.
 
 ## File ownership by role
@@ -25,8 +29,10 @@ site/                   everything that ships
 regions/<abbr>/         region.json, claims.jsonl, verdicts.a.jsonl, verdicts.b.jsonl, resolutions.jsonl (not shipped)
 factory/                map builder, pipeline scripts
 gates/                  all tests and checks
-bank/questions.csv      input, not shipped
+bank/questions.csv      historical template input, not the current Indiana file
 ```
+
+The current Indiana importer input is `inputs/battle-for-the-92-benchmark-1000_nokey.csv`. `bank/questions.csv` is not in the repo.
 
 The page picks its state from `?state=<abbr>`. All fetches are relative.
 
@@ -37,7 +43,7 @@ The page picks its state from `?state=<abbr>`. All fetches are relative.
 - **Starting armies, N = territories, p = players:** `max(ceil(N/p) + p, round(BASE[p] * N/92))`, with BASE = 2:60, 3:45, 4:38, 5:32, 6:28.
 - **Second player in a 2-player game** gets `map.meta.balance.secondPlayerExtra` extra armies, tuned per state. The tuner starts from `round(15 * N/92)`.
 - **Turn:** Quiz, Reinforce, Attack, Fortify.
-- **Quiz:** picks a county the player holds, favoring ones not yet asked, with no time limit. A correct answer earns `map.meta.balance.quizBonus` armies, tuned per state and never below 2. The right answer and explanation always show. Computer players succeed 60% of the time. The highlighted county must stay visible at every screen size.
+- **Quiz:** picks a county the player holds, favoring ones not yet asked, with no time limit. A correct answer earns `map.meta.balance.quizBonus` armies, tuned per state and never below 2. The right answer and explanation always show. Computer players succeed 60% of the time. The highlighted county must stay visible at every screen size. **Superseded for the current Indiana demo:** `CONTRACT.md` fixes the award at +2 once per correct answer and does not tune `quizBonus`. Favoring unasked counties is also superseded there.
 - **Reinforcements:** `max(3, floor(held/3))` + region bonuses + quiz bonus.
 - **Region bonus:** `max(2, round(0.33 * size + 0.21 * border crossings))`.
 - **Attack:** up to 3 attacking dice (armies minus 1), up to 2 defending. Highest pairs compared; ties go to the defender. On capture, move in at least the dice rolled, up to all but 1. Offers Roll and Blitz.
@@ -118,7 +124,7 @@ Remove any county listed as its own neighbor. Machine-drawn regions keep `"draft
 { "claimId": "in-18001-003", "ruling": "ship|reject", "correction": null, "source": { "url": "...", "title": "..." }, "by": "name" }
 ```
 
-**Ship rule:** a claim ships if both checkers say `confirmed`, or a person rules `ship`. Anything else, including any `corrected` verdict, is a disagreement. A disagreement unresolved at freeze is rejected. A question ships only if all its claims ship.
+**Ship rule:** a claim ships if both checkers say `confirmed`, or a person rules `ship`. Anything else, including any `corrected` verdict, is a disagreement. A disagreement unresolved at freeze is rejected. A question ships only if all its claims ship. **Superseded for the current Indiana demo:** factual QA and this ship rule are deferred, not Done. See `CONTRACT.md`.
 
 ## Page contract
 
