@@ -24,3 +24,13 @@ Built at Indy Init on November 7. This first commit is the plan and question ban
 | `RUNBOOK.md` | The day's schedule and the demo |
 
 To begin, an agent reads `SPEC.md` and takes ticket 1 from `BOARD.md`.
+
+## Box checks
+
+`npm run build:map` writes `data/regions/in/map.json` from Census cartographic boundaries.
+
+`npm run gates -- map` checks that map. A planted self-loop and a planted one-way border fail, then the real map passes.
+
+`npm run check` typechecks, runs the focused tests, and builds.
+
+The geometry source URL is `geometrySource` in `regions/in/region.json`.
