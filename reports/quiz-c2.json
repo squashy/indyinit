@@ -1,0 +1,962 @@
+{
+  "ticket": "BTT-10",
+  "kind": "structural-coverage",
+  "range": {
+    "from": "Johnson",
+    "through": "Whitley",
+    "order": "map county name, UTF-16 code unit ascending, then FIPS",
+    "endpointsFound": {
+      "Johnson": true,
+      "Whitley": true
+    },
+    "counties": 52,
+    "note": null
+  },
+  "input": {
+    "packPath": "data/quiz.json",
+    "mapPath": "data/regions/in/map.json",
+    "approvedDestinationName": "public/data/quiz.json",
+    "packaging": "Consumed the tracked pack at data/quiz.json. The approved destination name public/data/quiz.json is unresolved. This report does not create that path, move the pack, or write a second pack.",
+    "revision": "e3efa86c52ee26c733a128a40f91a53115283af0",
+    "revisionPath": "data/quiz.json",
+    "revisionMeaning": "git commit that last changed data/quiz.json; null when git cannot resolve it",
+    "sourceDigest": "12ecc69109decb249faeafbf558a45b48d82e4e4efb4e9d8cda0dc613ddfee5a",
+    "mapDigest": "bdfc6a3ab0dc9b47554a92be0e65bd86c44919651148cfdfdb9dc1bb277e2013",
+    "sourceDigestNote": "sourceDigest is copied from the tracked pack and is not recomputed. This report does not read or rewrite the CSV.",
+    "mapIssues": []
+  },
+  "factualQa": {
+    "status": "deferred",
+    "disclosure": "Factual QA is deferred. This report counts imported QuizQuestion coverage for Johnson through Whitley. It does not check historical truth, author questions, convert or import CSV, or apply question, category, or choice quotas."
+  },
+  "minima": "not applied",
+  "countDefinitions": {
+    "questions": "pack entries stored under each range county",
+    "categories": "distinct non-empty category strings on those entries",
+    "choices": "non-empty choice A, B, C, and D strings on those entries"
+  },
+  "summary": {
+    "countiesInRange": 52,
+    "countiesWithQuestions": 52,
+    "countiesMissing": 0,
+    "questions": 573,
+    "categories": [
+      "history",
+      "landmark",
+      "namesake",
+      "people",
+      "seat"
+    ],
+    "categoryCount": 5,
+    "choices": 2292,
+    "malformedQuestions": 0,
+    "misfiled": 0,
+    "diagnosticErrors": 0
+  },
+  "structuralStatus": "no structural errors in range",
+  "diagnostics": {
+    "checker": "gates/quiz-check.ts checkShippedPack",
+    "scope": "pack-level failures, Johnson through Whitley entries, and range question ids repeated outside the range",
+    "minimaNote": "minimaEnforced is false. Coverage fields from the existing checker are counts, not quotas.",
+    "minimaEnforced": false,
+    "historicalFactCheck": "not-run",
+    "ledger": "not-implemented",
+    "errors": [],
+    "coverage": {
+      "counties": 52,
+      "questions": 573,
+      "minQuestions": 9,
+      "maxQuestions": 13,
+      "countiesUnderFour": 0,
+      "countiesUnderThreeCategories": 0,
+      "countiesWithoutSeatAnswer": 0,
+      "mapCountiesMissingFromPack": 0,
+      "minimaEnforced": false,
+      "ledger": "not-implemented",
+      "historicalFactCheck": "not-run"
+    }
+  },
+  "missing": [],
+  "malformed": [],
+  "misfiled": [],
+  "counties": [
+    {
+      "name": "Johnson",
+      "fips": "18081",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Knox",
+      "fips": "18083",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Kosciusko",
+      "fips": "18085",
+      "questions": 9,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 36,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "LaGrange",
+      "fips": "18087",
+      "questions": 9,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 36,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "LaPorte",
+      "fips": "18091",
+      "questions": 13,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 52,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Lake",
+      "fips": "18089",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Lawrence",
+      "fips": "18093",
+      "questions": 9,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 36,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Madison",
+      "fips": "18095",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Marion",
+      "fips": "18097",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Marshall",
+      "fips": "18099",
+      "questions": 9,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 36,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Martin",
+      "fips": "18101",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "seat"
+      ],
+      "categoryCount": 4,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Miami",
+      "fips": "18103",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Monroe",
+      "fips": "18105",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Montgomery",
+      "fips": "18107",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Morgan",
+      "fips": "18109",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Newton",
+      "fips": "18111",
+      "questions": 13,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 52,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Noble",
+      "fips": "18113",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 4,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Ohio",
+      "fips": "18115",
+      "questions": 9,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 36,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Orange",
+      "fips": "18117",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Owen",
+      "fips": "18119",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Parke",
+      "fips": "18121",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Perry",
+      "fips": "18123",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "seat"
+      ],
+      "categoryCount": 4,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Pike",
+      "fips": "18125",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Porter",
+      "fips": "18127",
+      "questions": 13,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 52,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Posey",
+      "fips": "18129",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Pulaski",
+      "fips": "18131",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Putnam",
+      "fips": "18133",
+      "questions": 13,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 52,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Randolph",
+      "fips": "18135",
+      "questions": 9,
+      "categories": [
+        "history",
+        "landmark",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 4,
+      "choices": 36,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Ripley",
+      "fips": "18137",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Rush",
+      "fips": "18139",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Scott",
+      "fips": "18143",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "seat"
+      ],
+      "categoryCount": 4,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Shelby",
+      "fips": "18145",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Spencer",
+      "fips": "18147",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "St. Joseph",
+      "fips": "18141",
+      "questions": 13,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 52,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Starke",
+      "fips": "18149",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Steuben",
+      "fips": "18151",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Sullivan",
+      "fips": "18153",
+      "questions": 9,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 36,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Switzerland",
+      "fips": "18155",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Tippecanoe",
+      "fips": "18157",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Tipton",
+      "fips": "18159",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Union",
+      "fips": "18161",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Vanderburgh",
+      "fips": "18163",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Vermillion",
+      "fips": "18165",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Vigo",
+      "fips": "18167",
+      "questions": 13,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 52,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Wabash",
+      "fips": "18169",
+      "questions": 10,
+      "categories": [
+        "history",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 4,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Warren",
+      "fips": "18171",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Warrick",
+      "fips": "18173",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Washington",
+      "fips": "18175",
+      "questions": 12,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 48,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Wayne",
+      "fips": "18177",
+      "questions": 13,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 52,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Wells",
+      "fips": "18179",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "White",
+      "fips": "18181",
+      "questions": 11,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 44,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    },
+    {
+      "name": "Whitley",
+      "fips": "18183",
+      "questions": 10,
+      "categories": [
+        "history",
+        "landmark",
+        "namesake",
+        "people",
+        "seat"
+      ],
+      "categoryCount": 5,
+      "choices": 40,
+      "missing": false,
+      "missingReason": null,
+      "malformedQuestionIds": []
+    }
+  ]
+}
