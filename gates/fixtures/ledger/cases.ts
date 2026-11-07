@@ -185,7 +185,7 @@ export function materialize(model: LedgerModel, order: "as-is" | "shuffled" = "a
   fill(a, model.verdictsA);
   // Two checker slots may point at one file in planted cases; keep the first file text.
   if (String(b.path) === String(a.path)) {
-    if (b.digest === "") b.digest = a.digest;
+    if (b.digest === "") b.digest = a.digest ?? "";
   } else fill(b, model.verdictsB);
   fill(resolutions, model.resolutions);
   if (model.mapping) {

@@ -23,6 +23,16 @@ const inline = {
       process.exit(issues.length === 0 ? 0 : 1);
     `,
   },
+  // Deferred ledger work (CONTRACT.md §7.4): synthetic fixture suite only, not a release-plan gate.
+  ledger: {
+    file: "gates/ledger.ts",
+    code: (url) => `
+      const { runFixtureSuite } = await import(${JSON.stringify(url)});
+      const result = runFixtureSuite();
+      console.log(result.output);
+      process.exit(result.exitCode);
+    `,
+  },
 };
 
 const names = [...Object.keys(gates), ...Object.keys(inline)];

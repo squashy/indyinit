@@ -37,29 +37,22 @@ test("the gate re-checks shipped claims instead of trusting the merge", () => {
   const report = reportOf(named("valid-two-confirmed"));
   assert.equal(checkLedgerReport(report).ok, true);
 
-  const forged = structuredClone(report) as { -readonly [K in keyof LedgerReport]: LedgerReport[K] };
-  const claim = structuredClone(forged.claims[0]) as unknown as { verdicts: { kind: string; sourceUrls: string[]; checkerId: string }[] };
-  claim.verdicts[1]!.kind = "corrected";
-  forged.claims = [claim as never, ...forged.claims.slice(1)];
-  const corrected = checkLedgerReport(forged);
-  assert.equal(corrected.ok, false);
-  assert.ok(corrected.issues.some((issue) => issue.includes("not two confirmed")), corrected.issues.join("; "));
+  // Forge reports the merge would never produce and check the gate catches each one.
+  type Forged = { claims: { verdicts: { kind: string; sourceUrls: string[]; checkerId: string }[] }[]; summary: { shipped: number } };
+  const forge = (edit: (copy: Forged) => void): LedgerReport => {
+    const copy = JSON.parse(JSON.stringify(report)) as Forged;
+    edit(copy);
+    return copy as unknown as LedgerReport;
+  };
+  const issuesOf = (edit: (copy: Forged) => void) => checkLedgerReport(forge(edit)).issues;
 
-  const noUrl = structuredClone(report) as { claims: { verdicts: { sourceUrls: string[] }[] }[] };
-  noUrl.claims[0]!.verdicts[0]!.sourceUrls = [];
-  assert.ok(checkLedgerReport(noUrl as never).issues.some((issue) => issue.includes("source URL")));
-
-  const sameChecker = structuredClone(report) as { claims: { verdicts: { checkerId: string }[] }[] };
-  sameChecker.claims[0]!.verdicts[1]!.checkerId = sameChecker.claims[0]!.verdicts[0]!.checkerId;
-  assert.ok(checkLedgerReport(sameChecker as never).issues.some((issue) => issue.includes("distinct")));
-
-  const author = structuredClone(report) as { claims: { verdicts: { checkerId: string }[] }[] };
-  author.claims[0]!.verdicts[0]!.checkerId = "fixture-author";
-  assert.ok(checkLedgerReport(author as never).issues.some((issue) => issue.includes("author")));
-
-  const counts = structuredClone(report) as { summary: { shipped: number } };
-  counts.summary.shipped += 1;
-  assert.ok(checkLedgerReport(counts as never).issues.some((issue) => issue.includes("summary")));
+  assert.ok(issuesOf((copy) => void (copy.claims[0]!.verdicts[1]!.kind = "corrected")).some((issue) => issue.includes("not two confirmed")));
+  assert.ok(issuesOf((copy) => void (copy.claims[0]!.verdicts[0]!.sourceUrls = [])).some((issue) => issue.includes("source URL")));
+  assert.ok(
+    issuesOf((copy) => void (copy.claims[0]!.verdicts[1]!.checkerId = copy.claims[0]!.verdicts[0]!.checkerId)).some((issue) => issue.includes("distinct")),
+  );
+  assert.ok(issuesOf((copy) => void (copy.claims[0]!.verdicts[0]!.checkerId = "fixture-author")).some((issue) => issue.includes("author")));
+  assert.ok(issuesOf((copy) => void (copy.summary.shipped += 1)).some((issue) => issue.includes("summary")));
 });
 
 test("gate output names each failing claim and its reasons", () => {
