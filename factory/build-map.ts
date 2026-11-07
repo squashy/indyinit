@@ -69,14 +69,18 @@ export function buildState(manifest: RegionFile, atlasInput: unknown): BuiltStat
       facts: [],
     };
   });
-  const regions: Region[] = drawn.map((region) => ({
-    id: makeRegionId(region.id),
-    name: region.name,
-    counties: region.fips,
-    borderPath: regionBorder(region, borders.arcUsers, projected.arcs),
-    bonus: 0,
-    review: manifest.review,
-  }));
+  const listed = new Map(manifest.regions.map((region) => [region.id, region]));
+  const regions: Region[] = drawn.map((region) => {
+    const source = listed.get(region.id);
+    return {
+      id: makeRegionId(region.id),
+      name: region.name,
+      counties: region.fips,
+      borderPath: regionBorder(region, borders.arcUsers, projected.arcs),
+      bonus: source?.bonus ?? 0,
+      review: source?.review ?? "draft",
+    };
+  });
   const outline = arcsPath(borders.arcUsers, projected.arcs, (users) => users.length === 1);
   const body = {
     version: 1 as const,
@@ -89,12 +93,16 @@ export function buildState(manifest: RegionFile, atlasInput: unknown): BuiltStat
   const map: MapPack = { ...body, digest: createHash("sha256").update(JSON.stringify(body)).digest("hex") };
   const nextManifest: RegionFile = {
     ...manifest,
-    regions: regions.map((region) => ({
-      id: region.id,
-      name: region.name,
-      counties: [...region.counties],
-      review: manifest.review,
-    })),
+    regions: regions.map((region) => {
+      const source = listed.get(region.id);
+      const entry = {
+        id: region.id,
+        name: region.name,
+        counties: [...region.counties],
+        review: source?.review ?? "draft",
+      };
+      return source?.bonus === undefined ? entry : { ...entry, bonus: source.bonus };
+    }),
   };
   const encoded = `${JSON.stringify(map, null, 2)}\n`;
   return { map, manifest: nextManifest, cornerOnly: borders.cornerOnly, byteLength: Buffer.byteLength(encoded) };

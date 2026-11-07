@@ -1,1 +1,2 @@
 timestamp,ticket,tool,state,territories,minutes,tokens,est_cost_usd,gate_failures,human_interventions,questions_in,questions_shipped,notes
+2026-11-07T16:21:10Z,engine-quiz,cursor,in,92,30,,,1,2,0,0,rules engine quiz selector and csv importer; computer player not included; no supplied question bank
