@@ -3,7 +3,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const gates = { map: "gates/map-gate.ts", rules: "gates/rules-gate.ts", quiz: "gates/quiz-gate.ts" };
+const gates = {
+  map: "gates/map-gate.ts",
+  rules: "gates/rules.gate.ts",
+  "rules-engine": "gates/rules-gate.ts",
+  quiz: "gates/quiz-gate.ts",
+};
 const name = process.argv[2];
 const file = name && Object.hasOwn(gates, name) ? gates[name] : undefined;
 if (!file) {
