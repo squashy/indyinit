@@ -262,6 +262,18 @@ input:focus-visible,
   pointer-events: none;
 }
 
+.region-borders {
+  pointer-events: none;
+}
+
+.region-border {
+  fill: none;
+  stroke: var(--region-border-color);
+  stroke-width: var(--region-border-width);
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
 .county {
   cursor: pointer;
 }
@@ -845,6 +857,7 @@ summary {
   }
 
   .county-shape,
+  .region-border,
   .state-outline {
     stroke: CanvasText;
   }

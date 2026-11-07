@@ -38,8 +38,19 @@ export interface Region {
   readonly name: string;
   readonly counties: readonly CountyId[];
   readonly borderPath: string;
-  readonly bonus: number; // region values OPEN; no invented formula or placeholder value
+  readonly bonus: number;
   readonly review: "draft" | "reviewed";
+}
+export interface RegionBonusLine {
+  readonly id: RegionId;
+  readonly name: string;
+  readonly bonus: number;
+}
+export interface TurnGrant {
+  readonly turnSequence: number;
+  readonly player: PlayerId;
+  readonly base: number;
+  readonly lines: readonly RegionBonusLine[];
 }
 export interface MapPack {
   readonly version: 1;
@@ -167,6 +178,7 @@ export interface Income {
   readonly base: number;
   readonly regions: number;
   readonly quiz: 0 | 2;
+  readonly lines?: readonly RegionBonusLine[];
 }
 export type Phase =
   | {
@@ -174,6 +186,7 @@ export type Phase =
       readonly pending: PendingQuestion;
       readonly baseIncome: number;
       readonly regionIncome: number;
+      readonly regionLines?: readonly RegionBonusLine[];
     }
   | {
       readonly kind: "place";
@@ -228,6 +241,7 @@ export interface GameState {
   readonly phase: Phase;
   readonly asked: readonly AskedQuestions[];
   readonly events: readonly GameEvent[];
+  readonly turnGrant?: TurnGrant;
   // Elimination derived from holdings; no contradictory eliminated[] / winner?.
   // Quiz is consumed structurally by leaving quiz phase, not a reusable boolean.
 }
