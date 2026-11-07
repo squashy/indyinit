@@ -48,7 +48,13 @@ export function bindBattle(
       const fromName = view.from ? countyName(view.state, view.from) : "";
       const toName = view.to ? countyName(view.state, view.to) : "";
       if (matchup instanceof HTMLElement) {
-        matchup.textContent = fromName && toName ? `${fromName} attacks ${toName}.` : "Choose your county, then a neighboring county.";
+        if (view.lastBattle) {
+          matchup.textContent = `${countyName(view.state, view.lastBattle.from)} attacked ${countyName(view.state, view.lastBattle.to)}.`;
+        } else if (fromName && toName) {
+          matchup.textContent = `${fromName} attacks ${toName}.`;
+        } else {
+          matchup.textContent = "Choose your county, then a neighboring county.";
+        }
       }
       if (attackDice instanceof HTMLElement) {
         attackDice.textContent = view.lastBattle ? `Attack dice: ${view.lastBattle.attackRolls.join(", ")}` : "Attack dice:";

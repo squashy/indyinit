@@ -267,7 +267,10 @@ export function bindTurn(
       return;
     }
     const count = Number(fortifyInput.value);
+    const fromName = countyName(live.state, pair.from);
+    const toName = countyName(live.state, pair.to);
     if (!apply({ kind: "fortify", from: pair.from, to: pair.to, count })) return;
+    appendLog(doc, `${fromName} sends ${count} armies to ${toName}.`);
     fortifyFrom = null;
     fortifyTo = null;
     paint();
@@ -597,6 +600,15 @@ function actionButton(doc: Document, id: string, label: string): HTMLButtonEleme
 
 function setDisabled(node: Element | null, disabled: boolean): void {
   if (node instanceof HTMLButtonElement) node.disabled = disabled;
+}
+
+function appendLog(doc: Document, line: string): void {
+  const list = doc.querySelector("#trip-log ol");
+  if (!(list instanceof HTMLElement)) return;
+  const item = doc.createElement("li");
+  item.textContent = line;
+  list.append(item);
+  list.scrollTop = list.scrollHeight;
 }
 
 function phaseOf(session: Session): GameState["phase"] {
