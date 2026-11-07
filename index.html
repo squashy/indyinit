@@ -12,13 +12,114 @@
 </head>
 <body>
   <div id="app">
+    <p id="error-status" role="status" aria-live="assertive"></p>
+    <section id="landing" class="landing">
+      <div class="landing-copy">
+        <p class="landing-kicker">Indiana</p>
+        <h1 id="landing-title" class="landing-wordmark" tabindex="-1">Battle for 92</h1>
+        <p class="landing-hook">Share one screen on Indiana’s 92 counties. A right answer adds 2 armies.</p>
+        <p class="quiz-unverified">Questions unverified</p>
+        <div class="landing-actions">
+          <button type="button" id="new-game">New game</button>
+          <button type="button" id="continue-game" class="secondary" hidden>Continue</button>
+        </div>
+      </div>
+      <div id="landing-hero" class="landing-hero" aria-hidden="true"></div>
+    </section>
+    <section id="setup-screen" class="setup-screen" hidden>
+      <p class="setup-nav"><button type="button" id="setup-back" class="secondary">Back</button></p>
+        <section id="setup" class="card" aria-label="Set up the game">
+          <h1 id="setup-heading" tabindex="-1">Set up</h1>
+          <p>Choose 2 to 6 players. Type a name for each person or computer who is playing.</p>
+          <ol id="player-list">
+            <li data-owner="0">
+              <span class="player-swatch" data-owner="0" aria-hidden="true"></span>
+              <label class="name-field">Seat 1, checker
+                <input type="text" name="player-name-0" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-0" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-0" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="1">
+              <span class="player-swatch" data-owner="1" aria-hidden="true"></span>
+              <label class="name-field">Seat 2, triangles
+                <input type="text" name="player-name-1" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-1" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-1" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="2">
+              <span class="player-swatch" data-owner="2" aria-hidden="true"></span>
+              <label class="name-field">Seat 3, dots
+                <input type="text" name="player-name-2" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-2" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-2" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="3">
+              <span class="player-swatch" data-owner="3" aria-hidden="true"></span>
+              <label class="name-field">Seat 4, diagonal
+                <input type="text" name="player-name-3" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-3" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-3" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="4">
+              <span class="player-swatch" data-owner="4" aria-hidden="true"></span>
+              <label class="name-field">Seat 5, crosshatch
+                <input type="text" name="player-name-4" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-4" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-4" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="5">
+              <span class="player-swatch" data-owner="5" aria-hidden="true"></span>
+              <label class="name-field">Seat 6, bars
+                <input type="text" name="player-name-5" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-5" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-5" value="computer"> Computer</label>
+              </div>
+            </li>
+          </ol>
+          <fieldset id="mode">
+            <legend>How you win</legend>
+            <label><input type="radio" name="win-mode" value="quick60" checked> Quick — at least 60 counties</label>
+            <label><input type="radio" name="win-mode" value="total92"> Total — all 92 counties</label>
+          </fieldset>
+          <div class="setup-actions">
+            <button type="button" id="start-game">Start</button>
+          </div>
+        </section>
+      <section id="replace-dialog" class="card" hidden role="dialog" aria-modal="false" aria-labelledby="replace-title">
+        <h2 id="replace-title" tabindex="-1">Replace the saved game?</h2>
+        <p>Starting now replaces the game saved on this screen.</p>
+        <div class="setup-actions">
+          <button type="button" id="replace-stay">Keep the saved game</button>
+          <button type="button" id="replace-confirm">Replace and start</button>
+        </div>
+      </section>
+    </section>
+    <div id="game-screen" hidden>
     <a class="skip-link" href="#map">Skip to the map</a>
     <header class="site-header">
       <img src="/assets/mark.svg" width="48" height="48" alt="">
       <div>
-        <h1>Battle for the 92</h1>
+        <h1 id="game-title" tabindex="-1">Battle for the 92</h1>
         <p class="lede">Share one screen on Indiana’s 92 counties. A right answer adds 2 armies.</p>
       </div>
+      <button type="button" id="open-menu" class="secondary">Menu</button>
     </header>
     <main class="board">
       <div class="map-column">
@@ -1441,7 +1542,6 @@
       </div>
       <div class="side">
         <div class="phase-dock">
-        <p id="error-status" role="status" aria-live="assertive"></p>
         <section class="card" aria-label="This step">
           <h2>This step</h2>
           <div class="status-bar">
@@ -1500,81 +1600,6 @@
           </div>
         </div>
         <div class="side-rest">
-        <section id="setup" class="card" aria-label="Set up the game">
-          <h2>Set up</h2>
-          <p>Choose 2 to 6 players. Type a name for each person or computer who is playing.</p>
-          <ol id="player-list">
-            <li data-owner="0">
-              <span class="player-swatch" data-owner="0" aria-hidden="true"></span>
-              <label class="name-field">Seat 1, checker
-                <input type="text" name="player-name-0" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-0" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-0" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="1">
-              <span class="player-swatch" data-owner="1" aria-hidden="true"></span>
-              <label class="name-field">Seat 2, triangles
-                <input type="text" name="player-name-1" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-1" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-1" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="2">
-              <span class="player-swatch" data-owner="2" aria-hidden="true"></span>
-              <label class="name-field">Seat 3, dots
-                <input type="text" name="player-name-2" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-2" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-2" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="3">
-              <span class="player-swatch" data-owner="3" aria-hidden="true"></span>
-              <label class="name-field">Seat 4, diagonal
-                <input type="text" name="player-name-3" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-3" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-3" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="4">
-              <span class="player-swatch" data-owner="4" aria-hidden="true"></span>
-              <label class="name-field">Seat 5, crosshatch
-                <input type="text" name="player-name-4" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-4" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-4" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="5">
-              <span class="player-swatch" data-owner="5" aria-hidden="true"></span>
-              <label class="name-field">Seat 6, bars
-                <input type="text" name="player-name-5" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-5" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-5" value="computer"> Computer</label>
-              </div>
-            </li>
-          </ol>
-          <fieldset id="mode">
-            <legend>How you win</legend>
-            <label><input type="radio" name="win-mode" value="quick60" checked> Quick — at least 60 counties</label>
-            <label><input type="radio" name="win-mode" value="total92"> Total — all 92 counties</label>
-          </fieldset>
-          <div class="setup-actions">
-            <button type="button" id="start-game">Start game</button>
-            <button type="button" id="continue-game" class="secondary">Continue game</button>
-          </div>
-        </section>
         <details class="card how-to" open>
           <summary>How to play</summary>
           <ol>
@@ -1646,6 +1671,7 @@
         </div>
       </div>
     </main>
+    </div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
