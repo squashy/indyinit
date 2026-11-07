@@ -136,7 +136,7 @@ export function bindBattle(doc: Document, act: Act, map: MapView): BattleDialog 
           if (ok && fought) {
             if (attackDice) attackDice.textContent = `Attack dice ${fought.attackRolls.join(", ")}.`;
             if (defendDice) defendDice.textContent = `Defend dice ${fought.defenseRolls.join(", ")}.`;
-            if (outcome && !outcome.textContent) outcome.textContent = `Attacker lost ${fought.attackLosses}. Defender lost ${fought.defenseLosses}.`;
+            if (outcome) outcome.textContent = `Attacker lost ${fought.attackLosses}. Defender lost ${fought.defenseLosses}.`;
           } else if (!ok && current && current.phase.kind === "attack") {
             paintBattle(matchup, attackDice, defendDice, outcome, current, from, to, holding(current, from)?.armies ?? origin.armies, holding(current, to)?.armies ?? target.armies, fought, false);
           }
