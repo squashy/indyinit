@@ -9,7 +9,8 @@ export type QuestionId = string & { readonly __brand: "QuestionId" };
 export type ClaimId = string & { readonly __brand: "ClaimId" };
 export type PlayerId = 0 | 1 | 2 | 3 | 4 | 5;
 export type PlayerCount = 2 | 3 | 4 | 5 | 6;
-export type Rng = () => number; // validated [0,1); adapter retains serializable state
+/** One draw in [0, 1). The seeded adapter behind it keeps the cursor. */
+export type Rng = () => number;
 export type Point = readonly [number, number];
 export type Mode = "total92" | "quick60";
 export interface Player {
@@ -277,6 +278,7 @@ export type ReduceResult =
   | { readonly ok: true; readonly state: GameState; readonly events: readonly GameEvent[] }
   | { readonly ok: false; readonly state: GameState; readonly error: EngineError };
 export interface RngSnapshot {
+  readonly version: 1;
   readonly algorithm: string;
   readonly seed: string;
   readonly draws: number;
@@ -299,11 +301,12 @@ export interface PackParsers {
   parseConfig(raw: unknown): ParseResult<GameConfig>;
 }
 export interface QuizSelector {
-  /** County already drawn by engine. Does not favor a different county. */
-  pickQuestion(input: {
-    readonly countyId: CountyId;
-    readonly pack: QuizPack;
-    readonly asked: readonly QuestionId[];
-    readonly rng: Rng;
-  }): ParseResult<QuizQuestion>;
+  /** County already drawn by the engine. Null means that county has no usable question. */
+  prepareQuestion(
+    selectedCounty: CountyId,
+    quizPack: QuizPack,
+    askedIds: readonly QuestionId[],
+    turnSequence: number,
+    rng: Rng,
+  ): PendingQuestion | null;
 }

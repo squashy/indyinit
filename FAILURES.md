@@ -18,3 +18,5 @@ Where the AI needed correcting, and what we changed. Every new failure gets a ro
 | 12 | A browser test looked like a stall, but the computer had legitimately won | Investigated before deploying | Tests must recognize a finished game |
 | 13 | A temporary Vercel link would have expired in 60 minutes | Read the deploy output | Vercel login and team are set up before kickoff |
 | 14 | The quiz was worth 2 of the 17 armies on turn one, so it barely affected the game | Reviewing the arithmetic | Knowledge-matters bar; reward tuned by simulation |
+| 15 | The map builder wrote every region bonus as zero and the manifest could not carry one | Review of the built map | Copy an explicit integer bonus from the manifest through the parser into the map. A missing bonus stays 0 and draft |
+| 16 | A saved quiz could be drawn again because the random cursor was not stored with the position | Rules for resuming a game | Save the position and the random cursor together. Restore a pending question and an occupation without drawing again |
