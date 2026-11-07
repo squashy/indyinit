@@ -1,4 +1,5 @@
-import type { Action, CountyId, GameEvent, GameState, Player, PlayerId } from "../types.ts";
+import { chooseAction, DEFAULT_COMPUTER_CONFIG } from "../ai/ai.ts";
+import type { Action, CountyId, GameEvent, GameState, Player, PlayerId, Rng } from "../types.ts";
 import type { MapView } from "./map.ts";
 import type { Act } from "./quiz-dialog.ts";
 
@@ -7,7 +8,7 @@ export interface TurnChrome {
   hurry(): void;
 }
 
-export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => GameState | null): TurnChrome {
+export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => GameState | null, random: Rng, drive: (run: () => void) => void): TurnChrome {
   const phase = doc.getElementById("phase");
   const reinforcement = doc.getElementById("reinforcement-count");
   const endAttacks = doc.getElementById("end-attacks");
@@ -46,7 +47,7 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
     hurry() {
       ticket += 1;
       rushing = true;
-      for (let step = 0; step < 8; step += 1) {
+      for (let step = 0; step < DEFAULT_COMPUTER_CONFIG.maxSteps; step += 1) {
         const state = stateOf();
         if (!state || !computerShouldAct(state)) break;
         const mark = markOf(state);
@@ -105,7 +106,7 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
 
   frame?.addEventListener("click", (event) => {
     const state = stateOf();
-    if (!state || state.phase.kind !== "place" || !(event instanceof MouseEvent)) return;
+    if (!state || state.phase.kind !== "place" || computerShouldAct(state) || !(event instanceof MouseEvent)) return;
     const id = countyFromPoint(doc, event.clientX, event.clientY);
     if (!id) return;
     act({ kind: "place", countyId: id, count: 1 });
@@ -128,26 +129,16 @@ export function bindTurn(doc: Document, act: Act, map: MapView, stateOf: () => G
   }
 
   function stepComputer(state: GameState): void {
-    const action = computerAction(state);
-    if (action) act(action);
+    drive(() => {
+      const action = computerAction(state, random);
+      if (action) act(action);
+    });
   }
 }
 
-function computerAction(state: GameState): Action | null {
-  const phase = state.phase;
-  if (phase.kind === "quiz") {
-    return { kind: "skipQuiz", turnSequence: state.turnSequence, questionId: phase.pending.questionId };
-  }
-  if (phase.kind === "place") {
-    const held = state.holdings.find((item) => item.owner === state.activePlayer);
-    if (!held) return null;
-    return { kind: "place", countyId: held.countyId, count: phase.remaining };
-  }
-  if (phase.kind === "attack") return { kind: "endAttacks" };
-  if (phase.kind === "occupy") return { kind: "occupy", count: phase.minimum };
-  if (phase.kind === "fortify") return { kind: "skipFortify" };
-  if (phase.kind === "handoff") return { kind: "acknowledgeHandoff", turnSequence: state.turnSequence };
-  return null;
+function computerAction(state: GameState, random: Rng): Action | null {
+  if (state.phase.kind === "handoff") return { kind: "acknowledgeHandoff", turnSequence: state.turnSequence };
+  return chooseAction(state, random);
 }
 
 function computerShouldAct(state: GameState): boolean {
