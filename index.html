@@ -22,6 +22,7 @@
     </header>
     <main class="board">
       <div class="map-column">
+        <p class="compass" aria-hidden="true">N</p>
         <svg id="map" viewBox="-92 -34 760 1019" role="group" aria-label="Indiana county map" tabindex="0">
           <defs>
     <pattern id="cue-0" width="10" height="10" patternUnits="userSpaceOnUse">
@@ -1439,7 +1440,66 @@
         </svg>
       </div>
       <div class="side">
+        <div class="phase-dock">
         <p id="error-status" role="status" aria-live="assertive"></p>
+        <section class="card" aria-label="This step">
+          <h2>This step</h2>
+          <div class="status-bar">
+            <p id="phase" data-step="setup">This step: Setup</p>
+            <ol class="phase-track">
+              <li data-step="quiz">Quiz</li>
+              <li data-step="place">Place</li>
+              <li data-step="attack">Attack</li>
+              <li data-step="occupy">Move-in</li>
+              <li data-step="fortify">Fortify</li>
+              <li data-step="handoff">Handoff</li>
+            </ol>
+            <p id="reinforcement-count">Armies to place: 0</p>
+            <p id="phase-action" class="phase-action">Set up the game.</p>
+          </div>
+          <div class="turn-actions">
+            <button type="button" id="end-attacks" class="secondary" hidden>Stop attacking</button>
+            <button type="button" id="end-turn" hidden>Skip fortify</button>
+          </div>
+        </section>
+          <div class="phase-dialogs">
+        <section id="quiz-dialog" class="card" hidden role="dialog" aria-modal="false" aria-labelledby="quiz-county">
+          <h2 id="quiz-county">County</h2>
+          <p id="quiz-question"></p>
+          <div id="quiz-choices" role="group" aria-label="Answer choices"></div>
+          <p id="quiz-result" aria-live="polite"></p>
+          <button type="button" id="skip-quiz" class="secondary">Skip</button>
+          <p>The dotted county stays on the map. This box does not cover it.</p>
+        </section>
+        <section id="battle-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Battle">
+          <h2>Battle</h2>
+          <p class="battle-matchup"></p>
+          <p class="dice attack-dice"></p>
+          <p class="dice defend-dice"></p>
+          <p class="battle-outcome"></p>
+        </section>
+        <section id="occupy-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Move armies in">
+          <h2>Move armies in</h2>
+          <p>Move at least as many armies as the dice you rolled. Leave at least 1 army behind.</p>
+          <form class="occupy-form">
+            <label>Armies to move
+              <input type="number" name="occupy-count" min="1" step="1" inputmode="numeric">
+            </label>
+            <button type="submit" class="occupy-move">Move armies</button>
+          </form>
+        </section>
+        <section id="handoff-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Pass the screen">
+          <h2>Pass the screen</h2>
+          <p>Hand the screen to the next player.</p>
+          <button type="button" class="handoff-ready">Ready</button>
+        </section>
+        <section id="winner-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Winner">
+          <h2>Winner</h2>
+          <p></p>
+        </section>
+          </div>
+        </div>
+        <div class="side-rest">
         <section id="setup" class="card" aria-label="Set up the game">
           <h2>Set up</h2>
           <p>Choose 2 to 6 players. Type a name for each person or computer who is playing.</p>
@@ -1531,23 +1591,6 @@
           </ol>
           <p>The map shows who owns a county and how many armies sit there. “This step” tells you what to do now. Places in this county is for reading. It is not the quiz. The trip log writes what already happened.</p>
         </details>
-        <section class="card" aria-label="This step">
-          <h2>This step</h2>
-          <div class="status-bar">
-            <p id="phase" data-step="setup">This step: Setup</p>
-            <ol class="phase-track">
-              <li data-step="quiz">Quiz</li>
-              <li data-step="place">Reinforce</li>
-              <li data-step="attack">Attack</li>
-              <li data-step="fortify">Fortify</li>
-            </ol>
-            <p id="reinforcement-count">Armies to place: 0</p>
-          </div>
-          <div class="turn-actions">
-            <button type="button" id="end-attacks" class="secondary" hidden>Stop attacking</button>
-            <button type="button" id="end-turn" hidden>End turn</button>
-          </div>
-        </section>
         <section id="player-stats" class="card" aria-label="Players">
           <h2>Players</h2>
           <p>Each seat has its own color and its own pattern. The pattern still shows if the colors are hard to tell apart.</p>
@@ -1579,9 +1622,9 @@
           </ul>
           <h3>Map marks</h3>
           <ul class="map-marks">
-            <li><span class="mark-sample selected" aria-hidden="true"></span> Thick dark edge: the county you picked.</li>
+            <li><span class="mark-sample selected" aria-hidden="true"></span> Solid dark edge: the county you picked.</li>
             <li><span class="mark-sample source" aria-hidden="true"></span> Dashed edge: armies leave from here.</li>
-            <li><span class="mark-sample target" aria-hidden="true"></span> Dark red edge: you are aiming here.</li>
+            <li><span class="mark-sample target" aria-hidden="true"></span> Dotted edge: you are aiming here.</li>
             <li><span class="mark-sample quiz" aria-hidden="true"></span> Dotted dark edge: the quiz county. The question sits beside the map and does not cover it.</li>
           </ul>
         </section>
@@ -1600,37 +1643,7 @@
             <li>Nothing has happened yet.</li>
           </ol>
         </section>
-        <section id="quiz-dialog" class="card" hidden role="dialog" aria-modal="false" aria-labelledby="quiz-county">
-          <h2 id="quiz-county">County</h2>
-          <p id="quiz-question"></p>
-          <div id="quiz-choices" role="group" aria-label="Answer choices"></div>
-          <p id="quiz-result" aria-live="polite"></p>
-          <button type="button" id="skip-quiz" class="secondary">Skip</button>
-          <p>The dotted county stays on the map. This box does not cover it.</p>
-        </section>
-        <section id="battle-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Battle">
-          <h2>Battle</h2>
-          <p class="battle-matchup"></p>
-          <p class="dice attack-dice"></p>
-          <p class="dice defend-dice"></p>
-          <p class="battle-outcome"></p>
-        </section>
-        <section id="occupy-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Move armies in">
-          <h2>Move armies in</h2>
-          <p>Move at least as many armies as the dice you rolled. Leave at least 1 army behind.</p>
-          <label>Armies to move
-            <input type="number" name="occupy-count" min="1" step="1" inputmode="numeric">
-          </label>
-        </section>
-        <section id="handoff-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Pass the screen">
-          <h2>Pass the screen</h2>
-          <p>Hand the screen to the next player.</p>
-          <button type="button" class="handoff-ready">Ready</button>
-        </section>
-        <section id="winner-dialog" class="card" hidden role="dialog" aria-modal="false" aria-label="Winner">
-          <h2>Winner</h2>
-          <p></p>
-        </section>
+        </div>
       </div>
     </main>
   </div>

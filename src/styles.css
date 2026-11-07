@@ -269,9 +269,13 @@ input:focus-visible,
 }
 
 .county-label {
-  font-size: 0;
-  fill: transparent;
-  stroke: none;
+  font-size: 11px;
+  font-weight: 700;
+  fill: #1a120c;
+  stroke: #fff8ea;
+  stroke-width: 3px;
+  paint-order: stroke;
+  stroke-linejoin: round;
   pointer-events: none;
 }
 
@@ -281,8 +285,8 @@ input:focus-visible,
 
 .army-badge-shape {
   fill: #142033;
-  stroke: #ffffff;
-  stroke-width: 1.1;
+  stroke: #1a120c;
+  stroke-width: 1.6;
 }
 
 .army-badge-count {
@@ -310,6 +314,7 @@ input:focus-visible,
 .county.is-target .county-shape {
   stroke: var(--danger);
   stroke-width: 3.6;
+  stroke-dasharray: 2 1.4;
 }
 
 .county.is-quiz-county .county-shape {
@@ -319,16 +324,79 @@ input:focus-visible,
 }
 
 .side {
+  display: flex;
+  flex-direction: column;
   padding: 0.75rem;
+  overflow: hidden;
   background: var(--paper-deep);
+}
+
+.phase-dock {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow: auto;
+}
+
+@media (min-width: 821px) {
+  .phase-dock {
+    display: block;
+    flex: none;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .phase-dialogs {
+    max-height: none;
+    overflow: visible;
+  }
+
+  #quiz-dialog,
+  #battle-dialog,
+  #occupy-dialog,
+  #handoff-dialog,
+  #winner-dialog {
+    max-height: none;
+  }
+}
+
+.phase-dialogs {
+  min-height: 0;
+  overflow: auto;
+}
+
+.side-rest {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 .card {
   background: var(--paper-card);
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   border-top: 4px solid var(--gold);
   padding: 0.75rem;
   margin: 0 0 0.75rem;
+}
+
+.compass {
+  position: absolute;
+  z-index: 2;
+  top: 0.4rem;
+  left: 0.4rem;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  border: 2px solid var(--stitch);
+  border-radius: 50%;
+  background: var(--paper-card);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .card ol,
@@ -426,11 +494,8 @@ summary {
 }
 
 .side section:has(#phase) {
-  position: sticky;
-  top: 0;
-  z-index: 2;
+  position: static;
   background: var(--paper-card);
-  box-shadow: 0 -14px 0 0 var(--paper-deep);
 }
 
 .status-bar p {
@@ -446,25 +511,31 @@ summary {
   padding: 0;
 }
 
+.phase-track {
+  flex-wrap: wrap;
+}
+
 .phase-track li {
-  flex: 1 1 0;
-  min-height: var(--hit);
+  flex: 1 1 4.2rem;
+  min-height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #1a2330;
   background: var(--paper);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
+  text-align: center;
 }
 
-#phase[data-step="quiz"] + .phase-track [data-step="quiz"],
-#phase[data-step="place"] + .phase-track [data-step="place"],
-#phase[data-step="attack"] + .phase-track [data-step="attack"],
-#phase[data-step="occupy"] + .phase-track [data-step="attack"],
-#phase[data-step="fortify"] + .phase-track [data-step="fortify"] {
+.phase-track [aria-current="step"] {
   background: var(--blue);
   color: #fff8ea;
+}
+
+.phase-action {
+  margin: 0.2rem 0 0.35rem;
+  font-weight: 700;
 }
 
 #reinforcement-count {
@@ -545,6 +616,8 @@ summary {
   inset: auto;
   margin: 0 0 0.75rem;
   max-width: 100%;
+  max-height: min(24rem, 46dvh);
+  overflow: auto;
 }
 
 [hidden] {
@@ -569,6 +642,24 @@ summary {
   min-height: var(--hit);
   font-size: 1.35rem;
   font-variant-numeric: tabular-nums;
+}
+
+.battle-matchup,
+.battle-outcome,
+#occupy-dialog p {
+  font-weight: 700;
+}
+
+.dice-actions,
+.occupy-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+.occupy-form label {
+  flex: 1 1 8rem;
 }
 
 #county-info,
@@ -606,8 +697,20 @@ summary {
     min-height: 16rem;
   }
 
+  .county-label {
+    font-size: 0;
+    stroke: none;
+  }
+
   .side {
     overflow: visible;
+    max-height: none;
+  }
+
+  .phase-dock,
+  .side-rest {
+    overflow: visible;
+    max-height: none;
   }
 
   .side section:has(#phase) {
@@ -637,6 +740,50 @@ summary {
     padding-top: 0.3rem;
     padding-bottom: 0.3rem;
   }
+
+  #reinforcement-count[data-remaining]::before {
+    font-size: 1.6rem;
+  }
+}
+
+#quiz-dialog,
+#battle-dialog,
+#occupy-dialog,
+#handoff-dialog,
+.phase-dock {
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.is-entering {
+  animation: phase-in 160ms ease;
+}
+
+.is-rolling {
+  animation: dice-in 400ms ease;
+}
+
+@keyframes phase-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dice-in {
+  from {
+    opacity: 0.45;
+    transform: translateY(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -647,6 +794,13 @@ summary {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .is-entering,
+  .is-rolling {
+    animation: none;
+    transform: none;
+    opacity: 1;
   }
 }
 
