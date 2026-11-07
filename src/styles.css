@@ -586,9 +586,33 @@ summary {
     font-size: 1.35rem;
   }
 
+  html,
+  body {
+    height: auto;
+  }
+
+  #app {
+    max-height: none;
+    overflow: visible;
+  }
+
   .board {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(12rem, 70dvh) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  .map-column {
+    height: min(62dvh, 40rem);
+    min-height: 16rem;
+  }
+
+  .side {
+    overflow: visible;
+  }
+
+  .side section:has(#phase) {
+    position: static;
+    box-shadow: none;
   }
 
   #player-list li {
