@@ -61,6 +61,8 @@ export function embedMap(html: string, map: MapPack): string {
     );
   }
   out = replaceOnce(out, /(<path class="state-outline" d=")[^"]*(")/, `$1${map.outline}$2`, "state outline");
+  const borders = map.regions.map((region) => `<path class="region-border" data-region-id="${region.id}" d="${region.borderPath}"></path>`).join("");
+  out = replaceOnce(out, /(<g class="region-borders"[^>]*>)[\s\S]*?(<\/g>)/, `$1${borders}$2`, "region borders");
   return out;
 }
 

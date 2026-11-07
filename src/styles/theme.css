@@ -26,6 +26,8 @@
   --on-owner-3: #ffffff;
   --on-owner-4: #ffffff;
   --on-owner-5: #ffffff;
+  --region-border-width: 2.6;
+  --region-border-color: #101820;
   --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
   --font-ui: "Segoe UI", system-ui, -apple-system, "Noto Sans", "Liberation Sans", sans-serif;
 }

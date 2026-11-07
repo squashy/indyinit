@@ -101,7 +101,12 @@ export class DomElement extends DomNode {
   children: DomElement[] = [];
   classList = new DomClassList(this);
   dataset: Record<string, string>;
-  style: { setProperty: () => void } = { setProperty() {} };
+  style: { setProperty: (name: string, value: string) => void; animationDelay: string } = {
+    animationDelay: "",
+    setProperty(name: string, value: string) {
+      if (name === "animationDelay") this.animationDelay = value;
+    },
+  };
 
   get hidden(): boolean {
     return this.#hidden;
@@ -245,6 +250,24 @@ export class DomElement extends DomNode {
     for (const node of nodes) this.appendChild(node);
   }
 
+  cloneNode(deep = false): DomElement {
+    const Copy = this.constructor as new (tag: string) => DomElement;
+    const copy = new Copy(this.tagName);
+    copy.id = this.id;
+    copy.className = this.className;
+    copy.hidden = this.hidden;
+    copy.tabIndex = this.tabIndex;
+    copy.style.animationDelay = this.style.animationDelay;
+    for (const [name, value] of this.attributes) copy.setAttribute(name, value);
+    if (this.id) copy.setAttribute("id", this.id);
+    if (this.className) copy.setAttribute("class", this.className);
+    if (this.children.length === 0) copy.textContent = this.textContent;
+    if (deep) {
+      for (const child of [...this.children]) copy.appendChild(child.cloneNode(true));
+    }
+    return copy;
+  }
+
   closest(selector: string): DomElement | null {
     let node: DomElement | null = this;
     while (node) {
@@ -334,6 +357,7 @@ export class DomSVGSVGElement extends DomSVGElement {}
 export class DomDocument {
   documentElement: DomElement;
   activeElement: DomElement | null = null;
+  title = "";
   listeners = new Map<string, Listener[]>();
   elementFromPoint: (x: number, y: number) => DomElement | null = () => null;
   reducedMotion = false;
@@ -491,6 +515,8 @@ function matchesCompound(element: DomElement, compound: string): boolean {
     return "";
   });
   if (nots.some((inner) => matchesCompound(element, inner))) return false;
+  const wantsChecked = rest.includes(":checked");
+  rest = rest.replace(/:checked/g, "");
   const id = rest.match(/#([\w-]+)/);
   if (id && element.id !== id[1]) return false;
   rest = rest.replace(/#[\w-]+/g, "");
@@ -506,5 +532,6 @@ function matchesCompound(element: DomElement, compound: string): boolean {
   }
   rest = rest.replace(/\[[^\]]+\]/g, "").trim().toLowerCase();
   if (rest && element.tagName.toLowerCase() !== rest) return false;
+  if (wantsChecked && element.getAttribute("checked") === null) return false;
   return true;
 }

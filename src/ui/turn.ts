@@ -1,4 +1,5 @@
 import { chooseAction, DEFAULT_COMPUTER_CONFIG } from "../ai/ai.ts";
+import { reinforcementBreakdown } from "../engine/engine.ts";
 import type { Action, CountyId, GameEvent, GameState, Player, PlayerId, Rng } from "../types.ts";
 import type { MapView } from "./map.ts";
 import type { Act } from "./quiz-dialog.ts";
@@ -212,7 +213,7 @@ function paintStatus(doc: Document, phaseNode: HTMLElement | null, reinforcement
     reinforcement.dataset.regions = String(phase.regionIncome);
     reinforcement.dataset.quiz = "";
     delete reinforcement.dataset.remaining;
-    reinforcement.textContent = `Counties ${count}. Base reinforcement ${phase.baseIncome}. Regions ${phase.regionIncome}. Question not scored.`;
+    reinforcement.textContent = `Counties ${count}. Base reinforcement ${phase.baseIncome}. Regions ${phase.regionIncome}. Question not scored.${awardedRegionText(state)}`;
     return;
   }
   if (phase.kind === "place") {
@@ -220,7 +221,7 @@ function paintStatus(doc: Document, phaseNode: HTMLElement | null, reinforcement
     reinforcement.dataset.regions = String(phase.income.regions);
     reinforcement.dataset.quiz = String(phase.income.quiz);
     reinforcement.dataset.remaining = String(phase.remaining);
-    reinforcement.textContent = `Counties ${count}. Base reinforcement ${phase.income.base}. Regions ${phase.income.regions}. Question ${phase.income.quiz}. Armies to place ${phase.remaining}.`;
+    reinforcement.textContent = `Counties ${count}. Base reinforcement ${phase.income.base}. Regions ${phase.income.regions}. Question ${phase.income.quiz}. Armies to place ${phase.remaining}.${awardedRegionText(state)}`;
     return;
   }
   delete reinforcement.dataset.base;
@@ -228,6 +229,12 @@ function paintStatus(doc: Document, phaseNode: HTMLElement | null, reinforcement
   delete reinforcement.dataset.quiz;
   reinforcement.dataset.remaining = "0";
   reinforcement.textContent = `Counties ${count}. Armies to place 0.`;
+}
+
+function awardedRegionText(state: GameState): string {
+  const lines = reinforcementBreakdown(state)?.regions ?? [];
+  if (lines.length === 0) return "";
+  return ` Awarded regions: ${lines.map((line) => `${line.name} +${line.bonus}`).join(", ")}.`;
 }
 
 function paintTrack(doc: Document, phaseNode: HTMLElement, state: GameState): void {

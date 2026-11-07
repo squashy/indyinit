@@ -73,11 +73,11 @@ test("the Indiana pack matches the Census counties and excludes corner touches",
   const lake = built.map.counties.find((county) => county.name === "Lake");
   const vanderburgh = built.map.counties.find((county) => county.name === "Vanderburgh");
   assert.ok(marion && lake && vanderburgh);
-  assert.equal(marion.regionId, "central-indiana");
-  assert.equal(lake.regionId, "northwest-indiana");
-  assert.equal(vanderburgh.regionId, "southwest-indiana");
+  assert.equal(marion.regionId, "crossroads");
+  assert.equal(lake.regionId, "dunes-michiana");
+  assert.equal(vanderburgh.regionId, "pocket-coal-country");
   assert.equal(built.map.regions.length, 8);
-  assert.equal(built.map.regions.every((region) => region.review === "draft" && region.bonus === 0), true);
+  assert.equal(built.map.regions.every((region) => region.review === "reviewed" && Number.isSafeInteger(region.bonus) && region.bonus > 0), true);
   assert.deepEqual(
     marion.neighbors.map((fips) => names.get(fips)).sort(),
     ["Boone", "Hamilton", "Hancock", "Hendricks", "Johnson", "Morgan", "Shelby"],
@@ -104,15 +104,17 @@ test("the page map, the pack and the quiz digest agree, and the map is north-up"
 test("an explicit integer bonus is copied and a missing bonus stays zero without being marked reviewed", () => {
   const raw = JSON.parse(readFileSync(path.join(root, "regions", "in", "region.json"), "utf8")) as {
     review: string;
-    regions: { bonus?: number; review: string; id: string }[];
+    regions: { bonus?: number; review: string; id: string; counties: string[] }[];
   };
-  assert.equal(parseRegionFile(raw).regions.every((region) => region.bonus === undefined), true);
+  assert.equal(raw.regions.every((region) => Number.isSafeInteger(region.bonus) && region.review === "reviewed"), true);
+  assert.equal(raw.regions.every((region) => region.counties.every((county) => !/^\d{5}$/.test(county))), true);
   const adopted = structuredClone(raw);
-  adopted.review = "reviewed";
   const first = adopted.regions[0];
   const second = adopted.regions[1];
   if (!first || !second) throw new Error("missing region");
   first.bonus = 5;
+  delete second.bonus;
+  second.review = "draft";
   const parsed = parseRegionFile(adopted);
   assert.equal(parsed.regions[0]?.bonus, 5);
   assert.equal(parsed.regions[1]?.bonus, undefined);
@@ -120,7 +122,7 @@ test("an explicit integer bonus is copied and a missing bonus stays zero without
   const copied = built.map.regions.find((region) => region.id === first.id);
   const untouched = built.map.regions.find((region) => region.id === second.id);
   assert.equal(copied?.bonus, 5);
-  assert.equal(copied?.review, "draft");
+  assert.equal(copied?.review, "reviewed");
   assert.equal(untouched?.bonus, 0);
   assert.equal(untouched?.review, "draft");
   assert.equal(built.manifest.regions.find((region) => region.id === first.id)?.bonus, 5);
