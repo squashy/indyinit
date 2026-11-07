@@ -41,6 +41,7 @@ async function main() {
     await browser.check("desktop", 1440, 900, true);
     await browser.check("chromebook", 1366, 768, true);
     await browser.check("phone", 390, 844, true);
+    await browser.storage();
     await browser.close();
   } catch (error) {
     const detail = error instanceof Error ? error.stack || error.message : String(error);
@@ -89,7 +90,7 @@ function renderReport() {
     "",
     "On that local build, Chromebook 1366 completed a full human turn. A second correct answer stayed at question 2 and 135 armies. An enemy fortify and a disconnected fortify were rejected with the armies unchanged. A connected fortify moved exactly one army, 17 to 16 and 1 to 2. Continue restored player 1, phase place, turn sequence 2, and the same 92 owner and army pairs. Tab reached the map and Skip, and the arrow keys moved county focus.",
     "",
-    "Phone 390 on that same build could not click a quiz choice or Skip. The sticky phase card in `src/styles.css` is 191px tall and the side pane is 162px tall, so the click lands on `#phase`. Re-running this gate on that merge records `phone correct choice receives the click` as a failure with that target. Desktop and Chromebook on that merge pass the same full-turn checks. The product file is not changed on this branch.",
+    "That earlier merge failed the phone quiz click because a sticky phase card covered the choice. Visual head `60f527a17f351f37634299531b3775a8aae03d81` lets the phone page scroll. This file was produced by running the gate against that visual build, without changing a product branch. The phone rows above are the result. A blocked localStorage getter, throwing getItem and setItem, and a corrupt save are separate core rows: Start and a later action stay usable, and Continue must leave the live counties in place.",
     "",
   );
   return lines.join("\n");
@@ -170,6 +171,12 @@ async function connectBrowser() {
       recordCore(`${name} keyboard moves county focus`, arrows.moved, `${arrows.before} -> ${arrows.first} -> ${arrows.second}`, "src/ui/map.ts");
       if (full) await fullTurn(page, opened.prompt, name);
       recordCore(`${name} no page errors`, pageErrors.length === 0 && failed.length === 0, [...pageErrors, ...failed].join("; ") || "none", "src/main.ts");
+    },
+    async storage() {
+      await page.send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+      await storageCase(page, pageErrors, "blocked getter", "getter");
+      await storageCase(page, pageErrors, "throwing methods", "methods");
+      await storageCase(page, pageErrors, "corrupt save", "corrupt");
     },
     async close() {
       browserSocket.close();
@@ -360,6 +367,84 @@ function recordCore(name, ok, detail, owner) {
 
 function recordOptional(name, ok, detail, owner) {
   optional.push({ name, ok: Boolean(ok), detail, owner });
+}
+
+async function storageCase(page, pageErrors, label, mode) {
+  pageErrors.length = 0;
+  await page.send("Page.navigate", { url: `http://127.0.0.1:${port}/` });
+  await waitUntil(page, "document.readyState === 'complete' && document.getElementById('start-game')");
+  if (mode !== "corrupt") {
+    const installed = await installBrokenStorage(page, mode);
+    recordCore(`storage ${label} can be installed`, installed.ok, installed.detail || "installed", "gates/browser.mjs");
+    if (!installed.ok) return;
+  }
+  await type(page, "input[name='player-name-0']", "Ada");
+  await type(page, "input[name='player-name-1']", "Bo");
+  await click(page, "#start-game");
+  await waitUntil(page, "document.getElementById('quiz-dialog') && document.getElementById('quiz-dialog').hidden === false");
+  const started = await boardMark(page);
+  recordCore(`storage ${label} start stays usable`, started.owned === 92 && started.quiz && started.status === "", `${started.owned} owned, ${started.phase}`, "src/ui/setup.ts");
+  if (mode === "methods") {
+    await click(page, "#skip-quiz");
+    await waitUntil(page, "(document.getElementById('phase')?.textContent || '').includes('places armies')");
+    const placed = await boardMark(page);
+    recordCore(`storage ${label} persist does not block the turn`, placed.phase.includes("places armies") && placed.owned === 92, placed.phase, "src/ui/setup.ts");
+    await click(page, "#continue-game");
+    const after = await boardMark(page);
+    recordCore(`storage ${label} continue keeps the live counties`, after.status.includes("could not read") && after.rows === placed.rows && after.phase === placed.phase, after.status, "src/ui/setup.ts");
+  } else if (mode === "getter") {
+    await click(page, "#continue-game");
+    const after = await boardMark(page);
+    recordCore(`storage ${label} continue keeps the live counties`, after.status.includes("could not read") && after.rows === started.rows && after.phase === started.phase && after.quiz, after.status, "src/ui/setup.ts");
+  } else {
+    const written = await evalJson(page, "localStorage.setItem('battle-for-the-92.save', '{'), localStorage.getItem('battle-for-the-92.save')");
+    recordCore("storage corrupt save is stored", written === "{", String(written), "gates/browser.mjs");
+    await click(page, "#continue-game");
+    const after = await boardMark(page);
+    recordCore("storage corrupt save continue keeps the live counties", after.status.length > 0 && after.rows === started.rows && after.phase === started.phase && after.quiz, after.status, "src/ui/setup.ts");
+  }
+  recordCore(`storage ${label} no page error`, pageErrors.length === 0, pageErrors.join("; ") || "none", "src/ui/setup.ts");
+}
+
+async function installBrokenStorage(page, mode) {
+  return evalJson(page, `(() => {
+    try {
+      if (${JSON.stringify(mode)} === "getter") {
+        Object.defineProperty(window, "localStorage", { configurable: true, get() { throw new Error("blocked"); } });
+      } else {
+        const broken = {
+          getItem() { throw new Error("get"); },
+          setItem() { throw new Error("set"); },
+          removeItem() { throw new Error("remove"); },
+          clear() { throw new Error("clear"); },
+          key() { throw new Error("key"); },
+          get length() { throw new Error("length"); },
+        };
+        Object.defineProperty(window, "localStorage", { configurable: true, get() { return broken; } });
+      }
+      let threw = false;
+      try { void window.localStorage; } catch { threw = true; }
+      if (${JSON.stringify(mode)} === "getter" && !threw) return { ok: false, detail: "getter did not throw" };
+      return { ok: true, detail: "" };
+    } catch (error) {
+      return { ok: false, detail: error instanceof Error ? error.message : String(error) };
+    }
+  })()`);
+}
+
+async function boardMark(page) {
+  return evalJson(page, `(() => {
+    const rows = [...document.querySelectorAll("#map [data-county-id]")].map((node) => {
+      return node.getAttribute("data-county-id") + ":" + (node.getAttribute("data-owner") ?? "") + ":" + (node.querySelector(".army-badge-count")?.textContent || "");
+    }).sort();
+    return {
+      rows: rows.join("|"),
+      owned: rows.filter((row) => row.split(":")[1] !== "").length,
+      phase: document.getElementById("phase")?.textContent || "",
+      status: document.getElementById("error-status")?.textContent || "",
+      quiz: document.getElementById("quiz-dialog")?.hidden === false,
+    };
+  })()`);
 }
 
 async function played(page) {
