@@ -17,7 +17,7 @@
       <div class="landing-copy">
         <p class="landing-kicker">Indiana</p>
         <h1 id="landing-title" class="landing-wordmark" tabindex="-1">Battle for 92</h1>
-        <p class="landing-hook">Share one screen on Indiana’s 92 counties. A right answer adds 2 armies.</p>
+        <p class="landing-hook">A right answer adds 2 armies.</p>
         <p class="quiz-unverified">Questions unverified</p>
         <div class="landing-actions">
           <button type="button" id="new-game">New game</button>
@@ -27,9 +27,11 @@
       <div id="landing-hero" class="landing-hero" aria-hidden="true"></div>
     </section>
     <section id="setup-screen" class="setup-screen" hidden>
-      <p class="setup-nav"><button type="button" id="setup-back" class="secondary">Back</button></p>
         <section id="setup" class="card" aria-label="Set up the game">
-          <h1 id="setup-heading" tabindex="-1">Set up</h1>
+          <div class="setup-head">
+            <h1 id="setup-heading" tabindex="-1">Set up</h1>
+            <button type="button" id="setup-back" class="secondary">Back</button>
+          </div>
           <p>Choose 2 to 6 players. Type a name for each person or computer who is playing.</p>
           <ol id="player-list">
             <li data-owner="0">
@@ -1543,7 +1545,6 @@
       <div class="side">
         <div class="phase-dock">
         <section class="card" aria-label="This step">
-          <h2>This step</h2>
           <div class="status-bar">
             <p id="phase" data-step="setup">This step: Setup</p>
             <ol class="phase-track">

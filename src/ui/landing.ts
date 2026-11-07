@@ -27,12 +27,26 @@ export function bindLanding(doc: Document): void {
     node.removeAttribute("data-county-id");
     node.removeAttribute("tabindex");
     node.removeAttribute("role");
-    node.setAttribute("data-owner", String(index % 6));
+    const seat = index % 6;
+    node.setAttribute("data-owner", String(seat));
+    const delay = `${sweepMs(node, index)}ms`;
     if (node instanceof HTMLElement || node instanceof SVGElement) {
-      node.style.animationDelay = `${index * SWEEP_MS}ms`;
+      node.style.animationDelay = delay;
+      node.style.setProperty("--sweep", delay);
+      node.style.setProperty("--settled", `var(--owner-${seat})`);
     }
+    const shape = node.querySelector(".county-shape");
+    if (shape instanceof HTMLElement || shape instanceof SVGElement) shape.style.animationDelay = delay;
   });
   hero.replaceChildren(clone);
+}
+
+function sweepMs(node: Element, index: number): number {
+  const label = node.querySelector(".county-label");
+  const y = Number(label?.getAttribute("y"));
+  if (!Number.isFinite(y)) return index * SWEEP_MS;
+  const south = Math.min(1, Math.max(0, (y - 60) / 820));
+  return Math.round(south * 2600);
 }
 
 function eachElement(node: Element, visit: (node: Element) => void): void {
