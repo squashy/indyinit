@@ -269,9 +269,13 @@ input:focus-visible,
 }
 
 .county-label {
-  font-size: 0;
-  fill: transparent;
-  stroke: none;
+  font-size: 11px;
+  font-weight: 700;
+  fill: #1a120c;
+  stroke: #fff8ea;
+  stroke-width: 3px;
+  paint-order: stroke;
+  stroke-linejoin: round;
   pointer-events: none;
 }
 
@@ -281,8 +285,8 @@ input:focus-visible,
 
 .army-badge-shape {
   fill: #142033;
-  stroke: #ffffff;
-  stroke-width: 1.1;
+  stroke: #1a120c;
+  stroke-width: 1.6;
 }
 
 .army-badge-count {
@@ -310,6 +314,7 @@ input:focus-visible,
 .county.is-target .county-shape {
   stroke: var(--danger);
   stroke-width: 3.6;
+  stroke-dasharray: 2 1.4;
 }
 
 .county.is-quiz-county .county-shape {
@@ -346,10 +351,30 @@ input:focus-visible,
 
 .card {
   background: var(--paper-card);
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   border-top: 4px solid var(--gold);
   padding: 0.75rem;
   margin: 0 0 0.75rem;
+}
+
+.compass {
+  position: absolute;
+  z-index: 2;
+  top: 0.4rem;
+  left: 0.4rem;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  border: 2px solid var(--stitch);
+  border-radius: 50%;
+  background: var(--paper-card);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .card ol,
@@ -648,6 +673,11 @@ summary {
   .map-column {
     height: min(62dvh, 40rem);
     min-height: 16rem;
+  }
+
+  .county-label {
+    font-size: 0;
+    stroke: none;
   }
 
   .side {

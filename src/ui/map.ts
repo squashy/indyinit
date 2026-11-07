@@ -50,7 +50,7 @@ export function bindMap(doc: Document): MapView {
       }
     }
     paint(doc, state, marks);
-    showCountyInfo(doc, county);
+    showCountyInfo(doc, county, marks, state);
     focusCounty(doc, id);
   };
 
@@ -157,11 +157,14 @@ function paintPlayers(doc: Document, state: GameState): void {
       continue;
     }
     const count = state.holdings.reduce((total, holding) => total + (holding.owner === owner ? 1 : 0), 0);
-    text.textContent = `${player.label} · ${count} counties`;
+    const pattern = PATTERNS[owner] ?? "pattern";
+    text.textContent = `${player.label} · seat ${owner + 1} · ${pattern} · ${count} ${count === 1 ? "county" : "counties"}`;
   }
 }
 
-function showCountyInfo(doc: Document, county: County): void {
+const PATTERNS = ["checker", "triangles", "dots", "diagonal", "crosshatch", "bars"] as const;
+
+function showCountyInfo(doc: Document, county: County, marks?: Marks, state?: GameState | null): void {
   const section = doc.getElementById("county-info");
   if (!section) return;
   let slot = section.querySelector(".county-facts");
@@ -174,6 +177,23 @@ function showCountyInfo(doc: Document, county: County): void {
   const name = doc.createElement("p");
   name.textContent = county.name;
   slot.appendChild(name);
+  const holding = state?.holdings.find((item) => item.countyId === county.id);
+  if (holding && state) {
+    const player = state.config.players.find((item) => item.id === holding.owner);
+    const seat = player?.label ?? `Seat ${holding.owner + 1}`;
+    const summary = doc.createElement("p");
+    summary.textContent = `${seat}, ${holding.armies} armies.`;
+    slot.appendChild(summary);
+  }
+  const roles: string[] = [];
+  if (marks?.selected === county.id) roles.push("Selected");
+  if (marks?.source === county.id) roles.push("Armies leave from here");
+  if (marks?.target === county.id) roles.push("Aiming here");
+  if (roles.length > 0) {
+    const role = doc.createElement("p");
+    role.textContent = roles.join(". ") + ".";
+    slot.appendChild(role);
+  }
   if (county.facts.length === 0) {
     const empty = doc.createElement("p");
     empty.textContent = "No places were supplied for this county.";
