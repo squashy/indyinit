@@ -383,7 +383,30 @@ async function connectBrowser() {
     const sourceBefore = Number(before.source);
     const friendBefore = Number(before.friend);
     await click(pageSocket, ".fortify-move");
-    await waitUntil(pageSocket, "!(document.getElementById('phase')?.textContent || '').includes('may move armies once')");
+    const stillFortifying = () => evalJson(pageSocket, "(document.getElementById('phase')?.textContent || '').includes('may move armies once')");
+    if (await stillFortifying()) {
+      await click(pageSocket, `[data-county-id="${plan.source}"]`);
+      await click(pageSocket, `[data-county-id="${plan.friend}"]`);
+      await evalJson(pageSocket, "document.querySelector('.fortify-move')?.click(), true");
+    }
+    try {
+      await waitUntil(pageSocket, "!(document.getElementById('phase')?.textContent || '').includes('may move armies once')");
+    } catch (error) {
+      const detail = await evalJson(pageSocket, `(() => {
+        const dialog = document.getElementById('quiz-dialog');
+        return {
+          aimed: ${JSON.stringify(aimed)},
+          phase: document.getElementById('phase')?.textContent || '',
+          status: document.getElementById('error-status')?.textContent || '',
+          source: document.querySelector('.is-source')?.getAttribute('data-county-id') || '',
+          target: document.querySelector('.is-target')?.getAttribute('data-county-id') || '',
+          dialogOpen: dialog?.open === true,
+          dialogHidden: dialog?.hidden === true,
+          dialogModal: dialog?.matches(':modal') === true,
+        };
+      })()`);
+      throw new Error(`${error instanceof Error ? error.message : error} ${JSON.stringify(detail)}`);
+    }
     const after = await badges(pageSocket, plan.source, plan.friend);
     mark("fortify moves exactly one army", aimed === plan.friend && Number(after.source) === sourceBefore - 1 && Number(after.friend) === friendBefore + 1, `${before.source}->${after.source}, ${before.friend}->${after.friend}`, "src/ui/turn.ts");
     const handoff = await evalJson(pageSocket, "document.querySelector('#handoff-dialog p')?.textContent || ''");
