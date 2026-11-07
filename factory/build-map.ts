@@ -6,7 +6,9 @@ import { pathToFileURL } from "node:url";
 import type { County, MapPack, Region } from "../src/types.ts";
 import { adjacency, decodeArc, loadAtlas, ringPoints, type Atlas, type Point } from "./borders.ts";
 import { makeFips, makeRegionId, type Fips } from "./ids.ts";
+import { embedMap } from "./embed-map.ts";
 import { parseRegionFile, type RegionFile } from "./parse-map.ts";
+import { projectIndiana } from "./projection.ts";
 import { drawRegions, type DrawnRegion } from "./regions.ts";
 
 const require = createRequire(import.meta.url);
@@ -21,7 +23,7 @@ export type BuiltState = {
 };
 
 export function atlasJson(): unknown {
-  const atlasPath = require.resolve("us-atlas/counties-albers-10m.json");
+  const atlasPath = require.resolve("us-atlas/counties-10m.json");
   return JSON.parse(readFileSync(atlasPath, "utf8"));
 }
 
@@ -49,7 +51,9 @@ export function buildState(manifest: RegionFile, atlasInput: unknown): BuiltStat
     centroid: centroids.get(shape.fips) ?? [0, 0],
     neighbors: borders.neighbors.get(shape.fips) ?? [],
   }));
-  const drawn = manifest.review === "draft" ? drawRegions(manifest.name, placed, manifest.expectedRegions) : regionsFromManifest(manifest, atlas);
+  // A manifest that already lists its regions keeps them: redrawing from projected centroids
+  // would move counties between regions whenever the map projection changes.
+  const drawn = manifest.review === "draft" && manifest.regions.length === 0 ? drawRegions(manifest.name, placed, manifest.expectedRegions) : regionsFromManifest(manifest, atlas);
   const regionOf = new Map<Fips, DrawnRegion>();
   for (const region of drawn) {
     for (const fips of region.fips) regionOf.set(fips, region);
@@ -147,7 +151,7 @@ function largestRingCentroid(atlas: Atlas, rings: readonly (readonly number[])[]
   let best: Point[] = [];
   let bestArea = -1;
   for (const ring of rings) {
-    const points = ringPoints(atlas, ring);
+    const points = ringPoints(atlas, ring).map((point) => projectIndiana(point));
     const area = Math.abs(signedArea(points));
     if (area > bestArea) {
       best = points;
@@ -207,7 +211,7 @@ function projectArcs(atlas: Atlas): {
   for (const key of used) {
     const arc = atlas.arcs[key];
     if (!arc) throw new Error(`missing arc ${key}`);
-    const points = decodeArc(arc, atlas.transform);
+    const points = decodeArc(arc, atlas.transform).map((point) => projectIndiana(point));
     decoded.set(key, points);
     for (const point of points) {
       minX = Math.min(minX, point[0]);
@@ -322,6 +326,10 @@ function main(): void {
     const manifest = parseRegionFile(JSON.parse(readFileSync(manifestPath, "utf8")));
     const built = buildState(manifest, atlas);
     writeBuiltState(root, built);
+    if (abbr === "in") {
+      const pagePath = path.join(root, "index.html");
+      writeFileSync(pagePath, embedMap(readFileSync(pagePath, "utf8"), built.map));
+    }
     console.log(
       `${abbr}: ${built.map.counties.length} counties, ${built.map.regions.length} regions, ${built.byteLength} bytes, ${built.cornerOnly.length} corner-only touches excluded`,
     );
