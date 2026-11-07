@@ -33,6 +33,21 @@ test("the fixture CSV becomes a pack bound to the final map digest", () => {
   assert.equal(quizPackJson(pack), quizPackJson(importQuizText(csvText, map)));
 });
 
+test("the shipped quiz pack is the supplied file imported against the current map", () => {
+  const csvText = readFileSync(path.join(root, "inputs", "battle-for-the-92-benchmark-1000_nokey.csv"), "utf8");
+  const map = parseMapPack(JSON.parse(readFileSync(path.join(root, "data", "regions", "in", "map.json"), "utf8")));
+  const imported = importQuizText(csvText, map);
+  const shipped = readFileSync(path.join(root, "data", "quiz.json"), "utf8");
+  assert.equal(shipped, quizPackJson(imported));
+  const lists = Object.values(imported.counties);
+  const questions = lists.reduce((total, items) => total + items.length, 0);
+  const covered = lists.filter((items) => items.length > 0).length;
+  assert.equal(questions, 1000);
+  assert.equal(covered, map.counties.length);
+  assert.equal(imported.mapDigest, map.digest);
+  assert.equal(imported.sourceDigest, createHash("sha256").update(csvText, "utf8").digest("hex"));
+});
+
 test("the importer fails on a bad FIPS, a mismatched answer, a duplicate id, and a blank cell", () => {
   const map = parseMapPack(JSON.parse(readFileSync(path.join(root, "data", "regions", "in", "map.json"), "utf8")));
   assert.throws(() => importQuizText(sheet([{ FIPS: "99999" }]), map), /FIPS/);
