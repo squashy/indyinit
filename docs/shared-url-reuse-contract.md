@@ -1,5 +1,7 @@
 # Shared-URL reuse contract
 
+Architect verified Origin `packages/online` on 2026-11-07; adopt PR32 as draft base; see `docs/BTT27-architect-adaptation-contract.md` for decisions (invite URL still open; BTT-28/29 no-go until BF92-owned store; idempotency required in BTT-29; seats 2–6; sanitized public view).
+
 Investigation only. This record does not move board cards, mark any story Done, change gameplay, or authorize a store, deploy, or spend.
 
 Stories named for later linkage:
