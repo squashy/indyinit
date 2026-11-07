@@ -33,7 +33,7 @@ To begin, an agent reads `CONTRACT.md` first, then `SPEC.md`, subject to the cur
 
 ## Box checks
 
-`npm run build:map` writes `data/regions/in/map.json` from Census cartographic boundaries.
+`npm run build:map` writes `data/regions/in/map.json` from Census cartographic boundaries (`us-atlas@3.0.1` `counties-10m.json`) drawn north-up with an Indiana-centered transverse Mercator (`factory/projection.ts`), and rewrites the inline map in `index.html` to match. A region manifest that already lists its regions keeps them, even while marked draft; regions are only drawn from county centroids when the manifest lists none. After a rebuild, refresh the quiz map digest with `node --experimental-strip-types factory/import-quiz.ts --csv inputs/battle-for-the-92-benchmark-1000_nokey.csv --map data/regions/in/map.json --out data/quiz.json`.
 
 `npm run gates -- map` checks that map. A planted self-loop and a planted one-way border fail, then the real map passes.
 
