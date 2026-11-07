@@ -150,17 +150,23 @@ function computerShouldAct(state: GameState): boolean {
 
 function paintStatus(phaseNode: HTMLElement | null, reinforcement: HTMLElement | null, state: GameState): void {
   const phase = state.phase;
-  if (phaseNode) phaseNode.textContent = phaseLabel(state);
+  if (phaseNode) {
+    phaseNode.textContent = phaseLabel(state);
+    phaseNode.dataset.step = phase.kind;
+  }
   if (!reinforcement) return;
   if (phase.kind === "quiz") {
     reinforcement.textContent = `Armies to place: not yet. Counties ${phase.baseIncome}, regions ${phase.regionIncome}, question not scored.`;
+    delete reinforcement.dataset.remaining;
     return;
   }
   if (phase.kind === "place") {
     reinforcement.textContent = `Armies to place: ${phase.remaining}. Counties ${phase.income.base}, regions ${phase.income.regions}, question ${phase.income.quiz}.`;
+    reinforcement.dataset.remaining = String(phase.remaining);
     return;
   }
   reinforcement.textContent = "Armies to place: 0.";
+  reinforcement.dataset.remaining = "0";
 }
 
 function phaseLabel(state: GameState): string {
