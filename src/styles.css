@@ -347,8 +347,8 @@ input:focus-visible,
   }
 
   .phase-dialogs {
-    max-height: min(32rem, 58dvh);
-    overflow: auto;
+    max-height: none;
+    overflow: visible;
   }
 
   #quiz-dialog,
