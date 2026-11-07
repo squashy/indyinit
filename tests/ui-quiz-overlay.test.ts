@@ -135,6 +135,45 @@ test("a wrong answer and a skip score 0 once", () => {
   assert.equal(skipped.live.state.phase.income.quiz, 0);
 });
 
+test("visible letters stay A-D in reading order while grading follows the shuffled answer", () => {
+  const order = ["C", "A", "D", "B"] as const;
+  const correct = openQuiz(false, order);
+  correct.show(correct.state);
+  if (correct.live.state.phase.kind !== "quiz") return;
+  assert.deepEqual([...correct.live.state.phase.pending.choiceOrder], [...order]);
+  assert.deepEqual(
+    [...correct.doc.querySelectorAll(".quiz-letter")].map((node) => node.textContent),
+    ["A", "B", "C", "D"],
+  );
+  assert.deepEqual(
+    [...correct.doc.querySelectorAll(".quiz-choice-text")].map((node) => node.textContent),
+    ["Cairo", "Alpha", "Delta", "Bravo"],
+  );
+  correct.choice(1).click();
+  assert.deepEqual(correct.actions[0], {
+    kind: "answerQuiz",
+    turnSequence: 4,
+    questionId: "q-overlay",
+    answer: { kind: "choice", index: 1 },
+  });
+  assert.equal(correct.calls, 1);
+  assert.equal(correct.live.state.phase.kind, "place");
+  if (correct.live.state.phase.kind !== "place") return;
+  assert.equal(correct.live.state.phase.income.quiz, 2);
+  correct.choice(0).click();
+  assert.equal(correct.calls, 1);
+  assert.equal(correct.live.state.phase.income.quiz, 2);
+
+  const wrong = openQuiz(false, order);
+  wrong.show(wrong.state);
+  wrong.choice(0).click();
+  assert.deepEqual(wrong.actions[0]?.answer, { kind: "choice", index: 0 });
+  assert.equal(wrong.live.state.phase.kind, "place");
+  if (wrong.live.state.phase.kind !== "place") return;
+  assert.equal(wrong.live.state.phase.income.quiz, 0);
+  assert.match(wrong.doc.getElementById("quiz-result")?.textContent ?? "", /0 armies/);
+});
+
 test("reduced motion skips the quiz entrance", () => {
   const quiet = openQuiz(true);
   quiet.show(quiet.state);
@@ -169,11 +208,12 @@ function quizDialog(doc: DomDocument): DomElement & { close?: () => void; inert?
   return dialog;
 }
 
-function openQuiz(reduced: boolean): {
+function openQuiz(reduced: boolean, choiceOrder?: readonly [ChoiceLetter, ChoiceLetter, ChoiceLetter, ChoiceLetter]): {
   doc: DomDocument;
   state: GameState;
   live: { state: GameState };
   calls: number;
+  actions: Action[];
   show(state: GameState): void;
   choice(index: number): DomButton;
 } {
@@ -201,13 +241,14 @@ function openQuiz(reduced: boolean): {
   skip.textContent = "Skip";
   dialog.append(countyName, question, choices, result, skip);
   doc.documentElement.append(dialog);
-  const state = quizState();
+  const state = quizState(choiceOrder);
   const live = { state };
   const harness = {
     doc,
     state,
     live,
     calls: 0,
+    actions: [] as Action[],
     show(next: GameState) {
       live.state = next;
       quiz.show(next);
@@ -220,6 +261,7 @@ function openQuiz(reduced: boolean): {
   };
   const quiz = bindQuiz(doc as unknown as Document, (action: Action) => {
     harness.calls += 1;
+    harness.actions.push(action);
     const reducedResult = engine.reduce(live.state, action, () => 0);
     if (!reducedResult.ok) return false;
     live.state = reducedResult.state;
@@ -229,7 +271,7 @@ function openQuiz(reduced: boolean): {
   return harness;
 }
 
-function quizState(): GameState {
+function quizState(choiceOrder: readonly [ChoiceLetter, ChoiceLetter, ChoiceLetter, ChoiceLetter] = ["A", "B", "C", "D"]): GameState {
   const map = tinyMap();
   const question = sampleQuestion(county("99001"));
   return {
@@ -261,7 +303,7 @@ function quizState(): GameState {
         questionId: question.id,
         countyId: question.countyId,
         turnSequence: 4,
-        choiceOrder: ["A", "B", "C", "D"],
+        choiceOrder,
       },
       baseIncome: 3,
       regionIncome: 0,

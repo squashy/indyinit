@@ -105,12 +105,11 @@ export function bindQuiz(doc: Document, act: Act): QuizDialog {
       choices.replaceChildren();
       const labels = found ? displayedChoices(found, pending.choiceOrder) : [];
       labels.forEach((label, index) => {
-        const letter = pending.choiceOrder[index];
         const button = doc.createElement("button");
         button.type = "button";
         const mark = doc.createElement("span");
         mark.className = "quiz-letter";
-        mark.textContent = letter ?? "";
+        mark.textContent = READING_ORDER[index] ?? "";
         const text = doc.createElement("span");
         text.className = "quiz-choice-text";
         text.textContent = label;
@@ -325,3 +324,5 @@ function countyName(state: GameState, countyId: CountyId): string {
 function reducedMotion(): boolean {
   return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 }
+
+const READING_ORDER = ["A", "B", "C", "D"] as const;

@@ -188,6 +188,7 @@ async function connectBrowser() {
           inViewport: quiz.left >= -1 && quiz.top >= -1 && quiz.right <= window.innerWidth + 1 && quiz.bottom <= window.innerHeight + 1,
           columns: tracks.length,
           category: document.getElementById('quiz-category')?.textContent || '',
+          letters: [...document.querySelectorAll('#quiz-choices .quiz-letter')].map((node) => node.textContent || '').join(''),
           phase: document.getElementById('phase')?.textContent || '',
           result: document.getElementById('quiz-result')?.textContent || '',
           rail: document.querySelector('.side')?.getBoundingClientRect().width || 0,
@@ -203,6 +204,7 @@ async function connectBrowser() {
       recordCore(`${name} background is inert`, opened.inert === true, String(opened.inert), "src/ui/quiz-dialog.ts");
       recordCore(`${name} focus starts on the first answer`, opened.focusInside && opened.focusFirst, `inside ${opened.focusInside} first ${opened.focusFirst}`, "src/ui/quiz-dialog.ts");
       recordCore(`${name} answer buttons fit the viewport`, opened.columns === (width < 821 ? 1 : 2) && opened.category.length > 0, `${opened.columns} columns, ${opened.category}`, "src/styles.css");
+      recordCore(`${name} answer letters read A B C D`, opened.letters === "ABCD", opened.letters, "src/ui/quiz-dialog.ts");
       recordCore(`${name} no sideways scroll`, opened.sideways === false, String(opened.sideways), "src/styles.css");
       const short = opened.buttons.filter((button) => button.h < 44 || button.w < 44);
       recordOptional(`${name} 44px quiz targets`, short.length === 0, short.length ? JSON.stringify(short) : `${opened.buttons.length} controls`, "src/styles.css");
