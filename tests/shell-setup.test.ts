@@ -8,6 +8,7 @@ import "./ui-phase.test.ts";
 import "./ui-battle.test.ts";
 import "./ui-map.test.ts";
 import "./ui-motion.test.ts";
+import "./ui-quiz-overlay.test.ts";
 import "./ui-screens.test.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
