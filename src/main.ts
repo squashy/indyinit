@@ -4,9 +4,11 @@ import type { Action } from "./types.ts";
 import { attachPanZoom } from "./panzoom.ts";
 import { cue } from "./sound.ts";
 import { bindBattle } from "./ui/battle.ts";
+import { bindLanding } from "./ui/landing.ts";
 import { bindMap } from "./ui/map.ts";
 import { bindQuiz } from "./ui/quiz-dialog.ts";
-import { bindSetup, readGamePacks, type PlaySession } from "./ui/setup.ts";
+import { bindScreens, initialScreen } from "./ui/screens.ts";
+import { bindSetup, hasSavedGame, readGamePacks, type PlaySession } from "./ui/setup.ts";
 import { bindTurn } from "./ui/turn.ts";
 import { bindOnline } from "./ui/online.ts";
 
@@ -68,15 +70,20 @@ async function boot(): Promise<void> {
       battle.show(live.state);
       turn.show(live.state);
     });
+    bindLanding(document);
+    const screens = bindScreens(document, { canContinue: () => hasSavedGame(document) });
     setup = bindSetup(document, {
       packs: packs.value,
       onSession(session) {
         live = { state: session.state, rng: session.rng };
+        screens.show("game");
         panZoom?.reset();
         render();
       },
     });
+    screens.show(initialScreen());
     bindOnline(document);
+    document.documentElement.dataset.booted = "true";
   } catch (error) {
     setStatus(error instanceof Error ? error.message : "The game could not load.");
   }

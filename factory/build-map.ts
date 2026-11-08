@@ -5,7 +5,7 @@ import * as path from "node:path";
 import { pathToFileURL } from "node:url";
 import type { County, MapPack, Region } from "../src/types.ts";
 import { adjacency, decodeArc, loadAtlas, ringPoints, type Atlas, type Point } from "./borders.ts";
-import { makeFips, makeRegionId, type Fips } from "./ids.ts";
+import { makeRegionId, type Fips } from "./ids.ts";
 import { embedMap } from "./embed-map.ts";
 import { parseRegionFile, type RegionFile } from "./parse-map.ts";
 import { projectIndiana } from "./projection.ts";
@@ -97,15 +97,14 @@ export function buildState(manifest: RegionFile, atlasInput: unknown): BuiltStat
   const map: MapPack = { ...body, digest: createHash("sha256").update(JSON.stringify(body)).digest("hex") };
   const nextManifest: RegionFile = {
     ...manifest,
-    regions: regions.map((region) => {
-      const source = listed.get(region.id);
+    regions: manifest.regions.map((region) => {
       const entry = {
         id: region.id,
         name: region.name,
         counties: [...region.counties],
-        review: source?.review ?? "draft",
+        review: region.review,
       };
-      return source?.bonus === undefined ? entry : { ...entry, bonus: source.bonus };
+      return region.bonus === undefined ? entry : { ...entry, bonus: region.bonus };
     }),
   };
   const encoded = `${JSON.stringify(map, null, 2)}\n`;
@@ -123,13 +122,22 @@ export function writeBuiltState(root: string, built: BuiltState): void {
 }
 
 function regionsFromManifest(manifest: RegionFile, atlas: Atlas): DrawnRegion[] {
-  const known = new Set(atlas.shapes.map((shape) => shape.fips));
+  const byName = new Map<string, Fips>();
+  for (const shape of atlas.shapes) {
+    if (byName.has(shape.name)) throw new Error(`duplicate county name ${shape.name}`);
+    byName.set(shape.name, shape.fips);
+  }
+  const used = new Map<Fips, string>();
   return manifest.regions.map((region) => ({
     id: region.id,
     name: region.name,
-    fips: region.counties.map((id) => {
-      const fips = makeFips(id);
-      if (!known.has(fips)) throw new Error(`region ${region.id} lists unknown county ${id}`);
+    fips: region.counties.map((token) => {
+      if (/^\d{5}$/.test(token)) throw new Error(`region ${region.id} lists ${token}; name the county and resolve it from the map`);
+      const fips = byName.get(token);
+      if (!fips) throw new Error(`region ${region.id} lists unknown county ${token}`);
+      const previous = used.get(fips);
+      if (previous) throw new Error(`${token} is in ${previous} and ${region.id}`);
+      used.set(fips, region.id);
       return fips;
     }),
   }));

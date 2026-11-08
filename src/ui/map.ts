@@ -1,3 +1,4 @@
+import { regionStanding } from "../engine/engine.ts";
 import type { County, CountyId, GameState, PlayerId } from "../types.ts";
 
 export interface MapView {
@@ -141,6 +142,8 @@ function paint(doc: Document, state: GameState, marks: Marks): void {
     node.classList.toggle("is-quiz-county", holding.countyId === quiz);
   }
   paintPlayers(doc, state);
+  paintRegionBorders(doc, state);
+  paintRegionList(doc, state);
   if (missing > 0) setStatus(doc, "Some counties are missing from the map.");
 }
 
@@ -177,6 +180,12 @@ function showCountyInfo(doc: Document, county: County, marks?: Marks, state?: Ga
   const name = doc.createElement("p");
   name.textContent = county.name;
   slot.appendChild(name);
+  const region = state?.config.map.regions.find((item) => item.id === county.regionId);
+  if (region) {
+    const membership = doc.createElement("p");
+    membership.textContent = `Region: ${region.name}.`;
+    slot.appendChild(membership);
+  }
   const holding = state?.holdings.find((item) => item.countyId === county.id);
   if (holding && state) {
     const player = state.config.players.find((item) => item.id === holding.owner);
@@ -205,6 +214,57 @@ function showCountyInfo(doc: Document, county: County, marks?: Marks, state?: Ga
     line.textContent = `${fact.label}: ${fact.text}`;
     slot.appendChild(line);
   }
+}
+
+function paintRegionBorders(doc: Document, state: GameState): void {
+  const svg = doc.getElementById("map");
+  if (!(svg instanceof Element)) return;
+  let group = svg.querySelector(".region-borders");
+  if (!(group instanceof Element)) {
+    group = svgElement(doc, "g");
+    group.setAttribute("class", "region-borders");
+    group.setAttribute("aria-hidden", "true");
+    group.setAttribute("pointer-events", "none");
+    const outline = svg.querySelector(".state-outline");
+    if (outline) svg.insertBefore(group, outline);
+    else svg.appendChild(group);
+  }
+  const seen = new Set<string>();
+  for (const region of state.config.map.regions) {
+    seen.add(region.id);
+    let path = group.querySelector(`[data-region-id="${cssEscape(region.id)}"]`);
+    if (!(path instanceof Element)) {
+      path = svgElement(doc, "path");
+      path.setAttribute("class", "region-border");
+      path.setAttribute("data-region-id", region.id);
+      group.appendChild(path);
+    }
+    path.setAttribute("d", region.borderPath);
+  }
+  for (const path of Array.from(group.querySelectorAll(".region-border"))) {
+    const id = path.getAttribute("data-region-id");
+    if (!id || !seen.has(id)) path.remove();
+  }
+}
+
+function paintRegionList(doc: Document, state: GameState): void {
+  const list = doc.querySelector("#regions ul");
+  if (!(list instanceof Element)) return;
+  list.replaceChildren();
+  for (const region of regionStanding(state, state.activePlayer)) {
+    const item = doc.createElement("li");
+    item.setAttribute("data-region-id", region.id);
+    item.textContent = `${region.name}: ${region.held} of ${region.total}. Bonus ${region.bonus}.`;
+    list.appendChild(item);
+  }
+}
+
+function svgElement(doc: Document, tag: string): Element {
+  if (typeof doc.createElementNS === "function") {
+    const namespaced = doc.createElementNS("http://www.w3.org/2000/svg", tag);
+    if (namespaced instanceof Element) return namespaced;
+  }
+  return doc.createElement(tag);
 }
 
 function focusCounty(doc: Document, id: CountyId): void {
