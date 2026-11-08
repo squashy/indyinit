@@ -13,7 +13,8 @@
     "test": "node --experimental-strip-types --test factory/build-map.test.ts factory/import-quiz.test.ts gates/map.test.ts tests/rules.test.ts tests/regions.test.ts tests/quiz.test.ts tests/shell-setup.test.ts tests/ai.test.ts tests/simulation.test.ts gates/rules.test.ts gates/mutants.test.ts tests/btt19-release-check.test.mjs tests/verdicts-a.test.mjs tests/online.test.ts",
     "build": "vite build",
     "check": "npm run typecheck && npm test && npm run build",
-    "box": "npm run check && npm run gates"
+    "box": "npm run check && npm run gates",
+    "bench:ai": "node --experimental-strip-types scripts/sim/run.ts --bench"
   },
   "devDependencies": {
     "@types/node": "^22.19.1",

@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseMapPack } from "../../factory/parse-map.ts";
+import { chooseAction } from "../../src/ai/ai.ts";
 import { checkInvariants, createGame, createRng, reduce } from "../../src/engine/engine.ts";
 import type { SeededRng } from "../../src/engine/engine.ts";
 import type {
@@ -610,4 +611,231 @@ function failure(seed: string, step: number, phase: string, action: string, issu
 
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : "simulation failed";
+}
+
+/** Hard stop for one bench game, in individual player turns. */
+export const AI_BENCH_TURN_CAP = 400;
+
+/**
+ * Seed streams for one listed seed S and seat P. Seat streams stay with the seat
+ * when the policies swap, so the board and each seat's luck match across the pair.
+ * setup  btt33:S<S>:setup     createGame, then every acknowledgeHandoff (deal and question draw)
+ * combat btt33:S<S>:combat    attack reduces only (dice)
+ * quiz   btt33:S<S>:quiz:<P>  that seat's 0.6 success roll, plus one more draw only on a wrong answer
+ * policy btt33:S<S>:policy:<P> that seat's tie-break when two choices share a score
+ * The baseline does not draw the policy stream. The challenger draws it only on a tied score.
+ */
+export const AI_BENCH_RNG_NOTE =
+  "setup=btt33:S<seed>:setup (createGame and acknowledgeHandoff); combat=btt33:S<seed>:combat (attack dice only); quiz=btt33:S<seed>:quiz:<seat> (0.6 roll, second draw only when wrong); policy=btt33:S<seed>:policy:<seat> (tie-break only). Streams stay with the seat when policies swap.";
+
+export function aiBenchStream(seed: number, kind: "setup" | "combat" | "quiz" | "policy", seat?: 0 | 1): string {
+  if (kind === "quiz" || kind === "policy") return `btt33:S${seed}:${kind}:${seat ?? 0}`;
+  return `btt33:S${seed}:${kind}`;
+}
+
+export interface AiBenchGame {
+  readonly seed: number;
+  readonly challengerSeat: 0 | 1;
+  readonly outcome: "win" | "loss" | "draw" | "cap" | "error";
+  readonly winner: PlayerId | null;
+  readonly turns: number;
+  readonly playedTurns: number;
+  readonly error?: string;
+}
+
+export interface AiBenchSide {
+  readonly wins: number;
+  readonly losses: number;
+  readonly draws: number;
+  readonly caps: number;
+  readonly errors: number;
+}
+
+export interface AiBenchReport {
+  readonly seeds: readonly number[];
+  readonly turnCap: number;
+  readonly rng: string;
+  readonly games: readonly AiBenchGame[];
+  readonly wins: number;
+  readonly losses: number;
+  readonly draws: number;
+  readonly caps: number;
+  readonly errors: number;
+  readonly bySide: {
+    readonly seat0Wins: number;
+    readonly seat1Wins: number;
+    readonly challengerAsSeat0: AiBenchSide;
+    readonly challengerAsSeat1: AiBenchSide;
+  };
+  readonly medianTurns: number;
+  readonly distribution: readonly { readonly bucket: string; readonly games: number }[];
+  readonly targets: { readonly wins: number; readonly medianTurns: number; readonly winsMet: boolean; readonly medianMet: boolean };
+}
+
+export function runAiBenchmark(board: Board, seeds: readonly number[], onProgress?: (done: number, total: number) => void): AiBenchReport {
+  const games: AiBenchGame[] = [];
+  const total = seeds.length * 2;
+  for (const seed of seeds) {
+    for (const challengerSeat of [0, 1] as const) {
+      games.push(playAiMatch(board, seed, challengerSeat));
+      onProgress?.(games.length, total);
+    }
+  }
+  return summarizeAiBench(seeds, games);
+}
+
+export function summarizeAiBench(seeds: readonly number[], games: readonly AiBenchGame[]): AiBenchReport {
+  const bySide = {
+    seat0Wins: 0,
+    seat1Wins: 0,
+    challengerAsSeat0: emptySide(),
+    challengerAsSeat1: emptySide(),
+  };
+  let wins = 0;
+  let losses = 0;
+  let draws = 0;
+  let caps = 0;
+  let errors = 0;
+  for (const game of games) {
+    if (game.winner === 0) bySide.seat0Wins += 1;
+    if (game.winner === 1) bySide.seat1Wins += 1;
+    const side = game.challengerSeat === 0 ? bySide.challengerAsSeat0 : bySide.challengerAsSeat1;
+    if (game.outcome === "win") {
+      wins += 1;
+      side.wins += 1;
+    } else if (game.outcome === "loss") {
+      losses += 1;
+      side.losses += 1;
+    } else if (game.outcome === "draw") {
+      draws += 1;
+      side.draws += 1;
+    } else if (game.outcome === "cap") {
+      caps += 1;
+      side.caps += 1;
+    } else {
+      errors += 1;
+      side.errors += 1;
+    }
+  }
+  const charged = games.map((game) => game.turns);
+  const medianTurns = median(charged);
+  return {
+    seeds,
+    turnCap: AI_BENCH_TURN_CAP,
+    rng: AI_BENCH_RNG_NOTE,
+    games,
+    wins,
+    losses,
+    draws,
+    caps,
+    errors,
+    bySide,
+    medianTurns,
+    distribution: turnBuckets(charged),
+    targets: { wins: 241, medianTurns: 60, winsMet: wins >= 241, medianMet: medianTurns <= 60 },
+  };
+}
+
+export function formatAiBench(report: AiBenchReport): string {
+  const side = (label: string, value: AiBenchSide) =>
+    `${label} wins=${value.wins} losses=${value.losses} draws=${value.draws} caps=${value.caps} errors=${value.errors}`;
+  const lines = [
+    "BattleFor92 ai bench",
+    `config   seeds=${report.seeds.length} games=${report.games.length} players=2 mode=total92 success=0.600 turnCap=${report.turnCap}`,
+    `rng      ${report.rng}`,
+    `results  wins=${report.wins} losses=${report.losses} draws=${report.draws} caps=${report.caps} errors=${report.errors}`,
+    `sides    seat0Wins=${report.bySide.seat0Wins} seat1Wins=${report.bySide.seat1Wins}`,
+    `seat     ${side("challengerAsSeat0", report.bySide.challengerAsSeat0)}`,
+    `seat     ${side("challengerAsSeat1", report.bySide.challengerAsSeat1)}`,
+    `length   median=${report.medianTurns} (draws, caps and errors counted as ${report.turnCap})`,
+    `spread   ${report.distribution.map((bucket) => `${bucket.bucket}:${bucket.games}`).join(" ")}`,
+    `targets  wins>=${report.targets.wins} (${report.targets.winsMet ? "met" : "missed"}) median<=${report.targets.medianTurns} (${report.targets.medianMet ? "met" : "missed"})`,
+  ];
+  return lines.join("\n");
+}
+
+function playAiMatch(board: Board, seed: number, challengerSeat: 0 | 1): AiBenchGame {
+  try {
+    const setup = createRng(aiBenchStream(seed, "setup"));
+    const combat = createRng(aiBenchStream(seed, "combat"));
+    const quiz = [createRng(aiBenchStream(seed, "quiz", 0)), createRng(aiBenchStream(seed, "quiz", 1))] as const;
+    const policyRng = [createRng(aiBenchStream(seed, "policy", 0)), createRng(aiBenchStream(seed, "policy", 1))] as const;
+    const created = createGame(
+      {
+        players: [
+          { id: 0, label: "Seat 1", kind: "computer" },
+          { id: 1, label: "Seat 2", kind: "computer" },
+        ],
+        mode: "total92",
+        map: board.map,
+        quiz: board.quiz,
+      },
+      () => setup.draw(),
+    );
+    if (!created.ok) return benchGame(seed, challengerSeat, "error", null, 0, created.error.message);
+    let state = created.value;
+    let steps = 0;
+    while (state.phase.kind !== "over") {
+      steps += 1;
+      if (steps > 250000) return benchGame(seed, challengerSeat, "error", null, state.turnSequence, "step guard");
+      if (state.phase.kind === "handoff") {
+        if (state.turnSequence >= AI_BENCH_TURN_CAP) return benchGame(seed, challengerSeat, "cap", null, state.turnSequence);
+        const handed = reduce(state, { kind: "acknowledgeHandoff", turnSequence: state.turnSequence }, () => setup.draw());
+        if (!handed.ok) return benchGame(seed, challengerSeat, "error", null, state.turnSequence, handed.error.message);
+        state = handed.state;
+        continue;
+      }
+      const seat = state.activePlayer;
+      if (seat !== 0 && seat !== 1) return benchGame(seed, challengerSeat, "error", null, state.turnSequence, "unexpected seat");
+      const action = chooseAction(state, () => quiz[seat].draw(), {
+        quizSuccess: 0.6,
+        policy: seat === challengerSeat ? "challenger" : "baseline",
+        policyRandom: () => policyRng[seat].draw(),
+      });
+      if (!action) return benchGame(seed, challengerSeat, "error", null, state.turnSequence, "no legal action");
+      const engineRng = action.kind === "attack" ? () => combat.draw() : () => 0;
+      const result = reduce(state, action, engineRng);
+      if (!result.ok) return benchGame(seed, challengerSeat, "error", null, state.turnSequence, `${action.kind}: ${result.error.message}`);
+      state = result.state;
+    }
+    const winner = state.phase.kind === "over" ? state.phase.winner : null;
+    if (winner === null) return benchGame(seed, challengerSeat, "draw", null, state.turnSequence);
+    return benchGame(seed, challengerSeat, winner === challengerSeat ? "win" : "loss", winner, state.turnSequence);
+  } catch (error) {
+    return benchGame(seed, challengerSeat, "error", null, 0, errorText(error));
+  }
+}
+
+function benchGame(
+  seed: number,
+  challengerSeat: 0 | 1,
+  outcome: AiBenchGame["outcome"],
+  winner: PlayerId | null,
+  playedTurns: number,
+  error?: string,
+): AiBenchGame {
+  const turns = outcome === "win" || outcome === "loss" ? playedTurns : AI_BENCH_TURN_CAP;
+  return error === undefined ? { seed, challengerSeat, outcome, winner, turns, playedTurns } : { seed, challengerSeat, outcome, winner, turns, playedTurns, error };
+}
+
+function emptySide(): { wins: number; losses: number; draws: number; caps: number; errors: number } {
+  return { wins: 0, losses: 0, draws: 0, caps: 0, errors: 0 };
+}
+
+function turnBuckets(values: readonly number[]): { bucket: string; games: number }[] {
+  const counts = new Map<string, number>();
+  for (let start = 1; start <= 391; start += 10) counts.set(`${start}-${start + 9}`, 0);
+  counts.set("400", 0);
+  for (const value of values) {
+    if (value >= 400) {
+      counts.set("400", (counts.get("400") ?? 0) + 1);
+      continue;
+    }
+    const start = Math.floor((Math.max(1, value) - 1) / 10) * 10 + 1;
+    const key = `${start}-${start + 9}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const buckets: { bucket: string; games: number }[] = [];
+  for (const [bucket, games] of counts) if (games > 0) buckets.push({ bucket, games });
+  return buckets;
 }

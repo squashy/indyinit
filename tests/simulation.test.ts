@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseArgs } from "../scripts/sim/run.ts";
-import { formatReport, loadIndianaBoard, playGame, resolveOptions, runSimulation } from "../scripts/sim/harness.ts";
+import { AI_BENCH_SEEDS, parseArgs } from "../scripts/sim/run.ts";
+import { aiBenchStream, formatReport, loadIndianaBoard, playGame, resolveOptions, runSimulation, summarizeAiBench } from "../scripts/sim/harness.ts";
+import type { AiBenchGame } from "../scripts/sim/harness.ts";
 
 const board = loadIndianaBoard();
 
@@ -38,6 +39,33 @@ test("a sure answer takes the fixed quiz award and a miss does not", () => {
   assert.deepEqual(correct.quiz[0], { answered: 1, correct: 1 });
   assert.deepEqual(missed.quiz[0], { answered: 1, correct: 0 });
   assert.equal(correct.outcome, "cap");
+});
+
+test("the ai bench lists 200 seeds and charges unfinished games as 400 turns", () => {
+  assert.equal(AI_BENCH_SEEDS.length, 200);
+  assert.equal(new Set(AI_BENCH_SEEDS).size, 200);
+  assert.deepEqual(AI_BENCH_SEEDS[0], 1);
+  assert.deepEqual(AI_BENCH_SEEDS[199], 200);
+  assert.equal(aiBenchStream(7, "setup"), "btt33:S7:setup");
+  assert.equal(aiBenchStream(7, "combat"), "btt33:S7:combat");
+  assert.equal(aiBenchStream(7, "quiz", 1), "btt33:S7:quiz:1");
+  assert.equal(aiBenchStream(7, "policy", 0), "btt33:S7:policy:0");
+  const games: AiBenchGame[] = [
+    { seed: 1, challengerSeat: 0, outcome: "win", winner: 0, turns: 40, playedTurns: 40 },
+    { seed: 1, challengerSeat: 1, outcome: "loss", winner: 0, turns: 50, playedTurns: 50 },
+    { seed: 2, challengerSeat: 0, outcome: "cap", winner: null, turns: 400, playedTurns: 400 },
+    { seed: 2, challengerSeat: 1, outcome: "error", winner: null, turns: 400, playedTurns: 12, error: "bad" },
+  ];
+  const summary = summarizeAiBench([1, 2], games);
+  assert.equal(summary.wins, 1);
+  assert.equal(summary.losses, 1);
+  assert.equal(summary.caps, 1);
+  assert.equal(summary.errors, 1);
+  assert.equal(summary.draws, 0);
+  assert.equal(summary.medianTurns, 225);
+  assert.equal(summary.bySide.seat0Wins, 2);
+  assert.equal(summary.bySide.challengerAsSeat0.wins, 1);
+  assert.equal(summary.bySide.challengerAsSeat1.losses, 1);
 });
 
 test("a short step cap is a result, not an invariant failure", () => {
