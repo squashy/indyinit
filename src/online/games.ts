@@ -2,7 +2,7 @@ import { MemoryStore, type OnlineDocument, type OnlineStore, type SeatSlot } fro
 import { hashToken, randomToken } from "./tokens.ts";
 import { sharePath } from "./share.ts";
 
-export type OnlineError = "invalid" | "full" | "missing";
+export type OnlineError = "invalid" | "full" | "missing" | "expired" | "unavailable" | "rejoin" | "rejected" | "stale";
 
 export type OnlineResult<T> = { ok: true; value: T } | { ok: false; error: OnlineError };
 
@@ -63,6 +63,10 @@ export async function createOnlineGame(store: OnlineStore, input: { seatCount: n
       seats,
       inviteHash: hashToken(invite),
       seed: randomToken(),
+      expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+      applied: {},
+      play: null,
+      revisions: [],
     };
     const written = await store.create(doc);
     if (written === "exists") continue;
@@ -77,9 +81,9 @@ export async function joinOnlineGame(store: OnlineStore, id: string, name: strin
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const current = await store.read(id);
     if (!current) return { ok: false, error: "missing" };
-    if (current.status !== "lobby") return { ok: false, error: "invalid" };
     const seatIndex = current.seats.findIndex((seat) => seat === null);
     if (seatIndex < 0) return { ok: false, error: "full" };
+    if (current.status !== "lobby") return { ok: false, error: "invalid" };
     const seatToken = randomToken();
     const seats = current.seats.map((seat, index) => (index === seatIndex ? { name: cleaned, tokenHash: hashToken(seatToken) } : seat));
     const next: OnlineDocument = { ...current, version: current.version + 1, seats };
