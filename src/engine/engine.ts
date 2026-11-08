@@ -27,8 +27,10 @@ import type {
   QuizResult,
   ReduceResult,
   Region,
+  RegionBonusLine,
   RegionId,
   Rng,
+  TurnGrant,
   RngSnapshot,
   SaveEnvelope,
 } from "../types.ts";
@@ -83,6 +85,45 @@ export function createRng(seed: string): SeededRng {
 }
 
 export const engine: Engine = { createGame, reduce, checkInvariants, serialize, deserialize };
+
+export interface RegionStanding {
+  readonly id: RegionId;
+  readonly name: string;
+  readonly held: number;
+  readonly total: number;
+  readonly bonus: number;
+}
+
+export interface ReinforcementBreakdown {
+  readonly base: number;
+  readonly quiz: 0 | 2 | null;
+  readonly regions: readonly RegionBonusLine[];
+}
+
+export function openTurn(state: GameState, player: PlayerId, rng: Rng): GameState {
+  return beginTurn(state, player, rng);
+}
+
+export function regionStanding(state: GameState, player: PlayerId): readonly RegionStanding[] {
+  const owned = new Set(state.holdings.filter((holding) => holding.owner === player).map((holding) => holding.countyId));
+  return state.config.map.regions.map((region) => ({
+    id: region.id,
+    name: region.name,
+    held: region.counties.reduce((total, countyId) => total + (owned.has(countyId) ? 1 : 0), 0),
+    total: region.counties.length,
+    bonus: region.bonus,
+  }));
+}
+
+export function reinforcementBreakdown(state: GameState): ReinforcementBreakdown | null {
+  const grant = state.turnGrant;
+  if (grant && grant.turnSequence === state.turnSequence && grant.player === state.activePlayer) {
+    return { base: grant.base, quiz: awardedQuiz(state), regions: grant.lines };
+  }
+  if (state.phase.kind === "quiz") return { base: state.phase.baseIncome, quiz: null, regions: state.phase.regionLines ?? [] };
+  if (state.phase.kind === "place") return { base: state.phase.income.base, quiz: state.phase.income.quiz, regions: state.phase.income.lines ?? [] };
+  return null;
+}
 
 export interface Session {
   state: GameState;
@@ -243,11 +284,19 @@ function apply(state: GameState, action: Action, rng: Rng): ReduceResult {
 }
 
 function beginTurn(state: GameState, player: PlayerId, rng: Rng): GameState {
+  if (state.phase.kind === "over") return state;
+  if (state.turnGrant && state.turnGrant.turnSequence === state.turnSequence && state.turnGrant.player === player && state.activePlayer === player) {
+    return state;
+  }
+  const opening = state.turnSequence === 0 && !state.turnGrant;
+  if (!opening && state.phase.kind !== "handoff") return state;
   const turnSequence = state.turnSequence + 1;
-  const seated: GameState = { ...state, activePlayer: player, turnSequence };
+  const lines = regionLines({ ...state, activePlayer: player }, player);
+  const base = reinforcementBase(state.holdings.filter((holding) => holding.owner === player).length);
+  const regions = sumLines(lines);
+  const grant: TurnGrant = { turnSequence, player, base, lines };
+  const seated: GameState = { ...state, activePlayer: player, turnSequence, turnGrant: grant };
   const owned = seated.holdings.filter((holding) => holding.owner === player);
-  const base = reinforcementBase(owned.length);
-  const regions = regionBonus(seated, player);
   const first = owned[drawIndex(rng, owned.length)];
   if (!first) throw new Error("the active player has no counties");
   let countyId: CountyId | null = hasQuestions(seated, first.countyId) ? first.countyId : null;
@@ -258,11 +307,11 @@ function beginTurn(state: GameState, player: PlayerId, rng: Rng): GameState {
       countyId = redraw?.countyId ?? null;
     }
   }
-  if (!countyId) return openReinforcement(seated, base, regions, 0, "noQuestion", null);
+  if (!countyId) return openReinforcement(seated, base, lines, 0, "noQuestion", null);
   const asked = seated.asked.find((entry) => entry.countyId === countyId)?.questionIds ?? [];
   const pending = prepareQuestion(countyId, seated.config.quiz, asked, turnSequence, rng);
-  if (!pending) return openReinforcement(seated, base, regions, 0, "noQuestion", null);
-  const phase: Phase = { kind: "quiz", pending, baseIncome: base, regionIncome: regions };
+  if (!pending) return openReinforcement(seated, base, lines, 0, "noQuestion", null);
+  const phase: Phase = { kind: "quiz", pending, baseIncome: base, regionIncome: regions, regionLines: lines };
   return { ...seated, phase, events: [...seated.events, phaseEvent(seated, "quiz")] };
 }
 
@@ -292,19 +341,21 @@ function resolveQuiz(state: GameState, pending: PendingQuestion, result: QuizRes
   if (phase.kind !== "quiz") return state;
   const remembered: GameState = { ...state, asked: remember(state.asked, pending.countyId, pending.questionId) };
   const resolved = quizEvent(remembered, result, pending.countyId, bonus);
-  const next = openReinforcement(remembered, phase.baseIncome, phase.regionIncome, bonus, result, pending.countyId);
+  const lines = phase.regionLines ?? remembered.turnGrant?.lines ?? [];
+  const next = openReinforcement(remembered, phase.baseIncome, lines, bonus, result, pending.countyId);
   return { ...next, events: [...remembered.events, resolved, ...next.events.slice(remembered.events.length)] };
 }
 
 function openReinforcement(
   state: GameState,
   base: number,
-  regions: number,
+  lines: readonly RegionBonusLine[],
   quiz: 0 | 2,
   result: QuizResult,
   countyId: CountyId | null,
 ): GameState {
-  const income: Income = { base, regions, quiz };
+  const regions = sumLines(lines);
+  const income: Income = { base, regions, quiz, lines };
   const remaining = base + regions + quiz;
   const quizEventIfSkip =
     result === "noQuestion" ? [quizEvent(state, "noQuestion", countyId, 0)] : [];
@@ -590,6 +641,7 @@ export function checkInvariants(state: GameState): readonly string[] {
   }
   if (phase.kind === "handoff" && ownedCount(state, phase.nextPlayer) < 1) issues.push("handoff names an eliminated player");
   if (phase.kind === "over" && ownedCount(state, phase.winner) < 1) issues.push("the winner has no counties");
+  issues.push(...awardIssues(state));
   return issues;
 }
 
@@ -640,6 +692,7 @@ function readState(raw: unknown): GameState {
     phase: readPhase(record.phase, config.players.length),
     asked: readAsked(record.asked),
     events: readEvents(record.events),
+    ...(record.turnGrant == null ? {} : { turnGrant: readTurnGrant(record.turnGrant, config.players.length) }),
   };
 }
 
@@ -769,6 +822,7 @@ function readPhase(raw: unknown, seats: number): Phase {
         pending: readPending(record.pending),
         baseIncome: integer(record.baseIncome, "baseIncome"),
         regionIncome: integer(record.regionIncome, "regionIncome"),
+        regionLines: record.regionLines === undefined ? [] : readLines(record.regionLines),
       };
     case "place":
       return {
@@ -823,7 +877,12 @@ function readPending(raw: unknown): PendingQuestion {
 function readIncome(raw: unknown): Income {
   const record = objectOf(raw, "income");
   if (record.quiz !== 0 && record.quiz !== 2) throw new Error("quiz income is invalid");
-  return { base: integer(record.base, "base"), regions: integer(record.regions, "regions"), quiz: record.quiz };
+  return {
+    base: integer(record.base, "base"),
+    regions: integer(record.regions, "regions"),
+    quiz: record.quiz,
+    lines: record.lines === undefined ? [] : readLines(record.lines),
+  };
 }
 
 function readAsked(raw: unknown): readonly AskedQuestions[] {
@@ -921,13 +980,69 @@ function ownedPath(state: GameState, from: CountyId, to: CountyId): boolean {
   return false;
 }
 
-function regionBonus(state: GameState, player: PlayerId): number {
+function regionLines(state: GameState, player: PlayerId): RegionBonusLine[] {
   const owned = new Set(state.holdings.filter((holding) => holding.owner === player).map((holding) => holding.countyId));
-  let total = 0;
+  const lines: RegionBonusLine[] = [];
   for (const region of state.config.map.regions) {
-    if (region.counties.length > 0 && region.counties.every((countyId) => owned.has(countyId))) total += region.bonus;
+    if (region.counties.length > 0 && region.counties.every((countyId) => owned.has(countyId))) {
+      lines.push({ id: region.id, name: region.name, bonus: region.bonus });
+    }
   }
-  return total;
+  return lines;
+}
+
+function sumLines(lines: readonly RegionBonusLine[]): number {
+  return lines.reduce((total, line) => total + line.bonus, 0);
+}
+
+function regionBonus(state: GameState, player: PlayerId): number {
+  return sumLines(regionLines(state, player));
+}
+
+function awardedQuiz(state: GameState): 0 | 2 | null {
+  if (state.phase.kind === "quiz") return null;
+  if (state.phase.kind === "place") return state.phase.income.quiz;
+  for (let index = state.events.length - 1; index >= 0; index -= 1) {
+    const event = state.events[index];
+    if (!event || event.kind !== "quizResolved" || event.turnSequence !== state.turnSequence || event.player !== state.activePlayer) continue;
+    return event.bonus;
+  }
+  return null;
+}
+
+function awardIssues(state: GameState): string[] {
+  if (state.phase.kind !== "quiz" && state.phase.kind !== "place") return [];
+  const grant = state.turnGrant;
+  if (!grant || grant.turnSequence !== state.turnSequence || grant.player !== state.activePlayer) {
+    return ["the region award is not recorded for this turn"];
+  }
+  const issues: string[] = [];
+  const base = state.phase.kind === "quiz" ? state.phase.baseIncome : state.phase.income.base;
+  const regions = state.phase.kind === "quiz" ? state.phase.regionIncome : state.phase.income.regions;
+  const lines = state.phase.kind === "quiz" ? state.phase.regionLines ?? [] : state.phase.income.lines ?? [];
+  if (grant.base !== base) issues.push("base income does not match the recorded award");
+  if (sumLines(grant.lines) !== regions) issues.push("region income does not match the recorded award");
+  if (lines.length !== grant.lines.length || lines.some((line, index) => line.id !== grant.lines[index]?.id || line.bonus !== grant.lines[index]?.bonus)) {
+    issues.push("the reinforcement breakdown does not match the recorded award");
+  }
+  return issues;
+}
+
+function readLines(raw: unknown): RegionBonusLine[] {
+  return arrayOf(raw, "region lines").map((entry) => {
+    const record = objectOf(entry, "region line");
+    return { id: regionId(record.id), name: text(record.name, "name"), bonus: integer(record.bonus, "bonus") };
+  });
+}
+
+function readTurnGrant(raw: unknown, seats: number): TurnGrant {
+  const record = objectOf(raw, "turnGrant");
+  return {
+    turnSequence: integer(record.turnSequence, "turnSequence"),
+    player: readPlayerId(record.player, seats),
+    base: integer(record.base, "base"),
+    lines: readLines(record.lines),
+  };
 }
 
 function reinforcementBase(owned: number): number {

@@ -12,13 +12,116 @@
 </head>
 <body>
   <div id="app">
+    <p id="error-status" role="status" aria-live="assertive"></p>
+    <section id="landing" class="landing">
+      <div class="landing-copy">
+        <p class="landing-kicker">Indiana</p>
+        <h1 id="landing-title" class="landing-wordmark" tabindex="-1">Battle for 92</h1>
+        <p class="landing-hook">A right answer adds 2 armies.</p>
+        <p class="quiz-unverified">Questions unverified</p>
+        <div class="landing-actions">
+          <button type="button" id="new-game">New game</button>
+          <button type="button" id="continue-game" class="secondary" hidden>Continue</button>
+        </div>
+      </div>
+      <div id="landing-hero" class="landing-hero" aria-hidden="true"></div>
+    </section>
+    <section id="setup-screen" class="setup-screen" hidden>
+        <section id="setup" class="card" aria-label="Set up the game">
+          <div class="setup-head">
+            <h1 id="setup-heading" tabindex="-1">Set up</h1>
+            <button type="button" id="setup-back" class="secondary">Back</button>
+          </div>
+          <p>Choose 2 to 6 players. Type a name for each person or computer who is playing.</p>
+          <ol id="player-list">
+            <li data-owner="0">
+              <span class="player-swatch" data-owner="0" aria-hidden="true"></span>
+              <label class="name-field">Seat 1, checker
+                <input type="text" name="player-name-0" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-0" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-0" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="1">
+              <span class="player-swatch" data-owner="1" aria-hidden="true"></span>
+              <label class="name-field">Seat 2, triangles
+                <input type="text" name="player-name-1" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-1" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-1" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="2">
+              <span class="player-swatch" data-owner="2" aria-hidden="true"></span>
+              <label class="name-field">Seat 3, dots
+                <input type="text" name="player-name-2" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-2" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-2" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="3">
+              <span class="player-swatch" data-owner="3" aria-hidden="true"></span>
+              <label class="name-field">Seat 4, diagonal
+                <input type="text" name="player-name-3" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-3" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-3" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="4">
+              <span class="player-swatch" data-owner="4" aria-hidden="true"></span>
+              <label class="name-field">Seat 5, crosshatch
+                <input type="text" name="player-name-4" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-4" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-4" value="computer"> Computer</label>
+              </div>
+            </li>
+            <li data-owner="5">
+              <span class="player-swatch" data-owner="5" aria-hidden="true"></span>
+              <label class="name-field">Seat 6, bars
+                <input type="text" name="player-name-5" maxlength="24" autocomplete="off" spellcheck="false">
+              </label>
+              <div class="kind">
+                <label><input type="radio" name="player-kind-5" value="human" checked> Person</label>
+                <label><input type="radio" name="player-kind-5" value="computer"> Computer</label>
+              </div>
+            </li>
+          </ol>
+          <fieldset id="mode">
+            <legend>How you win</legend>
+            <label><input type="radio" name="win-mode" value="quick60" checked> Quick — at least 60 counties</label>
+            <label><input type="radio" name="win-mode" value="total92"> Total — all 92 counties</label>
+          </fieldset>
+          <div class="setup-actions">
+            <button type="button" id="start-game">Start</button>
+          </div>
+        </section>
+      <section id="replace-dialog" class="card" hidden role="dialog" aria-modal="false" aria-labelledby="replace-title">
+        <h2 id="replace-title" tabindex="-1">Replace the saved game?</h2>
+        <p>Starting now replaces the game saved on this screen.</p>
+        <div class="setup-actions">
+          <button type="button" id="replace-stay">Keep the saved game</button>
+          <button type="button" id="replace-confirm">Replace and start</button>
+        </div>
+      </section>
+    </section>
+    <div id="game-screen" hidden>
     <a class="skip-link" href="#map">Skip to the map</a>
     <header class="site-header">
       <img src="/assets/mark.svg" width="48" height="48" alt="">
       <div>
-        <h1>Battle for the 92</h1>
+        <h1 id="game-title" tabindex="-1">Battle for the 92</h1>
         <p class="lede">Share one screen on Indiana’s 92 counties. A right answer adds 2 armies.</p>
       </div>
+      <button type="button" id="open-menu" class="secondary">Menu</button>
     </header>
     <main class="board">
       <div class="map-column">
@@ -1436,14 +1539,13 @@
       </g>
     </g>
 
+        <g class="region-borders" aria-hidden="true" pointer-events="none"><path class="region-border" data-region-id="dunes-michiana" d="M436.8,83.6L436.7,63.9M365.2,144.1L365.3,164.3L375.1,163.9L375.1,174.1L387.9,173.6M387.9,173.6L387.4,183.6M387.4,183.6L350,184.5L349.4,204.1M349.4,204.1L298.6,204.1M436.7,63.9L435.1,10.2M435.1,10.2L413.3,10.3M117.2,242.2L161.5,242.8M161.5,242.8L190.3,243M368.1,84.2L368.9,144.1L365.2,144.1M298.6,204.1L279,203.8M279,203.8L219.5,203.1M367.3,10.1L413.3,10.3M436.8,83.6L368.1,84.2M119,114.1L119.5,74.9M119.5,74.9L120.9,20.7M120.9,20.7L129.9,28.8L137.2,25L141.4,28L137.7,35.8L154,40.5L171.6,40.5M118.6,144.3L119,114.1M190.3,243L190.6,219.9L210.2,220.1L209.7,203.3L219.5,203.1M367.3,10.1L339.5,10.4M118.6,144.3L118.1,179.7M118.1,179.7L117.2,242.2M289.3,10.4L339.5,10.4M171.6,40.5L188.6,35.8L220.8,21.2M289.3,10.4L239.1,9.9M220.8,21.2L239.1,9.9"></path><path class="region-border" data-region-id="lakes-three-rivers" d="M515.9,281.1L538.7,280.6M538.7,280.6L584.3,278.9M436.8,83.6L436.7,63.9M581.6,123.8L581.6,119.6M581.6,119.6L581,84.2M576,8.2L513.1,9.2M513.1,9.2L497.4,9.4M365.2,144.1L365.3,164.3L375.1,163.9L375.1,174.1L387.9,173.6M583.7,243.4L582.9,199M582.9,199L582.7,183.9M387.9,173.6L432,172.6M432,172.6L432.7,182.8L439.4,182.7M439.4,182.7L440.6,262.2M581.6,123.8L582.7,183.9M435.1,10.2L497.4,9.4M436.7,63.9L435.1,10.2M368.1,84.2L368.9,144.1L365.2,144.1M579.3,22.7L579,8L576,8.2M473.2,262L440.6,262.2M473.2,262L474,281.5M436.8,83.6L368.1,84.2M581,84.2L579.9,60.5M579.9,60.5L579.3,22.7M474,281.5L515.9,281.1M583.7,243.4L584.3,278.9"></path><path class="region-border" data-region-id="wabash-valley" d="M264.9,502.3L268,495.8L259.9,495.8L260.2,442.3L258.9,442.3M258.9,442.3L259,429M259.2,370.6L318.1,371L337.3,370.4M259,429L259.2,370.6M314.4,313.2L325.5,313.2L325.5,323L337.3,326.3M337.3,326.3L337.3,362.4M337.3,362.4L337.3,370.4M116.4,301.4L116.4,298.2M116.4,298.2L117.2,242.2M117.2,242.2L161.5,242.8M161.5,242.8L190.3,243M279,203.8L219.5,203.1M113.3,436.9L113.1,499.6M113.1,499.6L112.7,529.3M203,501.1L170.5,500.5M99.4,578.7L162.9,579.7M215.9,531.2L259.8,532.2M279,203.8L278.8,243.8M190.3,243L190.6,219.9L210.2,220.1L209.7,203.3L219.5,203.1M170.5,500.5L170.4,520.2L163.5,520L162.9,579.7M99.4,578.7L98.3,573.6L104.1,560.4L112.3,558.7L112.7,529.3M314.4,313.2L314.4,283.6M259.8,532.2L259.8,520.5L266.7,510.5L264.9,502.3M113.3,436.9L114.7,376.4M116.4,301.4L114.7,376.4M215.9,531.2L202.8,531.1L203,501.1M314.4,283.6L314.5,253.7L288.6,253.6L288.7,243.8L278.8,243.8"></path><path class="region-border" data-region-id="gas-belt" d="M515.9,281.1L538.7,280.6M538.7,280.6L584.3,278.9M584.3,278.9L585.1,329M585.1,329L585.3,338.6M517.5,409.4L585.2,408.2M514.3,458.8L514.7,439.4L517.8,439.1L517.5,409.4M387.9,173.6L387.4,183.6M387.4,183.6L350,184.5L349.4,204.1M349.4,204.1L298.6,204.1M387.9,173.6L432,172.6M432,172.6L432.7,182.8L439.4,182.7M439.4,182.7L440.6,262.2M314.4,313.2L325.5,313.2L325.5,323L337.3,326.3M337.3,326.3L337.3,362.4M585.2,408.2L584.7,380L585.3,338.6M514.3,458.8L500.6,459.1M500.6,459.1L449.5,459.8M449.5,459.8L449.4,440L452.5,440L453,423.6M298.6,204.1L279,203.8M473.2,262L440.6,262.2M473.2,262L474,281.5M453,423.6L403.2,424.3M403.2,424.3L402.9,361.6M279,203.8L278.8,243.8M402.9,361.6L337.3,362.4M314.4,313.2L314.4,283.6M474,281.5L515.9,281.1M314.4,283.6L314.5,253.7L288.6,253.6L288.7,243.8L278.8,243.8"></path><path class="region-border" data-region-id="crossroads" d="M388.2,560.3L365,561.1M365,561.1L335.5,561.8M264.9,502.3L268,495.8L259.9,495.8L260.2,442.3L258.9,442.3M258.9,442.3L259,429M443.4,479.8L444.5,535.9M444.5,535.9L444,559.4L434.6,559.4M434.6,559.4L388.2,560.3M259.2,370.6L318.1,371L337.3,370.4M259,429L259.2,370.6M337.3,362.4L337.3,370.4M449.5,459.8L449.4,440L452.5,440L453,423.6M259.8,532.2L269.2,532.3L269.7,560.5M453,423.6L403.2,424.3M403.2,424.3L402.9,361.6M313,562.2L335.5,561.8M402.9,361.6L337.3,362.4M313,562.2L269.7,561.9L269.7,560.5M259.8,532.2L259.8,520.5L266.7,510.5L264.9,502.3M449.5,459.8L443.3,459.9L443.4,479.8"></path><path class="region-border" data-region-id="whitewater-ohio-shore" d="M436.1,681.3L427.2,677.6L415.9,683.3M415.9,683.3L414.9,623.8M414.9,623.8L414.8,609.9L435,609.4M517.5,409.4L585.2,408.2M585.2,408.2L584.9,428.4M584.9,428.4L585.6,471.9M514.3,458.8L514.7,439.4L517.8,439.1L517.5,409.4M443.4,479.8L444.5,535.9M444.5,535.9L444,559.4L434.6,559.4M585.8,518.5L585.9,567.9M514.3,458.8L500.6,459.1M500.6,459.1L449.5,459.8M521.1,708.9L526.2,709.6L551.9,692.2M497.6,698.9L510.8,698.4L521.1,708.9M435,609.4L434.6,559.4M436.1,681.3L436.2,699.3L442.6,705.7L448.9,705.9L449.6,712.3L455.9,712.5L456,728.9M576.9,630.7L585.3,646.2L578.5,653.8L578.6,660.3M551.9,692.2L575.8,684.4L589.7,684.8L585.8,676.2L592,670M456,728.9L469.3,728.6L472.6,733.3L481.4,733.2M578.6,660.3L591.2,662.2L592,670M497.6,698.9L484.3,698.7L476.7,705.2L481.4,733.2M585.8,518.5L586.2,508.1M586.2,508.1L585.6,471.9M586.7,613.5L585.9,567.9M449.5,459.8L443.3,459.9L443.4,479.8M576.9,630.7L574.8,622.5L586.7,613.5"></path><path class="region-border" data-region-id="hoosier-hills" d="M259.9,661.1L259.9,641.1M259.6,710.9L259.9,661.1M436.1,681.3L427.2,677.6L415.9,683.3M415.9,683.3L414.9,623.8M414.9,623.8L414.8,609.9L435,609.4M388.2,560.3L365,561.1M365,561.1L335.5,561.8M434.6,559.4L388.2,560.3M195.3,600.8L260.1,601.6M260.1,601.6L259.9,641.1M435,609.4L434.6,559.4M381.1,867.6L390.6,865.6M436.1,681.3L436.2,699.3L442.6,705.7L448.9,705.9L449.6,712.3L455.9,712.5L456,728.9M321.6,826.4L314,823.4L314.6,830.1L322.9,832.5L322.3,837.3L314,837.7L308.9,843.4L298.7,839.9M298.7,839.9L298.7,820.5L278.9,820.2L279.6,806.7L259.9,807.4M259.9,807.4L260,777.5M417.8,801.6L410.8,804.2L407,816.6L398.1,826.4M260,777.5L259.5,747.5M259.5,747.5L259.6,710.9M215.9,531.2L259.8,532.2M259.8,532.2L269.2,532.3L269.7,560.5M195.3,600.8L195.7,561L215.1,561.2L215.9,531.2M321.6,826.4L332.5,836.2L333.1,854.6L349.7,865.3L363.8,865.5L372.1,876.9L374.7,869.8L381.1,867.6M313,562.2L335.5,561.8M456,728.9L469.3,728.6L472.6,733.3L481.4,733.2M481.4,733.2L483.4,743.6L480.3,747.3M480.3,747.3L473.3,751.5L469,760.1L450,767L444.4,780.5M444.4,780.5L438.1,798.6L426.1,806.3L417.8,801.6M313,562.2L269.7,561.9L269.7,560.5M398.1,826.4L397.6,847.8L394.5,861.5L390.6,865.6"></path><path class="region-border" data-region-id="pocket-coal-country" d="M259.9,661.1L259.9,641.1M259.6,710.9L259.9,661.1M195.3,600.8L260.1,601.6M260.1,601.6L259.9,641.1M77.8,889.1L54,893.5L47.2,883.1L37.5,887.5M37.5,887.5L34.8,894.5L41,907.9L33.1,917L18.5,910.5M18.5,910.5L11.5,909.9L9,903.2L16.7,905.1L8,889.3M8,889.3L22.1,888.8L12.6,882.9L22.4,870L23.3,858.2L18.3,853L30.5,849.5L31.9,842.1L24.2,845.7L38.5,831.7L29.7,819.7L28,812.5M264,903.4L274.2,897.8L275.6,885.5L290.3,883.7L287.1,876.3L287.1,861.2L293.5,857.1M203,501.1L170.5,500.5M298.7,839.9L298.7,820.5L278.9,820.2L279.6,806.7L259.9,807.4M259.9,807.4L260,777.5M206.5,883.1L219.3,880.3L228.3,870.2L235.4,867.6M235.4,867.6L239.2,869.8L246.8,887.3L253.1,891.6L259.6,886.8L266,888.7L264,903.4M110.1,671.7L116.2,688.7L116.7,696.9L107.7,711.7L98.8,713.9L94.3,720.1L88.3,736.3M298.7,839.9L303.8,847.9L299.9,856.1L293.5,857.1M110.1,671.7L107,670.1L111.5,659.2M71.3,771.1L72.8,757.2L88.1,749.2L88.3,736.3M71.3,771.1L65.4,781L60.3,782.7L51.7,802.5L46.7,795.9L42.1,803.9L39.1,797L33.1,810.2L28.1,806.4M92.2,601.9L104.3,588.2L99.4,578.7M99.4,578.7L162.9,579.7M111.5,659.2L114.2,648.5L103,640.5L103.8,625L93.9,614.1L92.2,601.9M260,777.5L259.5,747.5M259.5,747.5L259.6,710.9M77.8,889.1L84.2,890L82,904.7L89.1,905.4L97.5,897.6L90.7,885L95.3,872.1L100.4,873.4L104.1,883L113,886.9L122.1,879.7M122.1,879.7L134.9,881.1L148.8,889.9M195.3,600.8L195.7,561L215.1,561.2L215.9,531.2M28,812.5L28.1,806.4M148.8,889.9L154.5,894.4M154.5,894.4L162.8,901.2L174.3,903.8L179.3,916L186.4,915.5L190.9,910.2L194.3,891.3L206.5,883.1M170.5,500.5L170.4,520.2L163.5,520L162.9,579.7M215.9,531.2L202.8,531.1L203,501.1"></path></g>
         <path class="state-outline" d="M584.3,278.9L585.1,329M585.1,329L585.3,338.6M581.6,123.8L581.6,119.6M581.6,119.6L581,84.2M576,8.2L513.1,9.2M513.1,9.2L497.4,9.4M585.2,408.2L584.9,428.4M584.9,428.4L585.6,471.9M583.7,243.4L582.9,199M582.9,199L582.7,183.9M581.6,123.8L582.7,183.9M435.1,10.2L497.4,9.4M435.1,10.2L413.3,10.3M585.8,518.5L585.9,567.9M585.2,408.2L584.7,380L585.3,338.6M116.4,301.4L116.4,298.2M116.4,298.2L117.2,242.2M521.1,708.9L526.2,709.6L551.9,692.2M497.6,698.9L510.8,698.4L521.1,708.9M579.3,22.7L579,8L576,8.2M113.3,436.9L113.1,499.6M113.1,499.6L112.7,529.3M77.8,889.1L54,893.5L47.2,883.1L37.5,887.5M37.5,887.5L34.8,894.5L41,907.9L33.1,917L18.5,910.5M18.5,910.5L11.5,909.9L9,903.2L16.7,905.1L8,889.3M8,889.3L22.1,888.8L12.6,882.9L22.4,870L23.3,858.2L18.3,853L30.5,849.5L31.9,842.1L24.2,845.7L38.5,831.7L29.7,819.7L28,812.5M381.1,867.6L390.6,865.6M264,903.4L274.2,897.8L275.6,885.5L290.3,883.7L287.1,876.3L287.1,861.2L293.5,857.1M321.6,826.4L314,823.4L314.6,830.1L322.9,832.5L322.3,837.3L314,837.7L308.9,843.4L298.7,839.9M417.8,801.6L410.8,804.2L407,816.6L398.1,826.4M576.9,630.7L585.3,646.2L578.5,653.8L578.6,660.3M206.5,883.1L219.3,880.3L228.3,870.2L235.4,867.6M235.4,867.6L239.2,869.8L246.8,887.3L253.1,891.6L259.6,886.8L266,888.7L264,903.4M110.1,671.7L116.2,688.7L116.7,696.9L107.7,711.7L98.8,713.9L94.3,720.1L88.3,736.3M298.7,839.9L303.8,847.9L299.9,856.1L293.5,857.1M110.1,671.7L107,670.1L111.5,659.2M71.3,771.1L72.8,757.2L88.1,749.2L88.3,736.3M367.3,10.1L413.3,10.3M71.3,771.1L65.4,781L60.3,782.7L51.7,802.5L46.7,795.9L42.1,803.9L39.1,797L33.1,810.2L28.1,806.4M92.2,601.9L104.3,588.2L99.4,578.7M111.5,659.2L114.2,648.5L103,640.5L103.8,625L93.9,614.1L92.2,601.9M119,114.1L119.5,74.9M119.5,74.9L120.9,20.7M120.9,20.7L129.9,28.8L137.2,25L141.4,28L137.7,35.8L154,40.5L171.6,40.5M118.6,144.3L119,114.1M77.8,889.1L84.2,890L82,904.7L89.1,905.4L97.5,897.6L90.7,885L95.3,872.1L100.4,873.4L104.1,883L113,886.9L122.1,879.7M122.1,879.7L134.9,881.1L148.8,889.9M321.6,826.4L332.5,836.2L333.1,854.6L349.7,865.3L363.8,865.5L372.1,876.9L374.7,869.8L381.1,867.6M551.9,692.2L575.8,684.4L589.7,684.8L585.8,676.2L592,670M581,84.2L579.9,60.5M579.9,60.5L579.3,22.7M28,812.5L28.1,806.4M148.8,889.9L154.5,894.4M154.5,894.4L162.8,901.2L174.3,903.8L179.3,916L186.4,915.5L190.9,910.2L194.3,891.3L206.5,883.1M481.4,733.2L483.4,743.6L480.3,747.3M480.3,747.3L473.3,751.5L469,760.1L450,767L444.4,780.5M444.4,780.5L438.1,798.6L426.1,806.3L417.8,801.6M367.3,10.1L339.5,10.4M99.4,578.7L98.3,573.6L104.1,560.4L112.3,558.7L112.7,529.3M578.6,660.3L591.2,662.2L592,670M497.6,698.9L484.3,698.7L476.7,705.2L481.4,733.2M398.1,826.4L397.6,847.8L394.5,861.5L390.6,865.6M585.8,518.5L586.2,508.1M113.3,436.9L114.7,376.4M118.6,144.3L118.1,179.7M583.7,243.4L584.3,278.9M116.4,301.4L114.7,376.4M586.2,508.1L585.6,471.9M118.1,179.7L117.2,242.2M289.3,10.4L339.5,10.4M586.7,613.5L585.9,567.9M576.9,630.7L574.8,622.5L586.7,613.5M171.6,40.5L188.6,35.8L220.8,21.2M289.3,10.4L239.1,9.9M220.8,21.2L239.1,9.9"></path>
         </svg>
       </div>
       <div class="side">
         <div class="phase-dock">
-        <p id="error-status" role="status" aria-live="assertive"></p>
         <section class="card" aria-label="This step">
-          <h2>This step</h2>
           <div class="status-bar">
             <p id="phase" data-step="setup">This step: Setup</p>
             <ol class="phase-track">
@@ -1514,81 +1616,6 @@
           <p id="online-share"></p>
           <p id="online-view"></p>
           <p id="online-message" role="status"></p>
-        </section>
-        <section id="setup" class="card" aria-label="Set up the game">
-          <h2>Set up</h2>
-          <p>Choose 2 to 6 players. Type a name for each person or computer who is playing.</p>
-          <ol id="player-list">
-            <li data-owner="0">
-              <span class="player-swatch" data-owner="0" aria-hidden="true"></span>
-              <label class="name-field">Seat 1, checker
-                <input type="text" name="player-name-0" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-0" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-0" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="1">
-              <span class="player-swatch" data-owner="1" aria-hidden="true"></span>
-              <label class="name-field">Seat 2, triangles
-                <input type="text" name="player-name-1" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-1" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-1" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="2">
-              <span class="player-swatch" data-owner="2" aria-hidden="true"></span>
-              <label class="name-field">Seat 3, dots
-                <input type="text" name="player-name-2" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-2" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-2" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="3">
-              <span class="player-swatch" data-owner="3" aria-hidden="true"></span>
-              <label class="name-field">Seat 4, diagonal
-                <input type="text" name="player-name-3" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-3" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-3" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="4">
-              <span class="player-swatch" data-owner="4" aria-hidden="true"></span>
-              <label class="name-field">Seat 5, crosshatch
-                <input type="text" name="player-name-4" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-4" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-4" value="computer"> Computer</label>
-              </div>
-            </li>
-            <li data-owner="5">
-              <span class="player-swatch" data-owner="5" aria-hidden="true"></span>
-              <label class="name-field">Seat 6, bars
-                <input type="text" name="player-name-5" maxlength="24" autocomplete="off" spellcheck="false">
-              </label>
-              <div class="kind">
-                <label><input type="radio" name="player-kind-5" value="human" checked> Person</label>
-                <label><input type="radio" name="player-kind-5" value="computer"> Computer</label>
-              </div>
-            </li>
-          </ol>
-          <fieldset id="mode">
-            <legend>How you win</legend>
-            <label><input type="radio" name="win-mode" value="quick60" checked> Quick — at least 60 counties</label>
-            <label><input type="radio" name="win-mode" value="total92"> Total — all 92 counties</label>
-          </fieldset>
-          <div class="setup-actions">
-            <button type="button" id="start-game">Start game</button>
-            <button type="button" id="continue-game" class="secondary">Continue game</button>
-          </div>
         </section>
         <details class="card how-to" open>
           <summary>How to play</summary>
@@ -1661,6 +1688,7 @@
         </div>
       </div>
     </main>
+    </div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
