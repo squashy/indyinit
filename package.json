@@ -10,7 +10,7 @@
     "build:map": "node --experimental-strip-types factory/build-map.ts",
     "gates": "node scripts/box-gate.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test factory/build-map.test.ts factory/import-quiz.test.ts gates/map.test.ts tests/rules.test.ts tests/regions.test.ts tests/quiz.test.ts tests/shell-setup.test.ts tests/ai.test.ts tests/simulation.test.ts gates/rules.test.ts gates/mutants.test.ts tests/btt19-release-check.test.mjs tests/verdicts-a.test.mjs tests/online.test.ts",
+    "test": "node --experimental-strip-types --test factory/build-map.test.ts factory/import-quiz.test.ts gates/map.test.ts tests/rules.test.ts tests/regions.test.ts tests/quiz.test.ts tests/shell-setup.test.ts tests/ai.test.ts tests/simulation.test.ts gates/rules.test.ts gates/mutants.test.ts tests/btt19-release-check.test.mjs tests/verdicts-a.test.mjs tests/online.test.ts factory/merge-verdicts.test.ts gates/ledger.test.ts",
     "build": "vite build",
     "check": "npm run typecheck && npm test && npm run build",
     "box": "npm run check && npm run gates"
