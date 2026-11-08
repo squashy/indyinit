@@ -26,6 +26,8 @@
   --on-owner-3: #ffffff;
   --on-owner-4: #ffffff;
   --on-owner-5: #ffffff;
+  --region-border-width: 2.6;
+  --region-border-color: #101820;
   --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, "Times New Roman", serif;
   --font-ui: "Segoe UI", system-ui, -apple-system, "Noto Sans", "Liberation Sans", sans-serif;
 }
@@ -51,7 +53,11 @@ h3 {
 
 .player-swatch[data-owner="1"] {
   background-color: var(--owner-1);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10'%3E%3Cpath d='M6 1 L11 9 L1 9 Z' fill='%23602600' fill-opacity='0.45'/%3E%3C/svg%3E");
+  background-image: repeating-linear-gradient(
+    60deg,
+    transparent 0 4px,
+    rgba(96, 38, 0, 0.45) 4px 7px
+  );
   background-size: 12px 10px;
   border-radius: 4px;
 }

@@ -125,12 +125,37 @@ async function connectBrowser() {
       pageErrors.length = 0;
       failed.length = 0;
       await page.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: width < 600 });
+      await page.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "no-preference" }] });
       await page.send("Page.navigate", { url: `http://127.0.0.1:${port}/` });
-      await waitUntil(page, "document.readyState === 'complete' && document.getElementById('start-game')");
+      await waitUntil(page, "document.documentElement.dataset.booted === 'true'");
+      await evalJson(page, "localStorage.removeItem('battle-for-the-92.save')");
+      await page.send("Page.reload", { ignoreCache: true });
+      await waitUntil(page, "document.documentElement.dataset.booted === 'true' && document.getElementById('landing') && document.getElementById('landing').hidden === false && document.getElementById('continue-game') && document.getElementById('continue-game').hidden === true");
+      const openedLanding = await evalJson(page, `(() => ({
+        landing: document.getElementById('landing').hidden === false,
+        game: document.getElementById('game-screen').hidden === false,
+        setup: document.getElementById('setup') ? document.getElementById('setup').isConnected : false,
+        title: document.getElementById('landing-title')?.textContent || '',
+        focus: document.activeElement?.id || '',
+        notice: [...document.querySelectorAll('.quiz-unverified')].some((node) => node.textContent === 'Questions unverified' && node.getClientRects().length > 0),
+      }))()`);
+      recordCore(`${name} landing on first load`, openedLanding.landing === true && openedLanding.game === false && openedLanding.setup === false && String(openedLanding.title).includes("Battle for 92") && openedLanding.notice === true, JSON.stringify(openedLanding), "src/ui/screens.ts");
+      recordCore(`${name} landing focus`, openedLanding.focus === "landing-title", String(openedLanding.focus), "src/ui/screens.ts");
+      await click(page, "#new-game");
+      await waitUntil(page, "document.getElementById('setup-screen') && document.getElementById('setup-screen').hidden === false && document.getElementById('start-game')");
+      const setupFocus = await evalJson(page, "document.activeElement?.id || ''");
+      recordCore(`${name} setup focus`, setupFocus === "setup-heading", String(setupFocus), "src/ui/screens.ts");
       await type(page, "input[name='player-name-0']", "Ada");
       await type(page, "input[name='player-name-1']", "Bo");
       await click(page, "#start-game");
       await waitUntil(page, "document.getElementById('quiz-dialog') && document.getElementById('quiz-dialog').hidden === false");
+      const duringPlay = await evalJson(page, `(() => ({
+        setup: document.getElementById('setup') ? document.getElementById('setup').isConnected : false,
+        screen: document.getElementById('setup-screen') ? document.getElementById('setup-screen').isConnected : false,
+        game: document.getElementById('game-screen')?.hidden === false,
+        start: document.getElementById('start-game') ? document.getElementById('start-game').isConnected : false,
+      }))()`);
+      recordCore(`${name} setup absent during play`, duringPlay.setup === false && duringPlay.screen === false && duringPlay.game === true && duringPlay.start === false, JSON.stringify(duringPlay), "src/ui/screens.ts");
       const opened = await evalJson(page, `(() => {
         const dialog = document.getElementById('quiz-dialog');
         const quiz = dialog.getBoundingClientRect();
@@ -214,6 +239,8 @@ async function connectBrowser() {
       recordCore(`${name} focus stays in the dialog`, trapped.inside && trapped.skip && trapped.choice && !trapped.map, trapped.sample, "src/ui/quiz-dialog.ts");
       const dismissed = await dismissAttempt(page);
       recordCore(`${name} Escape and the backdrop do not close or skip`, dismissed.stayed && dismissed.samePhase && dismissed.noAward, `${dismissed.phase} / ${dismissed.result}`, "src/ui/quiz-dialog.ts");
+      const keys = await tabReach(page);
+      recordCore(`${name} setup stays out of the tab order`, keys.setup === false, keys.sample, "src/ui/screens.ts");
       if (full) await fullTurn(page, opened.prompt, name);
       recordCore(`${name} no page errors`, pageErrors.length === 0 && failed.length === 0, [...pageErrors, ...failed].join("; ") || "none", "src/main.ts");
     },
@@ -419,17 +446,62 @@ async function connectBrowser() {
     await waitUntil(pageSocket, "(document.getElementById('quiz-result')?.textContent || '').includes('0 armies')");
     const skipped = await evalJson(pageSocket, "document.getElementById('reinforcement-count')?.textContent || ''");
     mark("skip scores 0", String(skipped).includes("Question 0"), String(skipped), "src/ui/quiz-dialog.ts");
+    const beforeLeave = await played(pageSocket);
+    const kept = await evalJson(pageSocket, "localStorage.getItem('battle-for-the-92.save')");
+    await click(pageSocket, "#open-menu");
+    await waitUntil(pageSocket, "document.getElementById('landing')?.hidden === false && document.getElementById('game-screen')?.hidden === true && document.getElementById('continue-game')?.hidden === false");
+    const afterMenu = await evalJson(pageSocket, `(() => ({
+      save: localStorage.getItem('battle-for-the-92.save'),
+      focus: document.activeElement?.id || '',
+      setup: document.getElementById('setup') ? document.getElementById('setup').isConnected : false,
+    }))()`);
+    mark("menu returns to the landing and keeps the save", afterMenu.save === kept && afterMenu.focus === "landing-title" && afterMenu.setup === false, String(afterMenu.focus), "src/ui/screens.ts");
+    await click(pageSocket, "#new-game");
+    await waitUntil(pageSocket, "document.getElementById('setup-screen')?.isConnected === true && document.getElementById('setup-screen')?.hidden === false");
+    await click(pageSocket, "#setup-back");
+    await waitUntil(pageSocket, "document.getElementById('landing')?.hidden === false && document.getElementById('continue-game')?.hidden === false");
+    const afterBack = await evalJson(pageSocket, "localStorage.getItem('battle-for-the-92.save')");
+    mark("back keeps the saved game", afterBack === kept, afterBack === kept ? "same save" : "save changed", "src/ui/screens.ts");
+    await click(pageSocket, "#new-game");
+    await waitUntil(pageSocket, "document.getElementById('start-game')");
+    await click(pageSocket, "#start-game");
+    await waitUntil(pageSocket, "document.getElementById('replace-dialog')?.hidden === false");
+    const duringAsk = await evalJson(pageSocket, "localStorage.getItem('battle-for-the-92.save')");
+    mark("start asks before replacing a saved game", duringAsk === kept, duringAsk === kept ? "save unchanged" : "save changed", "src/ui/setup.ts");
+    await click(pageSocket, "#replace-stay");
+    await waitUntil(pageSocket, "document.getElementById('replace-dialog')?.hidden === true && document.getElementById('setup-screen')?.hidden === false");
+    const afterStay = await evalJson(pageSocket, "localStorage.getItem('battle-for-the-92.save')");
+    mark("keeping the saved game stays on setup", afterStay === kept, afterStay === kept ? "save unchanged" : "save changed", "src/ui/setup.ts");
+    await click(pageSocket, "#setup-back");
+    await waitUntil(pageSocket, "document.getElementById('continue-game')?.hidden === false && document.getElementById('landing')?.hidden === false");
+    await click(pageSocket, "#continue-game");
+    await waitUntil(pageSocket, "document.getElementById('game-screen')?.hidden === false && (document.getElementById('phase')?.textContent || '').includes('places armies')");
+    const resumed = await played(pageSocket);
+    const resumedSame = beforeLeave.player === resumed.player && beforeLeave.seq === resumed.seq && beforeLeave.phase === resumed.phase && beforeLeave.holdings === resumed.holdings && beforeLeave.badges === resumed.badges && resumed.count === 92;
+    mark("continue restores the same game", resumedSame, `player ${resumed.player} seq ${resumed.seq} ${resumed.reinforcement}`, "src/ui/setup.ts");
     const saved = await played(pageSocket);
     await pageSocket.send("Page.reload", { ignoreCache: true });
-    await waitUntil(pageSocket, "document.readyState === 'complete' && document.getElementById('continue-game')");
+    await waitUntil(pageSocket, "document.documentElement.dataset.booted === 'true' && document.getElementById('landing')?.hidden === false && document.getElementById('game-screen')?.hidden === true && document.getElementById('continue-game')?.hidden === false && (document.getElementById('setup') ? false : true)");
+    const reloaded = await evalJson(pageSocket, `(() => ({
+      landing: document.getElementById('landing')?.hidden === false,
+      game: document.getElementById('game-screen')?.hidden === false,
+      setup: document.getElementById('setup') ? document.getElementById('setup').isConnected : false,
+      continueShown: document.getElementById('continue-game')?.hidden === false,
+    }))()`);
+    mark("reload returns to the landing", reloaded.landing === true && reloaded.game === false && reloaded.setup === false && reloaded.continueShown === true, JSON.stringify(reloaded), "src/ui/screens.ts");
     await click(pageSocket, "#continue-game");
     await waitUntil(pageSocket, "(document.getElementById('phase')?.textContent || '').includes('places armies')");
     const restored = await played(pageSocket);
     const sameGame = saved.player === restored.player && saved.seq === restored.seq && saved.phase === restored.phase && saved.holdings === restored.holdings && saved.badges === restored.badges && saved.count === 92;
     mark("continue restores owners, armies, player, and phase", sameGame, `player ${restored.player} ${restored.kind} seq ${restored.seq} ${restored.reinforcement}`, "src/ui/setup.ts");
     await pageSocket.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-    const motion = await evalJson(pageSocket, "getComputedStyle(document.getElementById('start-game')).transitionDuration");
-    recordOptional("reduced motion shortens transitions", motion === "0.00001s" || motion === "0s" || motion === "1e-05s", String(motion), "src/styles.css");
+    const motion = await evalJson(pageSocket, `(() => {
+      const button = getComputedStyle(document.getElementById('new-game'));
+      const county = document.querySelector('#landing-map .county');
+      const painted = county ? getComputedStyle(county) : null;
+      return { duration: button.transitionDuration, animation: painted ? painted.animationName : '', opacity: painted ? painted.opacity : '' };
+    })()`);
+    recordOptional("reduced motion shortens transitions", (motion.duration === "0.00001s" || motion.duration === "0s" || motion.duration === "1e-05s") && motion.animation === "none" && motion.opacity === "1", `${motion.duration} ${motion.animation} ${motion.opacity}`, "src/styles.css");
   }
 }
 
@@ -453,12 +525,17 @@ function recordOptional(name, ok, detail, owner) {
 async function storageCase(page, pageErrors, label, mode) {
   pageErrors.length = 0;
   await page.send("Page.navigate", { url: `http://127.0.0.1:${port}/` });
-  await waitUntil(page, "document.readyState === 'complete' && document.getElementById('start-game')");
+  await waitUntil(page, "document.documentElement.dataset.booted === 'true'");
+  await evalJson(page, "localStorage.removeItem('battle-for-the-92.save')");
+  await page.send("Page.reload", { ignoreCache: true });
+  await waitUntil(page, "document.documentElement.dataset.booted === 'true' && document.getElementById('new-game')");
   if (mode !== "corrupt") {
     const installed = await installBrokenStorage(page, mode);
     recordCore(`storage ${label} can be installed`, installed.ok, installed.detail || "installed", "gates/browser.mjs");
     if (!installed.ok) return;
   }
+  await click(page, "#new-game");
+  await waitUntil(page, "document.getElementById('start-game')");
   await type(page, "input[name='player-name-0']", "Ada");
   await type(page, "input[name='player-name-1']", "Bo");
   await click(page, "#start-game");
@@ -470,17 +547,17 @@ async function storageCase(page, pageErrors, label, mode) {
     await waitUntil(page, "(document.getElementById('phase')?.textContent || '').includes('places armies')");
     const placed = await boardMark(page);
     recordCore(`storage ${label} persist does not block the turn`, placed.phase.includes("places armies") && placed.owned === 92, placed.phase, "src/ui/setup.ts");
-    await click(page, "#continue-game");
+    await offerBrokenContinue(page, label);
     const after = await boardMark(page);
     recordCore(`storage ${label} continue keeps the live counties`, after.status.includes("could not read") && after.rows === placed.rows && after.phase === placed.phase, after.status, "src/ui/setup.ts");
   } else if (mode === "getter") {
-    await click(page, "#continue-game");
+    await offerBrokenContinue(page, label);
     const after = await boardMark(page);
     recordCore(`storage ${label} continue keeps the live counties`, after.status.includes("could not read") && after.rows === started.rows && after.phase === started.phase && after.quiz, after.status, "src/ui/setup.ts");
   } else {
     const written = await evalJson(page, "localStorage.setItem('battle-for-the-92.save', '{'), localStorage.getItem('battle-for-the-92.save')");
     recordCore("storage corrupt save is stored", written === "{", String(written), "gates/browser.mjs");
-    await click(page, "#continue-game");
+    await offerBrokenContinue(page, label);
     const after = await boardMark(page);
     recordCore("storage corrupt save continue keeps the live counties", after.status.length > 0 && after.rows === started.rows && after.phase === started.phase && after.quiz, after.status, "src/ui/setup.ts");
   }
@@ -628,9 +705,18 @@ async function dismissAttempt(page) {
   };
 }
 
+async function offerBrokenContinue(page, label) {
+  await click(page, "#open-menu");
+  await waitUntil(page, "document.getElementById('landing')?.hidden === false");
+  const hidden = await evalJson(page, "document.getElementById('continue-game')?.hidden === true");
+  recordCore(`storage ${label} hides continue that cannot open a game`, hidden === true, String(hidden), "src/ui/setup.ts");
+  await evalJson(page, "document.getElementById('continue-game').click(), true");
+}
+
 async function tabReach(page) {
   await evalJson(page, "document.body.focus(), true");
   const seen = [];
+  const blocked = ["start-game", "setup-back", "setup-heading", "new-game", "continue-game", "replace-confirm", "replace-stay", "landing-title"];
   for (let step = 0; step < 80; step += 1) {
     await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
     await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9 });
@@ -638,7 +724,7 @@ async function tabReach(page) {
     seen.push(id);
   }
   const unique = seen.filter((item, index) => seen.indexOf(item) === index);
-  return { map: seen.includes("map"), skip: seen.includes("skip-quiz"), sample: unique.slice(0, 14).join(",") };
+  return { map: seen.includes("map"), skip: seen.includes("skip-quiz"), setup: seen.some((id) => blocked.includes(id)), sample: unique.slice(0, 14).join(",") };
 }
 
 async function arrowReach(page) {

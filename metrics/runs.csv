@@ -4,4 +4,5 @@ timestamp,ticket,tool,state,territories,minutes,tokens,est_cost_usd,gate_failure
 2026-11-07T16:55:00Z,engine-rollback,cursor,in,92,,,,0,0,0,0,rejected turns roll the random cursor back with the position; unsupported RNG algorithms fail to load
 2026-11-07T18:31:11Z,BTT-10,cursor,in,52,,,,0,0,573,0,Johnson through Whitley coverage report only; 52 counties; 573 questions; 5 categories; 2292 choices; 0 missing; 0 malformed; factual QA deferred; tracked pack data/quiz.json unchanged
 2026-11-07T20:10:00Z,BTT-23-26,local,in,92,,,,0,0,1000,1000,phase dock and contextual controls; battle losses and move-in; parchment map polish; short quiz battle and phase motion; questions unverified remain
+2026-11-07T20:45:00Z,entry-flow,local,in,92,,,,0,0,1000,1000,landing screen then setup then the game; continue only when a saved game already opens
 2026-11-07T21:40:00Z,quiz-overlay,cursor,in,92,,,,0,0,1000,1000,turn-start quiz opens in a centered modal over the board; escape and backdrop do not skip; correct answer stays +2 once
